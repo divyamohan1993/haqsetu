@@ -15,7 +15,8 @@ from typing import AsyncIterator
 import structlog
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import ORJSONResponse
+from fastapi.responses import HTMLResponse, ORJSONResponse
+from fastapi.staticfiles import StaticFiles
 
 from config.settings import settings
 from src.api.router import api_router
@@ -391,12 +392,37 @@ except ImportError:
 # -- Include routers -------------------------------------------------------
 app.include_router(api_router)
 
+# -- Static files ----------------------------------------------------------
+import pathlib
 
-# -- Root endpoint ----------------------------------------------------------
+_PROJECT_ROOT = pathlib.Path(__file__).resolve().parent.parent
+_STATIC_DIR = _PROJECT_ROOT / "static"
+_TEMPLATES_DIR = _PROJECT_ROOT / "templates"
+
+if _STATIC_DIR.exists():
+    app.mount("/static", StaticFiles(directory=str(_STATIC_DIR)), name="static")
+    logger.info("app.static_files_mounted", path=str(_STATIC_DIR))
 
 
-@app.get("/")
-async def root() -> dict:
+# -- Root endpoint (serves skeuomorphic dashboard) -------------------------
+
+
+@app.get("/", response_class=HTMLResponse)
+async def root() -> HTMLResponse:
+    """Serve the HaqSetu skeuomorphic dashboard."""
+    index_path = _TEMPLATES_DIR / "index.html"
+    if index_path.exists():
+        return HTMLResponse(content=index_path.read_text(encoding="utf-8"))
+    # Fallback to JSON API info if no template exists
+    return HTMLResponse(
+        content="<h1>HaqSetu API</h1><p>Dashboard template not found. "
+        'Visit <a href="/docs">/docs</a> for API documentation.</p>',
+        status_code=200,
+    )
+
+
+@app.get("/api", response_class=ORJSONResponse)
+async def api_info() -> dict:
     """API information endpoint."""
     return {
         "name": "HaqSetu API",
@@ -405,6 +431,7 @@ async def root() -> dict:
         "docs": "/docs",
         "health": "/api/v1/health",
         "languages_supported": 23,
+        "dashboard": "/",
         "verification_sources": [
             "Gazette of India (egazette.gov.in)",
             "India Code (indiacode.nic.in)",

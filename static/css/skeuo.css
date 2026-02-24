@@ -1,0 +1,2905 @@
+/* ==========================================================================
+   HaqSetu (हक़सेतु) — Skeuomorphic Design System
+   Voice-First AI Civic Assistant for Rural India
+
+   A rich, tactile design language inspired by iOS 6-era realism:
+   linen textures, parchment paper, brass gauges, wax seals,
+   leather toolbars, and carved wooden surfaces.
+
+   All textures are pure CSS — no external images required.
+   ========================================================================== */
+
+/* ==========================================================================
+   1. CSS CUSTOM PROPERTIES (Design Tokens)
+   ========================================================================== */
+
+:root {
+  /* --- Parchment & Paper --- */
+  --skeuo-parchment-light:   #F5F0E8;
+  --skeuo-parchment:         #EDE8D5;
+  --skeuo-parchment-dark:    #DDD5BE;
+  --skeuo-paper-white:       #FAF8F3;
+  --skeuo-paper-grain:       #E8E0CE;
+
+  /* --- Wood & Leather Browns --- */
+  --skeuo-wood-light:        #8B7355;
+  --skeuo-wood:              #6B5B45;
+  --skeuo-wood-dark:         #4A3F30;
+  --skeuo-leather:           #5C4A32;
+  --skeuo-leather-dark:      #3E2F1E;
+
+  /* --- Indian Tricolour Accents --- */
+  --skeuo-saffron:           #FF9933;
+  --skeuo-saffron-dark:      #E07A10;
+  --skeuo-green-verified:    #2D5016;
+  --skeuo-green-light:       #4A8C1C;
+  --skeuo-navy:              #1B3A5C;
+  --skeuo-navy-light:        #2A5580;
+
+  /* --- Metallic & Brass --- */
+  --skeuo-brass:             #B5A642;
+  --skeuo-brass-light:       #D4C86A;
+  --skeuo-brass-dark:        #8A7E32;
+  --skeuo-copper:            #B87333;
+  --skeuo-copper-light:      #DA9A5A;
+  --skeuo-silver:            #C0C0C0;
+
+  /* --- Status LED Colors --- */
+  --skeuo-led-green:         #39E75F;
+  --skeuo-led-amber:         #FFB347;
+  --skeuo-led-red:           #FF6B6B;
+
+  /* --- Wax Seal --- */
+  --skeuo-seal-red:          #8B1A1A;
+  --skeuo-seal-red-light:    #B22222;
+  --skeuo-stamp-ink:         #1A1A6B;
+
+  /* --- Typography --- */
+  --skeuo-font-serif:        Georgia, "Palatino Linotype", Palatino, "Book Antiqua", serif;
+  --skeuo-font-sans:         "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --skeuo-font-mono:         "Courier New", Courier, monospace;
+
+  /* --- Spacing Scale --- */
+  --skeuo-space-xs:          0.25rem;
+  --skeuo-space-sm:          0.5rem;
+  --skeuo-space-md:          1rem;
+  --skeuo-space-lg:          1.5rem;
+  --skeuo-space-xl:          2rem;
+  --skeuo-space-2xl:         3rem;
+
+  /* --- Border Radii --- */
+  --skeuo-radius-sm:         4px;
+  --skeuo-radius-md:         8px;
+  --skeuo-radius-lg:         12px;
+  --skeuo-radius-pill:       999px;
+  --skeuo-radius-circle:     50%;
+
+  /* --- Shadows --- */
+  --skeuo-shadow-subtle:     0 1px 2px rgba(0, 0, 0, 0.12);
+  --skeuo-shadow-card:       0 2px 6px rgba(0, 0, 0, 0.15),
+                             0 8px 24px rgba(0, 0, 0, 0.08);
+  --skeuo-shadow-lifted:     0 4px 12px rgba(0, 0, 0, 0.2),
+                             0 16px 40px rgba(0, 0, 0, 0.12);
+  --skeuo-shadow-inset:      inset 0 2px 4px rgba(0, 0, 0, 0.25);
+
+  /* --- Transitions --- */
+  --skeuo-transition-fast:   120ms ease-out;
+  --skeuo-transition:        200ms ease-out;
+  --skeuo-transition-slow:   400ms ease-in-out;
+
+  /* --- Z-index layers --- */
+  --skeuo-z-base:            1;
+  --skeuo-z-card:            10;
+  --skeuo-z-navbar:          100;
+  --skeuo-z-modal-backdrop:  500;
+  --skeuo-z-modal:           510;
+  --skeuo-z-tooltip:         600;
+}
+
+
+/* ==========================================================================
+   2. LINEN / FABRIC PAGE BACKGROUND
+   Pure CSS linen texture — layered noise-like gradients
+   ========================================================================== */
+
+body.skeuo,
+body.skeuo-body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--skeuo-font-sans);
+  color: var(--skeuo-wood-dark);
+  line-height: 1.6;
+  background-color: var(--skeuo-parchment-light);
+  background-image:
+    /* Horizontal linen fibers */
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(139, 115, 85, 0.03) 2px,
+      rgba(139, 115, 85, 0.03) 3px
+    ),
+    /* Vertical linen fibers */
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 2px,
+      rgba(139, 115, 85, 0.03) 2px,
+      rgba(139, 115, 85, 0.03) 3px
+    ),
+    /* Subtle warm grain */
+    repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 4px,
+      rgba(107, 91, 69, 0.015) 4px,
+      rgba(107, 91, 69, 0.015) 5px
+    );
+}
+
+
+/* ==========================================================================
+   3. TYPOGRAPHY — Serif headings, sans-serif body
+   ========================================================================== */
+
+.skeuo h1, .skeuo h2, .skeuo h3,
+.skeuo h4, .skeuo h5, .skeuo h6,
+.skeuo-body h1, .skeuo-body h2, .skeuo-body h3,
+.skeuo-body h4, .skeuo-body h5, .skeuo-body h6 {
+  font-family: var(--skeuo-font-serif);
+  color: var(--skeuo-wood-dark);
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+}
+
+.skeuo h1, .skeuo-body h1 { font-size: 2rem;   margin-bottom: var(--skeuo-space-lg); }
+.skeuo h2, .skeuo-body h2 { font-size: 1.6rem; margin-bottom: var(--skeuo-space-md); }
+.skeuo h3, .skeuo-body h3 { font-size: 1.3rem; margin-bottom: var(--skeuo-space-sm); }
+.skeuo h4, .skeuo-body h4 { font-size: 1.1rem; margin-bottom: var(--skeuo-space-sm); }
+
+.skeuo p,
+.skeuo-body p {
+  font-family: var(--skeuo-font-sans);
+  margin-bottom: var(--skeuo-space-md);
+}
+
+/* Devanagari / Hindi text gets a slight size boost for legibility */
+.skeuo [lang="hi"],
+.skeuo .text-hindi,
+.skeuo-body [lang="hi"],
+.skeuo-body .text-hindi {
+  font-size: 1.05em;
+  line-height: 1.7;
+}
+
+
+/* ==========================================================================
+   4. PARCHMENT CARDS — Paper with curled edges
+   ========================================================================== */
+
+.skeuo-card {
+  position: relative;
+  background-color: var(--skeuo-paper-white);
+  /* Paper grain texture */
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 1px,
+      rgba(139, 115, 85, 0.02) 1px,
+      rgba(139, 115, 85, 0.02) 2px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 3px,
+      rgba(107, 91, 69, 0.015) 3px,
+      rgba(107, 91, 69, 0.015) 4px
+    );
+  border: 1px solid rgba(139, 115, 85, 0.2);
+  border-radius: var(--skeuo-radius-md);
+  padding: var(--skeuo-space-lg);
+  margin-bottom: var(--skeuo-space-lg);
+  /* Layered shadows for curled-edge paper effect */
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.1),
+    0 4px 8px rgba(0, 0, 0, 0.06),
+    0 0 0 1px rgba(255, 255, 255, 0.5) inset,
+    /* Curled bottom-left corner */
+    -3px 3px 6px -2px rgba(0, 0, 0, 0.12),
+    /* Curled bottom-right corner */
+    3px 3px 6px -2px rgba(0, 0, 0, 0.12);
+  transition: box-shadow var(--skeuo-transition);
+}
+
+.skeuo-card:hover {
+  box-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.14),
+    0 8px 16px rgba(0, 0, 0, 0.08),
+    0 0 0 1px rgba(255, 255, 255, 0.5) inset,
+    -4px 4px 8px -2px rgba(0, 0, 0, 0.15),
+    4px 4px 8px -2px rgba(0, 0, 0, 0.15);
+}
+
+/* Curled corner pseudo-element for extra realism */
+.skeuo-card::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 24px;
+  height: 24px;
+  background: linear-gradient(
+    225deg,
+    var(--skeuo-parchment-light) 50%,
+    transparent 50%
+  );
+  border-radius: 0 0 var(--skeuo-radius-md) 0;
+  box-shadow: -2px -2px 4px rgba(0, 0, 0, 0.06);
+  pointer-events: none;
+}
+
+.skeuo-card__title {
+  font-family: var(--skeuo-font-serif);
+  font-size: 1.25rem;
+  color: var(--skeuo-navy);
+  border-bottom: 1px solid var(--skeuo-parchment-dark);
+  padding-bottom: var(--skeuo-space-sm);
+  margin-bottom: var(--skeuo-space-md);
+}
+
+
+/* ==========================================================================
+   5. NAVIGATION BAR — Dark wood / leather toolbar
+   ========================================================================== */
+
+.skeuo-navbar {
+  position: sticky;
+  top: 0;
+  z-index: var(--skeuo-z-navbar);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--skeuo-space-sm) var(--skeuo-space-lg);
+  min-height: 56px;
+  /* Dark leather gradient */
+  background:
+    linear-gradient(
+      180deg,
+      #5C4E3C 0%,
+      #4A3F30 40%,
+      #3E3428 60%,
+      #352C22 100%
+    );
+  /* Leather grain overlay */
+  background-color: var(--skeuo-leather);
+  border-bottom: 1px solid #2A2218;
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.3);
+}
+
+.skeuo-navbar__brand {
+  font-family: var(--skeuo-font-serif);
+  font-size: 1.3rem;
+  font-weight: bold;
+  color: var(--skeuo-parchment-light);
+  text-shadow: 0 -1px 1px rgba(0, 0, 0, 0.6);
+  text-decoration: none;
+}
+
+.skeuo-navbar__link {
+  color: var(--skeuo-parchment);
+  text-decoration: none;
+  font-size: 0.9rem;
+  padding: var(--skeuo-space-xs) var(--skeuo-space-md);
+  border-radius: var(--skeuo-radius-sm);
+  text-shadow: 0 -1px 1px rgba(0, 0, 0, 0.5);
+  transition: background var(--skeuo-transition-fast);
+}
+
+.skeuo-navbar__link:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.skeuo-navbar__link--active {
+  background: rgba(0, 0, 0, 0.25);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+
+/* ==========================================================================
+   6. BUTTONS — 3D glossy pills with pressed states
+   ========================================================================== */
+
+.skeuo-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--skeuo-space-xs);
+  padding: 0.6em 1.4em;
+  font-family: var(--skeuo-font-sans);
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-decoration: none;
+  border: 1px solid rgba(0, 0, 0, 0.25);
+  border-radius: var(--skeuo-radius-pill);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition:
+    box-shadow var(--skeuo-transition-fast),
+    transform var(--skeuo-transition-fast);
+  /* Default: warm brown 3D pill */
+  color: #fff;
+  text-shadow: 0 -1px 1px rgba(0, 0, 0, 0.4);
+  background: linear-gradient(
+    180deg,
+    #A08060 0%,
+    #8B7355 40%,
+    #7A6448 70%,
+    #6B5B45 100%
+  );
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.15) inset,
+    0 -1px 0 rgba(0, 0, 0, 0.2) inset,
+    0 2px 4px rgba(0, 0, 0, 0.25);
+}
+
+/* Glossy highlight stripe across top */
+.skeuo-btn::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 10%;
+  right: 10%;
+  height: 45%;
+  border-radius: var(--skeuo-radius-pill) var(--skeuo-radius-pill) 50% 50%;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.35) 0%,
+    rgba(255, 255, 255, 0.05) 100%
+  );
+  pointer-events: none;
+}
+
+.skeuo-btn:hover {
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.2) inset,
+    0 -1px 0 rgba(0, 0, 0, 0.2) inset,
+    0 3px 8px rgba(0, 0, 0, 0.3);
+  transform: translateY(-1px);
+}
+
+.skeuo-btn:active {
+  transform: translateY(1px);
+  background: linear-gradient(
+    180deg,
+    #6B5B45 0%,
+    #7A6448 50%,
+    #8B7355 100%
+  );
+  box-shadow:
+    inset 0 2px 6px rgba(0, 0, 0, 0.4),
+    0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.skeuo-btn:active::before {
+  opacity: 0;
+}
+
+/* --- Button Variants --- */
+
+.skeuo-btn--primary {
+  background: linear-gradient(180deg, #2A6FAE 0%, #1B3A5C 100%);
+  border-color: #122840;
+}
+
+.skeuo-btn--saffron {
+  background: linear-gradient(180deg, #FFB74D 0%, #FF9933 40%, #E07A10 100%);
+  border-color: #B86200;
+}
+
+.skeuo-btn--success {
+  background: linear-gradient(180deg, #5CAA28 0%, #2D5016 100%);
+  border-color: #1E3A0E;
+}
+
+.skeuo-btn--danger {
+  background: linear-gradient(180deg, #D44040 0%, #8B1A1A 100%);
+  border-color: #5A0E0E;
+}
+
+.skeuo-btn--sm {
+  padding: 0.35em 1em;
+  font-size: 0.82rem;
+}
+
+.skeuo-btn--lg {
+  padding: 0.75em 2em;
+  font-size: 1.1rem;
+}
+
+.skeuo-btn:disabled,
+.skeuo-btn[disabled] {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+}
+
+
+/* ==========================================================================
+   7. INPUT FIELDS — Engraved / inset into surface
+   ========================================================================== */
+
+.skeuo-input {
+  display: block;
+  width: 100%;
+  padding: 0.6em 0.9em;
+  font-family: var(--skeuo-font-sans);
+  font-size: 1rem;
+  color: var(--skeuo-wood-dark);
+  background-color: #fff;
+  background-image:
+    linear-gradient(180deg, #F0EBE0 0%, #FFFFFF 6px);
+  border: 1px solid var(--skeuo-wood-light);
+  border-radius: var(--skeuo-radius-sm);
+  box-shadow:
+    inset 0 2px 5px rgba(0, 0, 0, 0.18),
+    inset 0 0 2px rgba(0, 0, 0, 0.08),
+    0 1px 0 rgba(255, 255, 255, 0.6);
+  outline: none;
+  transition: border-color var(--skeuo-transition), box-shadow var(--skeuo-transition);
+  box-sizing: border-box;
+}
+
+.skeuo-input:focus {
+  border-color: var(--skeuo-navy);
+  box-shadow:
+    inset 0 2px 5px rgba(0, 0, 0, 0.18),
+    inset 0 0 2px rgba(0, 0, 0, 0.08),
+    0 0 0 3px rgba(27, 58, 92, 0.2),
+    0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+.skeuo-input::placeholder {
+  color: var(--skeuo-wood-light);
+  font-style: italic;
+}
+
+.skeuo-textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.skeuo-select {
+  appearance: none;
+  padding-right: 2.2em;
+  background-image:
+    linear-gradient(180deg, #F0EBE0 0%, #FFFFFF 6px),
+    /* Down arrow triangle */
+    linear-gradient(45deg, transparent 50%, var(--skeuo-wood) 50%),
+    linear-gradient(135deg, var(--skeuo-wood) 50%, transparent 50%);
+  background-position:
+    0 0,
+    calc(100% - 16px) center,
+    calc(100% - 10px) center;
+  background-size:
+    100% 100%,
+    6px 6px,
+    6px 6px;
+  background-repeat: no-repeat;
+}
+
+.skeuo-label {
+  display: block;
+  font-family: var(--skeuo-font-serif);
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--skeuo-wood);
+  margin-bottom: var(--skeuo-space-xs);
+}
+
+
+/* ==========================================================================
+   8. TRUST SCORE GAUGE — Brass / copper speedometer
+   ========================================================================== */
+
+.skeuo-gauge {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  border-radius: var(--skeuo-radius-circle);
+  /* Brass bezel */
+  background: conic-gradient(
+    from 180deg,
+    #D4C86A, #B5A642, #8A7E32, #B5A642, #D4C86A
+  );
+  padding: 6px;
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.3),
+    inset 0 1px 2px rgba(255, 255, 255, 0.4),
+    inset 0 -1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.skeuo-gauge__face {
+  width: 100%;
+  height: 100%;
+  border-radius: var(--skeuo-radius-circle);
+  background:
+    radial-gradient(
+      circle at 40% 35%,
+      #FFFEF5 0%,
+      #F5F0E8 40%,
+      #E8E0CE 100%
+    );
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  position: relative;
+}
+
+.skeuo-gauge__value {
+  font-family: var(--skeuo-font-serif);
+  font-size: 1.6rem;
+  font-weight: bold;
+  color: var(--skeuo-wood-dark);
+  line-height: 1;
+}
+
+.skeuo-gauge__label {
+  font-family: var(--skeuo-font-sans);
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--skeuo-wood-light);
+  margin-top: 2px;
+}
+
+/* SVG-driven progress ring sits on top of gauge face */
+.skeuo-gauge__ring {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.skeuo-gauge__ring circle {
+  fill: none;
+  stroke-width: 5;
+  stroke-linecap: round;
+}
+
+.skeuo-gauge__ring .ring-bg {
+  stroke: var(--skeuo-parchment-dark);
+}
+
+.skeuo-gauge__ring .ring-fill {
+  stroke: var(--skeuo-copper);
+  transition: stroke-dashoffset 0.8s ease-in-out;
+}
+
+/* Gauge size variants */
+.skeuo-gauge--sm { width: 80px;  height: 80px; }
+.skeuo-gauge--sm .skeuo-gauge__value { font-size: 1.1rem; }
+.skeuo-gauge--lg { width: 160px; height: 160px; }
+.skeuo-gauge--lg .skeuo-gauge__value { font-size: 2.2rem; }
+
+
+/* ==========================================================================
+   9. VERIFICATION BADGES — Wax seals & rubber stamps
+   ========================================================================== */
+
+.skeuo-seal {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 72px;
+  height: 72px;
+  border-radius: var(--skeuo-radius-circle);
+  /* Wax seal gradient */
+  background:
+    radial-gradient(
+      circle at 35% 30%,
+      #C44040 0%,
+      var(--skeuo-seal-red-light) 35%,
+      var(--skeuo-seal-red) 100%
+    );
+  border: 3px solid #6B1010;
+  box-shadow:
+    0 3px 8px rgba(0, 0, 0, 0.35),
+    inset 0 2px 4px rgba(255, 255, 255, 0.15),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.3);
+  color: #F5E0C0;
+  font-family: var(--skeuo-font-serif);
+  font-size: 0.55rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  text-align: center;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  transform: rotate(-6deg);
+  line-height: 1.2;
+}
+
+.skeuo-seal--verified {
+  background:
+    radial-gradient(
+      circle at 35% 30%,
+      #3E8A20 0%,
+      var(--skeuo-green-light) 35%,
+      var(--skeuo-green-verified) 100%
+    );
+  border-color: #1A3A0A;
+}
+
+.skeuo-stamp {
+  display: inline-block;
+  padding: 0.4em 1em;
+  border: 3px solid var(--skeuo-stamp-ink);
+  border-radius: var(--skeuo-radius-sm);
+  color: var(--skeuo-stamp-ink);
+  font-family: var(--skeuo-font-mono);
+  font-size: 0.75rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  transform: rotate(-3deg);
+  opacity: 0.85;
+  /* Ink bleed effect */
+  text-shadow:
+    0 0 1px var(--skeuo-stamp-ink),
+    1px 0 2px rgba(26, 26, 107, 0.3);
+  box-shadow:
+    0 0 0 1px rgba(26, 26, 107, 0.1),
+    1px 1px 0 rgba(26, 26, 107, 0.05);
+  position: relative;
+}
+
+/* Ink irregularity pseudo-element */
+.skeuo-stamp::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border: 2px solid transparent;
+  border-top-color: rgba(26, 26, 107, 0.15);
+  border-left-color: rgba(26, 26, 107, 0.1);
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.skeuo-stamp--approved {
+  border-color: var(--skeuo-green-verified);
+  color: var(--skeuo-green-verified);
+  text-shadow: 0 0 1px var(--skeuo-green-verified);
+}
+
+.skeuo-stamp--rejected {
+  border-color: var(--skeuo-seal-red);
+  color: var(--skeuo-seal-red);
+  text-shadow: 0 0 1px var(--skeuo-seal-red);
+}
+
+
+/* ==========================================================================
+   10. TABLES — Paper ledger / register aesthetic
+   ========================================================================== */
+
+.skeuo-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--skeuo-font-sans);
+  font-size: 0.9rem;
+  background: var(--skeuo-paper-white);
+  border: 1px solid var(--skeuo-parchment-dark);
+  box-shadow: var(--skeuo-shadow-card);
+}
+
+.skeuo-table thead {
+  background: linear-gradient(
+    180deg,
+    var(--skeuo-wood-light) 0%,
+    var(--skeuo-wood) 100%
+  );
+}
+
+.skeuo-table thead th {
+  padding: 0.7em 1em;
+  color: var(--skeuo-parchment-light);
+  font-family: var(--skeuo-font-serif);
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-align: left;
+  text-shadow: 0 -1px 1px rgba(0, 0, 0, 0.4);
+  border-bottom: 2px solid var(--skeuo-wood-dark);
+}
+
+.skeuo-table tbody td {
+  padding: 0.6em 1em;
+  border-bottom: 1px solid rgba(139, 115, 85, 0.15);
+}
+
+/* Ledger ruled lines — alternating faint blue/cream like real registers */
+.skeuo-table tbody tr:nth-child(odd) {
+  background-color: rgba(245, 240, 232, 0.5);
+}
+
+.skeuo-table tbody tr:nth-child(even) {
+  background-color: rgba(237, 232, 213, 0.3);
+}
+
+/* Faint horizontal ruling */
+.skeuo-table tbody tr {
+  background-image:
+    linear-gradient(
+      180deg,
+      transparent calc(100% - 1px),
+      rgba(27, 58, 92, 0.06) calc(100% - 1px)
+    );
+}
+
+.skeuo-table tbody tr:hover {
+  background-color: rgba(255, 153, 51, 0.08);
+}
+
+
+/* ==========================================================================
+   11. MODAL DIALOGS — Paper document on desk
+   ========================================================================== */
+
+.skeuo-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(30, 25, 18, 0.6);
+  z-index: var(--skeuo-z-modal-backdrop);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--skeuo-space-lg);
+  animation: skeuo-fade-in 0.25s ease-out;
+}
+
+.skeuo-modal {
+  position: relative;
+  width: 100%;
+  max-width: 540px;
+  max-height: 85vh;
+  overflow-y: auto;
+  background: var(--skeuo-paper-white);
+  /* Paper grain */
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 1px,
+      rgba(139, 115, 85, 0.02) 1px,
+      rgba(139, 115, 85, 0.02) 2px
+    );
+  border-radius: var(--skeuo-radius-lg);
+  border: 1px solid rgba(139, 115, 85, 0.25);
+  /* Document on desk — heavy drop shadow */
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.25),
+    0 24px 60px rgba(0, 0, 0, 0.15),
+    0 0 0 1px rgba(255, 255, 255, 0.3) inset;
+  z-index: var(--skeuo-z-modal);
+  animation: skeuo-slide-up 0.3s ease-out;
+}
+
+.skeuo-modal__header {
+  padding: var(--skeuo-space-lg);
+  border-bottom: 1px solid var(--skeuo-parchment-dark);
+  font-family: var(--skeuo-font-serif);
+  font-size: 1.2rem;
+  color: var(--skeuo-navy);
+}
+
+.skeuo-modal__body {
+  padding: var(--skeuo-space-lg);
+}
+
+.skeuo-modal__footer {
+  padding: var(--skeuo-space-md) var(--skeuo-space-lg);
+  border-top: 1px solid var(--skeuo-parchment-dark);
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--skeuo-space-sm);
+}
+
+@keyframes skeuo-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes skeuo-slide-up {
+  from { opacity: 0; transform: translateY(20px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+
+/* ==========================================================================
+   12. STATUS LED INDICATORS — Glowing lights
+   ========================================================================== */
+
+.skeuo-led {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: var(--skeuo-radius-circle);
+  border: 1px solid rgba(0, 0, 0, 0.3);
+  box-shadow:
+    inset 0 1px 2px rgba(255, 255, 255, 0.5),
+    inset 0 -1px 2px rgba(0, 0, 0, 0.2);
+  position: relative;
+}
+
+/* Bright highlight dot */
+.skeuo-led::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 3px;
+  width: 4px;
+  height: 3px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.skeuo-led--green {
+  background: radial-gradient(circle at 40% 35%, #7CFC00, #228B22);
+  box-shadow:
+    inset 0 1px 2px rgba(255, 255, 255, 0.5),
+    0 0 6px rgba(57, 231, 95, 0.5),
+    0 0 12px rgba(57, 231, 95, 0.2);
+}
+
+.skeuo-led--amber {
+  background: radial-gradient(circle at 40% 35%, #FFD700, #CC8800);
+  box-shadow:
+    inset 0 1px 2px rgba(255, 255, 255, 0.5),
+    0 0 6px rgba(255, 179, 71, 0.5),
+    0 0 12px rgba(255, 179, 71, 0.2);
+}
+
+.skeuo-led--red {
+  background: radial-gradient(circle at 40% 35%, #FF6B6B, #B22222);
+  box-shadow:
+    inset 0 1px 2px rgba(255, 255, 255, 0.5),
+    0 0 6px rgba(255, 107, 107, 0.5),
+    0 0 12px rgba(255, 107, 107, 0.2);
+}
+
+/* Pulsing active state */
+.skeuo-led--pulse {
+  animation: skeuo-led-pulse 2s ease-in-out infinite;
+}
+
+@keyframes skeuo-led-pulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.5; }
+}
+
+
+/* ==========================================================================
+   13. TABS — Physical file folder tabs
+   ========================================================================== */
+
+.skeuo-tabs {
+  display: flex;
+  gap: 2px;
+  padding: 0 var(--skeuo-space-md);
+  border-bottom: 2px solid var(--skeuo-wood-light);
+  position: relative;
+}
+
+.skeuo-tab {
+  position: relative;
+  padding: 0.55em 1.3em;
+  font-family: var(--skeuo-font-serif);
+  font-size: 0.9rem;
+  color: var(--skeuo-wood);
+  background: linear-gradient(
+    180deg,
+    var(--skeuo-parchment) 0%,
+    var(--skeuo-parchment-dark) 100%
+  );
+  border: 1px solid rgba(139, 115, 85, 0.35);
+  border-bottom: none;
+  border-radius: var(--skeuo-radius-md) var(--skeuo-radius-md) 0 0;
+  cursor: pointer;
+  top: 2px;
+  transition: background var(--skeuo-transition-fast);
+  text-decoration: none;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    0 -1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.skeuo-tab:hover {
+  background: linear-gradient(
+    180deg,
+    var(--skeuo-paper-white) 0%,
+    var(--skeuo-parchment) 100%
+  );
+}
+
+.skeuo-tab--active {
+  background: var(--skeuo-paper-white);
+  color: var(--skeuo-navy);
+  font-weight: 600;
+  border-color: var(--skeuo-wood-light);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.8),
+    -1px -1px 3px rgba(0, 0, 0, 0.08),
+    1px -1px 3px rgba(0, 0, 0, 0.08);
+  /* Overlap border-bottom of container */
+  z-index: 1;
+  margin-bottom: -2px;
+  border-bottom: 2px solid var(--skeuo-paper-white);
+}
+
+.skeuo-tab-content {
+  background: var(--skeuo-paper-white);
+  border: 1px solid rgba(139, 115, 85, 0.2);
+  border-top: none;
+  border-radius: 0 0 var(--skeuo-radius-md) var(--skeuo-radius-md);
+  padding: var(--skeuo-space-lg);
+}
+
+
+/* ==========================================================================
+   14. CUSTOM SCROLLBAR — Leather book edge
+   ========================================================================== */
+
+.skeuo ::-webkit-scrollbar {
+  width: 14px;
+}
+
+.skeuo ::-webkit-scrollbar-track {
+  background:
+    linear-gradient(
+      90deg,
+      #D5C8B0 0%,
+      #E8DEC8 30%,
+      #E8DEC8 70%,
+      #D5C8B0 100%
+    );
+  border-left: 1px solid rgba(139, 115, 85, 0.3);
+}
+
+.skeuo ::-webkit-scrollbar-thumb {
+  background:
+    linear-gradient(
+      90deg,
+      var(--skeuo-wood-dark) 0%,
+      var(--skeuo-wood) 40%,
+      var(--skeuo-wood-light) 60%,
+      var(--skeuo-wood) 100%
+    );
+  border: 2px solid #D5C8B0;
+  border-radius: 7px;
+  min-height: 40px;
+}
+
+.skeuo ::-webkit-scrollbar-thumb:hover {
+  background:
+    linear-gradient(
+      90deg,
+      var(--skeuo-leather-dark) 0%,
+      var(--skeuo-leather) 40%,
+      var(--skeuo-wood) 60%,
+      var(--skeuo-leather) 100%
+    );
+}
+
+/* Firefox scrollbar */
+.skeuo {
+  scrollbar-width: thin;
+  scrollbar-color: var(--skeuo-wood) #E8DEC8;
+}
+
+
+/* ==========================================================================
+   15. FOOTER — Embossed text on dark surface
+   ========================================================================== */
+
+.skeuo-footer {
+  margin-top: var(--skeuo-space-2xl);
+  padding: var(--skeuo-space-lg) var(--skeuo-space-xl);
+  background: linear-gradient(
+    180deg,
+    var(--skeuo-leather) 0%,
+    var(--skeuo-leather-dark) 100%
+  );
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.3);
+  text-align: center;
+}
+
+.skeuo-footer__text {
+  font-family: var(--skeuo-font-serif);
+  font-size: 0.85rem;
+  /* Embossed / letterpress effect */
+  color: transparent;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.08) 0%,
+    rgba(255, 255, 255, 0.15) 100%
+  );
+  background-clip: text;
+  -webkit-background-clip: text;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.6);
+}
+
+.skeuo-footer a {
+  color: var(--skeuo-saffron);
+  text-decoration: none;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.5);
+}
+
+.skeuo-footer a:hover {
+  color: var(--skeuo-saffron-dark);
+  text-decoration: underline;
+}
+
+
+/* ==========================================================================
+   16. ASHOKA CHAKRA — Decorative circular motif & loading spinner
+   ========================================================================== */
+
+.skeuo-chakra {
+  display: inline-block;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--skeuo-radius-circle);
+  border: 3px solid var(--skeuo-navy);
+  position: relative;
+  box-sizing: border-box;
+}
+
+/* 24 spokes represented by a conic gradient */
+.skeuo-chakra::before {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  border-radius: var(--skeuo-radius-circle);
+  background: conic-gradient(
+    from 0deg,
+    var(--skeuo-navy) 0deg,    transparent 4deg,
+    transparent 11deg,          var(--skeuo-navy) 15deg,
+    var(--skeuo-navy) 15deg,   transparent 19deg,
+    transparent 26deg,          var(--skeuo-navy) 30deg,
+    var(--skeuo-navy) 30deg,   transparent 34deg,
+    transparent 41deg,          var(--skeuo-navy) 45deg,
+    var(--skeuo-navy) 45deg,   transparent 49deg,
+    transparent 56deg,          var(--skeuo-navy) 60deg,
+    var(--skeuo-navy) 60deg,   transparent 64deg,
+    transparent 71deg,          var(--skeuo-navy) 75deg,
+    var(--skeuo-navy) 75deg,   transparent 79deg,
+    transparent 86deg,          var(--skeuo-navy) 90deg,
+    var(--skeuo-navy) 90deg,   transparent 94deg,
+    transparent 101deg,         var(--skeuo-navy) 105deg,
+    var(--skeuo-navy) 105deg,  transparent 109deg,
+    transparent 116deg,         var(--skeuo-navy) 120deg,
+    var(--skeuo-navy) 120deg,  transparent 124deg,
+    transparent 131deg,         var(--skeuo-navy) 135deg,
+    var(--skeuo-navy) 135deg,  transparent 139deg,
+    transparent 146deg,         var(--skeuo-navy) 150deg,
+    var(--skeuo-navy) 150deg,  transparent 154deg,
+    transparent 161deg,         var(--skeuo-navy) 165deg,
+    var(--skeuo-navy) 165deg,  transparent 169deg,
+    transparent 176deg,         var(--skeuo-navy) 180deg,
+    var(--skeuo-navy) 180deg,  transparent 184deg,
+    transparent 191deg,         var(--skeuo-navy) 195deg,
+    var(--skeuo-navy) 195deg,  transparent 199deg,
+    transparent 206deg,         var(--skeuo-navy) 210deg,
+    var(--skeuo-navy) 210deg,  transparent 214deg,
+    transparent 221deg,         var(--skeuo-navy) 225deg,
+    var(--skeuo-navy) 225deg,  transparent 229deg,
+    transparent 236deg,         var(--skeuo-navy) 240deg,
+    var(--skeuo-navy) 240deg,  transparent 244deg,
+    transparent 251deg,         var(--skeuo-navy) 255deg,
+    var(--skeuo-navy) 255deg,  transparent 259deg,
+    transparent 266deg,         var(--skeuo-navy) 270deg,
+    var(--skeuo-navy) 270deg,  transparent 274deg,
+    transparent 281deg,         var(--skeuo-navy) 285deg,
+    var(--skeuo-navy) 285deg,  transparent 289deg,
+    transparent 296deg,         var(--skeuo-navy) 300deg,
+    var(--skeuo-navy) 300deg,  transparent 304deg,
+    transparent 311deg,         var(--skeuo-navy) 315deg,
+    var(--skeuo-navy) 315deg,  transparent 319deg,
+    transparent 326deg,         var(--skeuo-navy) 330deg,
+    var(--skeuo-navy) 330deg,  transparent 334deg,
+    transparent 341deg,         var(--skeuo-navy) 345deg,
+    var(--skeuo-navy) 345deg,  transparent 349deg,
+    transparent 356deg,         var(--skeuo-navy) 360deg
+  );
+  mask: radial-gradient(
+    circle,
+    transparent 30%,
+    black 31%,
+    black 100%
+  );
+  -webkit-mask: radial-gradient(
+    circle,
+    transparent 30%,
+    black 31%,
+    black 100%
+  );
+}
+
+/* Hub dot */
+.skeuo-chakra::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 8px;
+  height: 8px;
+  margin: -4px 0 0 -4px;
+  border-radius: var(--skeuo-radius-circle);
+  background: var(--skeuo-navy);
+}
+
+/* Spinning loader variant */
+.skeuo-chakra--spin {
+  animation: skeuo-chakra-rotate 2s linear infinite;
+}
+
+.skeuo-chakra--sm { width: 28px; height: 28px; border-width: 2px; }
+.skeuo-chakra--sm::after { width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; }
+
+.skeuo-chakra--lg { width: 72px; height: 72px; border-width: 4px; }
+.skeuo-chakra--lg::after { width: 12px; height: 12px; margin: -6px 0 0 -6px; }
+
+@keyframes skeuo-chakra-rotate {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* General loading overlay */
+.skeuo-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--skeuo-space-md);
+  padding: var(--skeuo-space-2xl);
+  color: var(--skeuo-wood);
+  font-family: var(--skeuo-font-serif);
+  font-style: italic;
+}
+
+
+/* ==========================================================================
+   17. LAYOUT UTILITIES
+   ========================================================================== */
+
+.skeuo-container {
+  width: 100%;
+  max-width: 1100px;
+  margin-inline: auto;
+  padding-inline: var(--skeuo-space-md);
+}
+
+.skeuo-grid {
+  display: grid;
+  gap: var(--skeuo-space-lg);
+}
+
+.skeuo-grid--2 { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+.skeuo-grid--3 { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+
+.skeuo-flex {
+  display: flex;
+  align-items: center;
+  gap: var(--skeuo-space-md);
+}
+
+.skeuo-flex--wrap  { flex-wrap: wrap; }
+.skeuo-flex--col   { flex-direction: column; align-items: stretch; }
+.skeuo-flex--between { justify-content: space-between; }
+
+.skeuo-mt-sm { margin-top: var(--skeuo-space-sm); }
+.skeuo-mt-md { margin-top: var(--skeuo-space-md); }
+.skeuo-mt-lg { margin-top: var(--skeuo-space-lg); }
+.skeuo-mb-sm { margin-bottom: var(--skeuo-space-sm); }
+.skeuo-mb-md { margin-bottom: var(--skeuo-space-md); }
+.skeuo-mb-lg { margin-bottom: var(--skeuo-space-lg); }
+
+
+/* ==========================================================================
+   18. VOICE ASSISTANT INTERFACE — Mic button & transcript area
+   ========================================================================== */
+
+.skeuo-mic-btn {
+  width: 72px;
+  height: 72px;
+  border-radius: var(--skeuo-radius-circle);
+  border: none;
+  cursor: pointer;
+  /* Metallic ring */
+  background:
+    radial-gradient(
+      circle at 40% 35%,
+      #E8E0CE 0%,
+      #C0C0C0 20%,
+      #A0A0A0 50%,
+      #808080 80%,
+      #606060 100%
+    );
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.3),
+    inset 0 2px 4px rgba(255, 255, 255, 0.4),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: box-shadow var(--skeuo-transition), transform var(--skeuo-transition-fast);
+}
+
+.skeuo-mic-btn:hover {
+  transform: scale(1.04);
+  box-shadow:
+    0 6px 16px rgba(0, 0, 0, 0.35),
+    inset 0 2px 4px rgba(255, 255, 255, 0.4),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.skeuo-mic-btn:active {
+  transform: scale(0.96);
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.3),
+    inset 0 3px 8px rgba(0, 0, 0, 0.4);
+}
+
+/* Recording state — red glow ring */
+.skeuo-mic-btn--recording {
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.3),
+    0 0 0 4px rgba(255, 107, 107, 0.4),
+    0 0 20px rgba(255, 107, 107, 0.3),
+    inset 0 2px 4px rgba(255, 255, 255, 0.4);
+  animation: skeuo-mic-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes skeuo-mic-pulse {
+  0%, 100% { box-shadow: 0 4px 12px rgba(0,0,0,.3), 0 0 0 4px rgba(255,107,107,.4), 0 0 20px rgba(255,107,107,.3), inset 0 2px 4px rgba(255,255,255,.4); }
+  50%      { box-shadow: 0 4px 12px rgba(0,0,0,.3), 0 0 0 8px rgba(255,107,107,.2), 0 0 30px rgba(255,107,107,.4), inset 0 2px 4px rgba(255,255,255,.4); }
+}
+
+.skeuo-transcript {
+  background: var(--skeuo-paper-white);
+  border: 1px solid var(--skeuo-parchment-dark);
+  border-radius: var(--skeuo-radius-md);
+  padding: var(--skeuo-space-md);
+  min-height: 80px;
+  font-family: var(--skeuo-font-mono);
+  font-size: 0.9rem;
+  line-height: 1.7;
+  box-shadow: var(--skeuo-shadow-inset);
+  /* Lined paper effect */
+  background-image:
+    repeating-linear-gradient(
+      180deg,
+      transparent,
+      transparent 27px,
+      rgba(27, 58, 92, 0.08) 27px,
+      rgba(27, 58, 92, 0.08) 28px
+    );
+  background-position: 0 0.7em;
+}
+
+
+/* ==========================================================================
+   19. PROGRESS BAR — Brass-trimmed fill
+   ========================================================================== */
+
+.skeuo-progress {
+  width: 100%;
+  height: 22px;
+  background: #E0D8C4;
+  border-radius: var(--skeuo-radius-pill);
+  border: 1px solid var(--skeuo-wood-light);
+  box-shadow:
+    inset 0 2px 4px rgba(0, 0, 0, 0.2),
+    0 1px 0 rgba(255, 255, 255, 0.5);
+  overflow: hidden;
+  position: relative;
+}
+
+.skeuo-progress__fill {
+  height: 100%;
+  border-radius: var(--skeuo-radius-pill);
+  background: linear-gradient(
+    180deg,
+    var(--skeuo-brass-light) 0%,
+    var(--skeuo-brass) 50%,
+    var(--skeuo-brass-dark) 100%
+  );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.15);
+  transition: width 0.6s ease-in-out;
+  position: relative;
+}
+
+/* Glossy stripe on progress fill */
+.skeuo-progress__fill::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 50%;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.3) 0%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  border-radius: var(--skeuo-radius-pill) var(--skeuo-radius-pill) 0 0;
+}
+
+
+/* ==========================================================================
+   20. TOOLTIP
+   ========================================================================== */
+
+.skeuo-tooltip {
+  position: relative;
+}
+
+.skeuo-tooltip::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%) scale(0.9);
+  padding: 0.35em 0.7em;
+  font-family: var(--skeuo-font-sans);
+  font-size: 0.78rem;
+  color: var(--skeuo-parchment-light);
+  background: var(--skeuo-wood-dark);
+  border-radius: var(--skeuo-radius-sm);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--skeuo-transition), transform var(--skeuo-transition);
+  z-index: var(--skeuo-z-tooltip);
+}
+
+.skeuo-tooltip:hover::after {
+  opacity: 1;
+  transform: translateX(-50%) scale(1);
+}
+
+
+/* ==========================================================================
+   21. ALERT / NOTICE BANNERS
+   ========================================================================== */
+
+.skeuo-alert {
+  padding: var(--skeuo-space-md) var(--skeuo-space-lg);
+  border-radius: var(--skeuo-radius-md);
+  font-size: 0.9rem;
+  margin-bottom: var(--skeuo-space-md);
+  border: 1px solid;
+  box-shadow: var(--skeuo-shadow-subtle);
+}
+
+.skeuo-alert--info {
+  background: linear-gradient(180deg, #E8EFF8 0%, #D5E1F0 100%);
+  border-color: #A0B8D0;
+  color: var(--skeuo-navy);
+}
+
+.skeuo-alert--success {
+  background: linear-gradient(180deg, #E8F5E0 0%, #D0E8C0 100%);
+  border-color: #90C070;
+  color: var(--skeuo-green-verified);
+}
+
+.skeuo-alert--warning {
+  background: linear-gradient(180deg, #FFF5E0 0%, #FFE8B8 100%);
+  border-color: #E0B860;
+  color: #7A5A00;
+}
+
+.skeuo-alert--danger {
+  background: linear-gradient(180deg, #FDE8E8 0%, #F8D0D0 100%);
+  border-color: #D09090;
+  color: var(--skeuo-seal-red);
+}
+
+
+/* ==========================================================================
+   22. RESPONSIVE DESIGN — Mobile-first breakpoints
+   ========================================================================== */
+
+/* Base (mobile) styles are the defaults above */
+
+/* Small tablets (480px+) */
+@media (min-width: 30em) {
+  .skeuo-container {
+    padding-inline: var(--skeuo-space-lg);
+  }
+
+  .skeuo h1 { font-size: 2.2rem; }
+}
+
+/* Tablets (768px+) */
+@media (min-width: 48em) {
+  .skeuo-container {
+    padding-inline: var(--skeuo-space-xl);
+  }
+
+  .skeuo h1 { font-size: 2.5rem; }
+
+  .skeuo-navbar {
+    padding: var(--skeuo-space-sm) var(--skeuo-space-xl);
+  }
+
+  .skeuo-modal {
+    max-width: 600px;
+  }
+}
+
+/* Desktop (1024px+) */
+@media (min-width: 64em) {
+  .skeuo-container {
+    padding-inline: var(--skeuo-space-2xl);
+  }
+
+  .skeuo h1 { font-size: 2.8rem; }
+
+  .skeuo-grid--2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .skeuo-grid--3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .skeuo-chakra--spin,
+  .skeuo-led--pulse,
+  .skeuo-mic-btn--recording {
+    animation: none;
+  }
+
+  *, *::before, *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
+
+
+/* ==========================================================================
+   23. DARK MODE — Rich dark-leather aesthetic
+   ========================================================================== */
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --skeuo-parchment-light:   #2A2520;
+    --skeuo-parchment:         #232018;
+    --skeuo-parchment-dark:    #1A1712;
+    --skeuo-paper-white:       #302B24;
+    --skeuo-paper-grain:       #3A342A;
+    --skeuo-wood-light:        #A89878;
+    --skeuo-wood:              #C4B090;
+    --skeuo-wood-dark:         #E0D4BC;
+  }
+
+  body.skeuo,
+  body.skeuo-body {
+    color: #E0D4BC;
+    background-color: #1E1A14;
+    background-image:
+      repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(200, 180, 140, 0.02) 2px,
+        rgba(200, 180, 140, 0.02) 3px
+      ),
+      repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 2px,
+        rgba(200, 180, 140, 0.02) 2px,
+        rgba(200, 180, 140, 0.02) 3px
+      );
+  }
+
+  .skeuo h1, .skeuo h2, .skeuo h3,
+  .skeuo h4, .skeuo h5, .skeuo h6 {
+    color: #E8DEC8;
+  }
+
+  .skeuo-card {
+    background-color: #302B24;
+    border-color: rgba(200, 180, 140, 0.12);
+    box-shadow:
+      0 2px 8px rgba(0, 0, 0, 0.4),
+      0 8px 24px rgba(0, 0, 0, 0.2),
+      0 0 0 1px rgba(255, 255, 255, 0.03) inset;
+  }
+
+  .skeuo-card::after {
+    background: linear-gradient(
+      225deg,
+      #1E1A14 50%,
+      transparent 50%
+    );
+  }
+
+  .skeuo-card__title {
+    color: var(--skeuo-saffron);
+    border-bottom-color: rgba(200, 180, 140, 0.15);
+  }
+
+  .skeuo-navbar {
+    background:
+      linear-gradient(
+        180deg,
+        #2A2418 0%,
+        #1E1A12 40%,
+        #161210 60%,
+        #100E0A 100%
+      );
+    border-bottom-color: #0A0806;
+    box-shadow:
+      0 2px 10px rgba(0, 0, 0, 0.5),
+      inset 0 1px 0 rgba(255, 255, 255, 0.04),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.4);
+  }
+
+  .skeuo-input {
+    background-color: #252018;
+    background-image: linear-gradient(180deg, #201B14 0%, #252018 6px);
+    color: #E0D4BC;
+    border-color: #4A4030;
+    box-shadow:
+      inset 0 2px 5px rgba(0, 0, 0, 0.4),
+      0 1px 0 rgba(255, 255, 255, 0.04);
+  }
+
+  .skeuo-input:focus {
+    border-color: var(--skeuo-saffron);
+    box-shadow:
+      inset 0 2px 5px rgba(0, 0, 0, 0.4),
+      0 0 0 3px rgba(255, 153, 51, 0.15);
+  }
+
+  .skeuo-input::placeholder {
+    color: #7A6E58;
+  }
+
+  .skeuo-table {
+    background: #2A2520;
+    border-color: rgba(200, 180, 140, 0.1);
+  }
+
+  .skeuo-table thead {
+    background: linear-gradient(180deg, #3A3428 0%, #2A2418 100%);
+  }
+
+  .skeuo-table tbody tr:nth-child(odd) {
+    background-color: rgba(48, 43, 36, 0.6);
+  }
+
+  .skeuo-table tbody tr:nth-child(even) {
+    background-color: rgba(42, 37, 32, 0.6);
+  }
+
+  .skeuo-table tbody tr:hover {
+    background-color: rgba(255, 153, 51, 0.06);
+  }
+
+  .skeuo-modal-backdrop {
+    background: rgba(10, 8, 6, 0.75);
+  }
+
+  .skeuo-modal {
+    background: #302B24;
+    border-color: rgba(200, 180, 140, 0.1);
+    box-shadow:
+      0 8px 32px rgba(0, 0, 0, 0.5),
+      0 24px 60px rgba(0, 0, 0, 0.3);
+  }
+
+  .skeuo-modal__header {
+    color: var(--skeuo-saffron);
+    border-bottom-color: rgba(200, 180, 140, 0.12);
+  }
+
+  .skeuo-modal__footer {
+    border-top-color: rgba(200, 180, 140, 0.12);
+  }
+
+  .skeuo-tab {
+    background: linear-gradient(180deg, #302B24 0%, #252018 100%);
+    border-color: rgba(200, 180, 140, 0.15);
+    color: #C4B090;
+  }
+
+  .skeuo-tab--active {
+    background: #302B24;
+    color: var(--skeuo-saffron);
+    border-bottom-color: #302B24;
+  }
+
+  .skeuo-tab-content {
+    background: #302B24;
+    border-color: rgba(200, 180, 140, 0.1);
+  }
+
+  .skeuo-tabs {
+    border-bottom-color: #4A4030;
+  }
+
+  .skeuo-footer {
+    background: linear-gradient(180deg, #161210 0%, #0E0C0A 100%);
+    border-top-color: rgba(255, 255, 255, 0.03);
+  }
+
+  .skeuo-transcript {
+    background: #252018;
+    border-color: #3A3428;
+    color: #D0C4A8;
+    box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.4);
+    background-image:
+      repeating-linear-gradient(
+        180deg,
+        transparent,
+        transparent 27px,
+        rgba(200, 180, 140, 0.05) 27px,
+        rgba(200, 180, 140, 0.05) 28px
+      );
+  }
+
+  .skeuo-progress {
+    background: #1E1A14;
+    border-color: #3A3428;
+  }
+
+  .skeuo-gauge__face {
+    background: radial-gradient(
+      circle at 40% 35%,
+      #3A342A 0%,
+      #302B24 40%,
+      #252018 100%
+    );
+  }
+
+  .skeuo-gauge__value {
+    color: #E0D4BC;
+  }
+
+  .skeuo-alert--info {
+    background: linear-gradient(180deg, #1A2530 0%, #152030 100%);
+    border-color: #2A4060;
+    color: #90B8E0;
+  }
+
+  .skeuo-alert--success {
+    background: linear-gradient(180deg, #1A2A18 0%, #152818 100%);
+    border-color: #2A5020;
+    color: #80C060;
+  }
+
+  .skeuo-alert--warning {
+    background: linear-gradient(180deg, #2A2518 0%, #2A2010 100%);
+    border-color: #5A4820;
+    color: #E0B860;
+  }
+
+  .skeuo-alert--danger {
+    background: linear-gradient(180deg, #2A1A1A 0%, #281515 100%);
+    border-color: #5A2020;
+    color: #E08080;
+  }
+
+  /* Dark scrollbar */
+  .skeuo ::-webkit-scrollbar-track {
+    background: linear-gradient(90deg, #1A1712 0%, #232018 50%, #1A1712 100%);
+    border-left-color: rgba(200, 180, 140, 0.08);
+  }
+
+  .skeuo ::-webkit-scrollbar-thumb {
+    background: linear-gradient(90deg, #3A3428 0%, #4A4030 50%, #3A3428 100%);
+    border-color: #1A1712;
+  }
+
+  .skeuo {
+    scrollbar-color: #4A4030 #1A1712;
+  }
+
+  .skeuo-chakra {
+    border-color: var(--skeuo-saffron);
+  }
+
+  .skeuo-chakra::before {
+    background: conic-gradient(
+      from 0deg,
+      var(--skeuo-saffron) 0deg,    transparent 4deg,
+      transparent 11deg,              var(--skeuo-saffron) 15deg,
+      var(--skeuo-saffron) 15deg,    transparent 19deg,
+      transparent 26deg,              var(--skeuo-saffron) 30deg,
+      var(--skeuo-saffron) 30deg,    transparent 34deg,
+      transparent 41deg,              var(--skeuo-saffron) 45deg,
+      var(--skeuo-saffron) 45deg,    transparent 49deg,
+      transparent 56deg,              var(--skeuo-saffron) 60deg,
+      var(--skeuo-saffron) 60deg,    transparent 64deg,
+      transparent 71deg,              var(--skeuo-saffron) 75deg,
+      var(--skeuo-saffron) 75deg,    transparent 79deg,
+      transparent 86deg,              var(--skeuo-saffron) 90deg,
+      var(--skeuo-saffron) 90deg,    transparent 94deg,
+      transparent 101deg,             var(--skeuo-saffron) 105deg,
+      var(--skeuo-saffron) 105deg,   transparent 109deg,
+      transparent 116deg,             var(--skeuo-saffron) 120deg,
+      var(--skeuo-saffron) 120deg,   transparent 124deg,
+      transparent 131deg,             var(--skeuo-saffron) 135deg,
+      var(--skeuo-saffron) 135deg,   transparent 139deg,
+      transparent 146deg,             var(--skeuo-saffron) 150deg,
+      var(--skeuo-saffron) 150deg,   transparent 154deg,
+      transparent 161deg,             var(--skeuo-saffron) 165deg,
+      var(--skeuo-saffron) 165deg,   transparent 169deg,
+      transparent 176deg,             var(--skeuo-saffron) 180deg,
+      var(--skeuo-saffron) 180deg,   transparent 184deg,
+      transparent 191deg,             var(--skeuo-saffron) 195deg,
+      var(--skeuo-saffron) 195deg,   transparent 199deg,
+      transparent 206deg,             var(--skeuo-saffron) 210deg,
+      var(--skeuo-saffron) 210deg,   transparent 214deg,
+      transparent 221deg,             var(--skeuo-saffron) 225deg,
+      var(--skeuo-saffron) 225deg,   transparent 229deg,
+      transparent 236deg,             var(--skeuo-saffron) 240deg,
+      var(--skeuo-saffron) 240deg,   transparent 244deg,
+      transparent 251deg,             var(--skeuo-saffron) 255deg,
+      var(--skeuo-saffron) 255deg,   transparent 259deg,
+      transparent 266deg,             var(--skeuo-saffron) 270deg,
+      var(--skeuo-saffron) 270deg,   transparent 274deg,
+      transparent 281deg,             var(--skeuo-saffron) 285deg,
+      var(--skeuo-saffron) 285deg,   transparent 289deg,
+      transparent 296deg,             var(--skeuo-saffron) 300deg,
+      var(--skeuo-saffron) 300deg,   transparent 304deg,
+      transparent 311deg,             var(--skeuo-saffron) 315deg,
+      var(--skeuo-saffron) 315deg,   transparent 319deg,
+      transparent 326deg,             var(--skeuo-saffron) 330deg,
+      var(--skeuo-saffron) 330deg,   transparent 334deg,
+      transparent 341deg,             var(--skeuo-saffron) 345deg,
+      var(--skeuo-saffron) 345deg,   transparent 349deg,
+      transparent 356deg,             var(--skeuo-saffron) 360deg
+    );
+  }
+
+  .skeuo-chakra::after {
+    background: var(--skeuo-saffron);
+  }
+}
+
+
+/* ==========================================================================
+   24. PRINT STYLES
+   ========================================================================== */
+
+@media print {
+  .skeuo-navbar,
+  .skeuo-footer,
+  .skeuo-mic-btn {
+    display: none;
+  }
+
+  body.skeuo,
+  body.skeuo-body {
+    background: #fff;
+  }
+
+  .skeuo-card {
+    box-shadow: none;
+    border: 1px solid #ccc;
+    page-break-inside: avoid;
+  }
+
+  .skeuo-modal-backdrop {
+    position: static;
+    background: none;
+  }
+
+  .skeuo-modal {
+    box-shadow: none;
+    border: 1px solid #ccc;
+  }
+}
+
+
+/* ==========================================================================
+   25. APPLICATION-SPECIFIC STYLES
+   Classes used in index.html that augment the design system above.
+   ========================================================================== */
+
+/* ---- Main content area ---- */
+
+.skeuo-main {
+  max-width: 1200px;
+  margin-inline: auto;
+  padding: var(--skeuo-space-lg);
+  min-height: calc(100vh - 56px - 120px);
+}
+
+
+/* ---- View system (show/hide sections) ---- */
+
+.view {
+  display: none;
+}
+
+.view.active {
+  display: block;
+  animation: skeuo-fade-in 0.3s ease-out;
+}
+
+
+/* ---- Navbar brand & links ---- */
+
+.navbar-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--skeuo-space-sm);
+}
+
+.brand-emblem {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--skeuo-radius-circle);
+  background: radial-gradient(circle at 35% 30%, #FFD280, var(--skeuo-saffron), var(--skeuo-saffron-dark));
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Noto Sans Devanagari', var(--skeuo-font-serif);
+  font-size: 1rem;
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+  box-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.3),
+    inset 0 1px 2px rgba(255, 255, 255, 0.3);
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.brand-text h1 {
+  font-family: 'Noto Sans Devanagari', var(--skeuo-font-serif);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--skeuo-parchment-light);
+  margin: 0;
+  text-shadow: 0 -1px 1px rgba(0, 0, 0, 0.6);
+}
+
+.brand-text span {
+  font-family: var(--skeuo-font-sans);
+  font-size: 0.7rem;
+  color: var(--skeuo-parchment);
+  text-shadow: 0 -1px 1px rgba(0, 0, 0, 0.5);
+  letter-spacing: 0.05em;
+}
+
+.navbar-links {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.nav-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3em;
+  padding: var(--skeuo-space-xs) var(--skeuo-space-md);
+  font-family: var(--skeuo-font-sans);
+  font-size: 0.88rem;
+  color: var(--skeuo-parchment);
+  text-decoration: none;
+  border-radius: var(--skeuo-radius-sm);
+  text-shadow: 0 -1px 1px rgba(0, 0, 0, 0.5);
+  transition: background var(--skeuo-transition-fast);
+}
+
+.nav-tab:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.nav-tab.active {
+  background: rgba(0, 0, 0, 0.25);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.4);
+  color: var(--skeuo-saffron);
+  font-weight: 600;
+}
+
+.tab-icon {
+  font-size: 0.85em;
+}
+
+.navbar-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--skeuo-space-sm);
+}
+
+
+/* ---- Button variants (non-BEM names used in HTML) ---- */
+
+.btn-primary {
+  background: linear-gradient(180deg, #2A6FAE 0%, #1B3A5C 100%);
+  border-color: #122840;
+}
+
+.btn-sm {
+  padding: 0.35em 1em;
+  font-size: 0.82rem;
+}
+
+.btn-lg {
+  padding: 0.75em 2em;
+  font-size: 1.1rem;
+}
+
+
+/* ---- Form input aliases ---- */
+
+.search-input {
+  flex: 1;
+}
+
+.skeuo-select {
+  display: inline-block;
+}
+
+
+/* ---- Hero banner ---- */
+
+.hero-banner {
+  position: relative;
+  padding: var(--skeuo-space-2xl) var(--skeuo-space-lg);
+  margin-bottom: var(--skeuo-space-lg);
+  background:
+    linear-gradient(
+      135deg,
+      rgba(27, 58, 92, 0.92) 0%,
+      rgba(27, 58, 92, 0.85) 50%,
+      rgba(42, 85, 128, 0.9) 100%
+    );
+  border-radius: var(--skeuo-radius-lg);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.2),
+    0 12px 32px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  text-align: center;
+  color: #fff;
+}
+
+.hero-content {
+  max-width: 640px;
+  margin-inline: auto;
+}
+
+.hero-title {
+  font-family: var(--skeuo-font-serif);
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: var(--skeuo-space-sm);
+  color: #fff;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.hero-subtitle {
+  font-family: var(--skeuo-font-sans);
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.85);
+  margin-bottom: var(--skeuo-space-lg);
+}
+
+.hero-search {
+  display: flex;
+  gap: var(--skeuo-space-sm);
+  max-width: 500px;
+  margin-inline: auto;
+}
+
+.hero-search .skeuo-input {
+  flex: 1;
+}
+
+
+/* ---- Stats row ---- */
+
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--skeuo-space-md);
+  margin-bottom: var(--skeuo-space-lg);
+}
+
+.stat-card {
+  position: relative;
+  background: var(--skeuo-paper-white);
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 1px,
+      rgba(139, 115, 85, 0.02) 1px,
+      rgba(139, 115, 85, 0.02) 2px
+    );
+  border: 1px solid rgba(139, 115, 85, 0.2);
+  border-radius: var(--skeuo-radius-md);
+  padding: var(--skeuo-space-md) var(--skeuo-space-lg);
+  text-align: center;
+  box-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.12),
+    0 0 0 1px rgba(255, 255, 255, 0.5) inset;
+  transition: box-shadow var(--skeuo-transition), transform var(--skeuo-transition);
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.16),
+    0 0 0 1px rgba(255, 255, 255, 0.5) inset;
+}
+
+.stat-card.verified { border-left: 4px solid #27ae60; }
+.stat-card.partial  { border-left: 4px solid #f39c12; }
+.stat-card.unverified { border-left: 4px solid #95a5a6; }
+
+.stat-icon {
+  font-size: 1.6rem;
+  margin-bottom: var(--skeuo-space-xs);
+}
+
+.stat-value {
+  font-family: var(--skeuo-font-serif);
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--skeuo-navy);
+  line-height: 1.2;
+}
+
+.stat-label {
+  font-family: var(--skeuo-font-sans);
+  font-size: 0.82rem;
+  color: var(--skeuo-wood-light);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-top: var(--skeuo-space-xs);
+}
+
+
+/* ---- Dashboard grid ---- */
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--skeuo-space-lg);
+  margin-bottom: var(--skeuo-space-lg);
+}
+
+@media (max-width: 768px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+/* ---- Paper card (generic content card) ---- */
+
+.paper-card {
+  position: relative;
+  background-color: var(--skeuo-paper-white);
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 1px,
+      rgba(139, 115, 85, 0.02) 1px,
+      rgba(139, 115, 85, 0.02) 2px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 3px,
+      rgba(107, 91, 69, 0.015) 3px,
+      rgba(107, 91, 69, 0.015) 4px
+    );
+  border: 1px solid rgba(139, 115, 85, 0.2);
+  border-radius: var(--skeuo-radius-md);
+  padding: var(--skeuo-space-lg);
+  margin-bottom: var(--skeuo-space-lg);
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.1),
+    0 4px 8px rgba(0, 0, 0, 0.06),
+    0 0 0 1px rgba(255, 255, 255, 0.5) inset;
+  transition: box-shadow var(--skeuo-transition);
+}
+
+.paper-card:hover {
+  box-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.14),
+    0 8px 16px rgba(0, 0, 0, 0.08),
+    0 0 0 1px rgba(255, 255, 255, 0.5) inset;
+}
+
+.gauge-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.sources-card {}
+
+.card-title {
+  font-family: var(--skeuo-font-serif);
+  font-size: 1.15rem;
+  color: var(--skeuo-navy);
+  border-bottom: 1px solid var(--skeuo-parchment-dark);
+  padding-bottom: var(--skeuo-space-sm);
+  margin-bottom: var(--skeuo-space-md);
+}
+
+
+/* ---- Source list + LED indicators ---- */
+
+.source-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--skeuo-space-sm);
+}
+
+.source-item {
+  display: flex;
+  align-items: center;
+  gap: var(--skeuo-space-sm);
+  padding: var(--skeuo-space-xs) 0;
+  font-size: 0.9rem;
+}
+
+.source-weight {
+  margin-left: auto;
+  font-size: 0.8rem;
+  color: var(--skeuo-wood-light);
+  font-weight: 600;
+}
+
+/* Non-BEM LED indicator names (used in HTML alongside the BEM skeuo-led) */
+.led {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: var(--skeuo-radius-circle);
+  border: 1px solid rgba(0, 0, 0, 0.3);
+  box-shadow:
+    inset 0 1px 2px rgba(255, 255, 255, 0.5),
+    inset 0 -1px 2px rgba(0, 0, 0, 0.2);
+  position: relative;
+  flex-shrink: 0;
+}
+
+.led::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 3px;
+  width: 4px;
+  height: 3px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.led-green {
+  background: radial-gradient(circle at 40% 35%, #7CFC00, #228B22);
+  box-shadow:
+    inset 0 1px 2px rgba(255, 255, 255, 0.5),
+    0 0 6px rgba(57, 231, 95, 0.5),
+    0 0 12px rgba(57, 231, 95, 0.2);
+}
+
+.led-red {
+  background: radial-gradient(circle at 40% 35%, #FF6B6B, #B22222);
+  box-shadow:
+    inset 0 1px 2px rgba(255, 255, 255, 0.5),
+    0 0 6px rgba(255, 107, 107, 0.5),
+    0 0 12px rgba(255, 107, 107, 0.2);
+}
+
+.led-amber {
+  background: radial-gradient(circle at 40% 35%, #FFD700, #CC8800);
+  box-shadow:
+    inset 0 1px 2px rgba(255, 255, 255, 0.5),
+    0 0 6px rgba(255, 179, 71, 0.5),
+    0 0 12px rgba(255, 179, 71, 0.2);
+}
+
+
+/* ---- Activity feed ---- */
+
+.activity-feed {
+  display: flex;
+  flex-direction: column;
+  gap: var(--skeuo-space-sm);
+}
+
+.activity-item {
+  padding: var(--skeuo-space-sm) 0;
+  border-bottom: 1px solid rgba(139, 115, 85, 0.12);
+}
+
+.activity-item:last-child {
+  border-bottom: none;
+}
+
+.activity-link {
+  display: flex;
+  align-items: center;
+  gap: var(--skeuo-space-sm);
+  text-decoration: none;
+  color: var(--skeuo-wood-dark);
+}
+
+.activity-link:hover {
+  color: var(--skeuo-navy);
+}
+
+.activity-time {
+  margin-left: auto;
+  font-size: 0.8rem;
+  color: var(--skeuo-wood-light);
+}
+
+.placeholder-text {
+  font-family: var(--skeuo-font-sans);
+  font-style: italic;
+  color: var(--skeuo-wood-light);
+  padding: var(--skeuo-space-md);
+  text-align: center;
+}
+
+
+/* ---- Trust gauge container ---- */
+
+.trust-gauge-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--skeuo-space-md);
+}
+
+
+/* ---- View header & controls ---- */
+
+.view-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--skeuo-space-md);
+  margin-bottom: var(--skeuo-space-lg);
+}
+
+.view-header h2 {
+  margin-bottom: 0;
+}
+
+.view-description {
+  color: var(--skeuo-wood-light);
+  font-size: 0.92rem;
+  margin-top: var(--skeuo-space-xs);
+}
+
+.view-controls {
+  display: flex;
+  align-items: center;
+  gap: var(--skeuo-space-sm);
+  flex-wrap: wrap;
+}
+
+.view-toggle {
+  display: inline-flex;
+  gap: 2px;
+}
+
+
+/* ---- Schemes grid ---- */
+
+.schemes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--skeuo-space-md);
+}
+
+.schemes-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--skeuo-space-sm);
+}
+
+.schemes-list .scheme-card {
+  display: flex;
+  align-items: center;
+  gap: var(--skeuo-space-md);
+}
+
+
+/* ---- Scheme cards ---- */
+
+.scheme-card {
+  cursor: pointer;
+  transition: box-shadow var(--skeuo-transition), transform var(--skeuo-transition);
+}
+
+.scheme-card:hover,
+.scheme-card:focus {
+  transform: translateY(-2px);
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.18),
+    0 0 0 1px rgba(255, 255, 255, 0.5) inset;
+  outline: none;
+}
+
+.scheme-card__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--skeuo-space-sm);
+  margin-bottom: var(--skeuo-space-xs);
+}
+
+.scheme-card__name {
+  font-family: var(--skeuo-font-serif);
+  font-size: 1.05rem;
+  color: var(--skeuo-navy);
+  margin-bottom: 0;
+}
+
+.scheme-card__ministry {
+  font-size: 0.82rem;
+  color: var(--skeuo-wood-light);
+  margin-bottom: var(--skeuo-space-xs);
+}
+
+.scheme-card__cat {
+  display: inline-block;
+  padding: 0.15em 0.6em;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-radius: var(--skeuo-radius-pill);
+  background: var(--skeuo-parchment);
+  border: 1px solid var(--skeuo-parchment-dark);
+  color: var(--skeuo-wood);
+  margin-bottom: var(--skeuo-space-sm);
+}
+
+.scheme-card__desc {
+  font-size: 0.88rem;
+  color: var(--skeuo-wood);
+  line-height: 1.5;
+  margin-bottom: var(--skeuo-space-sm);
+}
+
+
+/* ---- Pagination ---- */
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--skeuo-space-sm);
+  padding: var(--skeuo-space-md) 0;
+}
+
+.pagination .skeuo-btn {
+  min-width: 36px;
+}
+
+
+/* ---- Scheme detail layout ---- */
+
+.scheme-detail-layout {
+  /* Container for dynamically rendered detail content */
+}
+
+.detail-back {
+  margin-bottom: var(--skeuo-space-md);
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: var(--skeuo-space-lg);
+  margin-bottom: var(--skeuo-space-lg);
+}
+
+@media (max-width: 768px) {
+  .detail-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.detail-main {}
+
+.detail-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--skeuo-space-md);
+}
+
+.detail-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--skeuo-space-sm);
+  margin-bottom: var(--skeuo-space-lg);
+}
+
+.detail-section {
+  margin-bottom: var(--skeuo-space-lg);
+}
+
+
+/* ---- Verification layout ---- */
+
+.verification-layout {
+  display: flex;
+  flex-direction: column;
+  gap: var(--skeuo-space-lg);
+}
+
+
+/* ---- Chart container ---- */
+
+.chart-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 240px;
+  padding: var(--skeuo-space-md);
+}
+
+.donut-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--skeuo-space-lg);
+  flex-wrap: wrap;
+}
+
+.chart-legend {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--skeuo-space-xs);
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: var(--skeuo-space-sm);
+  font-size: 0.88rem;
+  color: var(--skeuo-wood);
+}
+
+.legend-dot {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: var(--skeuo-radius-circle);
+  flex-shrink: 0;
+}
+
+
+/* ---- Table wrapper ---- */
+
+.table-wrapper {
+  overflow-x: auto;
+}
+
+.full-width {
+  grid-column: 1 / -1;
+}
+
+
+/* ---- Feedback layout ---- */
+
+.feedback-layout {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: var(--skeuo-space-lg);
+}
+
+@media (max-width: 768px) {
+  .feedback-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.feedback-form-card {}
+.feedback-stats-card {}
+
+.stamp-header {
+  position: relative;
+}
+
+.stamp-header::after {
+  content: "";
+  position: absolute;
+  top: -4px;
+  right: 0;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--skeuo-radius-circle);
+  background: radial-gradient(circle at 35% 30%, #C44040, var(--skeuo-seal-red-light), var(--skeuo-seal-red));
+  opacity: 0.15;
+  pointer-events: none;
+}
+
+
+/* ---- Skeuo form ---- */
+
+.skeuo-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--skeuo-space-md);
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--skeuo-space-xs);
+}
+
+.form-group label {
+  font-family: var(--skeuo-font-serif);
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--skeuo-wood);
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--skeuo-space-md);
+}
+
+@media (max-width: 480px) {
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.char-count {
+  font-size: 0.78rem;
+  color: var(--skeuo-wood-light);
+  text-align: right;
+}
+
+
+/* ---- Toast container ---- */
+
+.toast-container {
+  position: fixed;
+  bottom: var(--skeuo-space-lg);
+  right: var(--skeuo-space-lg);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: var(--skeuo-space-sm);
+  pointer-events: none;
+}
+
+.toast {
+  pointer-events: auto;
+  padding: 0.75em 1.25em;
+  border-radius: var(--skeuo-radius-md);
+  font-family: var(--skeuo-font-sans);
+  font-size: 0.9rem;
+  color: #fff;
+  background: var(--skeuo-wood-dark);
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.toast--visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.toast--info {
+  background: linear-gradient(180deg, var(--skeuo-navy-light), var(--skeuo-navy));
+}
+
+.toast--success {
+  background: linear-gradient(180deg, var(--skeuo-green-light), var(--skeuo-green-verified));
+}
+
+.toast--error {
+  background: linear-gradient(180deg, var(--skeuo-seal-red-light), var(--skeuo-seal-red));
+}
+
+.toast--warning {
+  background: linear-gradient(180deg, #f39c12, #e67e22);
+}
+
+
+/* ---- Footer ---- */
+
+.footer-content {
+  max-width: 800px;
+  margin-inline: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--skeuo-space-sm);
+}
+
+.footer-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--skeuo-space-sm);
+  font-family: var(--skeuo-font-serif);
+  font-size: 0.9rem;
+  color: var(--skeuo-parchment);
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.6);
+}
+
+.footer-emblem {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--skeuo-radius-circle);
+  background: var(--skeuo-saffron);
+  font-family: 'Noto Sans Devanagari', var(--skeuo-font-serif);
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.footer-links {
+  font-family: var(--skeuo-font-sans);
+  font-size: 0.78rem;
+  color: var(--skeuo-parchment-dark);
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.5);
+}
+
+.footer-disclaimer {
+  font-family: var(--skeuo-font-sans);
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+
+/* ---- Badge (verification status) ---- */
+
+.badge {
+  display: inline-block;
+  padding: 0.2em 0.7em;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: var(--skeuo-radius-pill);
+  color: #fff;
+  background: var(--badge-clr, #95a5a6);
+  text-shadow: 0 -1px 1px rgba(0, 0, 0, 0.3);
+}
+
+.badge--stamp {
+  border: 2px solid var(--badge-clr, #95a5a6);
+  background: transparent;
+  color: var(--badge-clr, #95a5a6);
+  text-shadow: none;
+  font-family: var(--skeuo-font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  transform: rotate(-2deg);
+}
+
+
+/* ---- Trust bar (inline) ---- */
+
+.trust-bar {
+  position: relative;
+  width: 100%;
+  height: 8px;
+  background: #e0d6c8;
+  border-radius: var(--skeuo-radius-pill);
+  overflow: hidden;
+  margin-top: var(--skeuo-space-xs);
+}
+
+.trust-bar__fill {
+  height: 100%;
+  border-radius: var(--skeuo-radius-pill);
+  transition: width 0.6s ease-in-out;
+}
+
+.trust-bar__label {
+  position: absolute;
+  right: 0;
+  top: -1.2em;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--skeuo-wood);
+}
+
+
+/* ---- Loading spinner (JS-generated) ---- */
+
+.loading-spinner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--skeuo-space-2xl);
+  color: var(--skeuo-wood-light);
+  gap: var(--skeuo-space-md);
+}
+
+.spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--skeuo-parchment-dark);
+  border-top-color: var(--skeuo-saffron);
+  border-radius: var(--skeuo-radius-circle);
+  animation: skeuo-chakra-rotate 0.8s linear infinite;
+}
+
+
+/* ---- Evidence timeline (scheme detail) ---- */
+
+.evidence-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: var(--skeuo-space-md);
+}
+
+.evidence-card {
+  padding: var(--skeuo-space-md);
+}
+
+.evidence-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--skeuo-space-sm);
+}
+
+.evidence-card__date {
+  font-size: 0.8rem;
+  color: var(--skeuo-wood-light);
+}
+
+.evidence-card__title {
+  font-weight: 600;
+  margin-bottom: var(--skeuo-space-xs);
+}
+
+.evidence-card__excerpt {
+  font-size: 0.88rem;
+  color: var(--skeuo-wood);
+  line-height: 1.5;
+  margin-bottom: var(--skeuo-space-sm);
+}
+
+.evidence-card__link {
+  color: var(--skeuo-navy);
+  font-size: 0.85rem;
+  text-decoration: underline;
+}
+
+.evidence-card__weight {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--skeuo-wood-light);
+  margin-top: var(--skeuo-space-xs);
+}
+
+
+/* ---- Dark mode toggle ---- */
+
+body.dark-mode {
+  --skeuo-parchment-light:   #2A2520;
+  --skeuo-parchment:         #232018;
+  --skeuo-parchment-dark:    #1A1712;
+  --skeuo-paper-white:       #302B24;
+  --skeuo-paper-grain:       #3A342A;
+  --skeuo-wood-light:        #A89878;
+  --skeuo-wood:              #C4B090;
+  --skeuo-wood-dark:         #E0D4BC;
+}
+
+body.dark-mode {
+  color: #E0D4BC;
+  background-color: #1E1A14;
+}
+
+body.dark-mode .skeuo-navbar {
+  background:
+    linear-gradient(
+      180deg,
+      #2A2418 0%,
+      #1E1A12 40%,
+      #161210 60%,
+      #100E0A 100%
+    );
+}
+
+body.dark-mode .paper-card,
+body.dark-mode .stat-card {
+  background-color: #302B24;
+  border-color: rgba(200, 180, 140, 0.12);
+}
+
+body.dark-mode .hero-banner {
+  background: linear-gradient(135deg, rgba(16, 32, 50, 0.95) 0%, rgba(20, 40, 60, 0.9) 100%);
+}
+
+body.dark-mode .card-title {
+  color: var(--skeuo-saffron);
+}
+
+
+/* ---- Responsive navbar ---- */
+
+@media (max-width: 768px) {
+  .skeuo-navbar {
+    flex-wrap: wrap;
+    gap: var(--skeuo-space-sm);
+  }
+
+  .navbar-links {
+    order: 3;
+    width: 100%;
+    overflow-x: auto;
+    padding-top: var(--skeuo-space-xs);
+  }
+
+  .nav-tab {
+    white-space: nowrap;
+    font-size: 0.8rem;
+  }
+
+  .hero-title {
+    font-size: 1.4rem;
+  }
+
+  .hero-search {
+    flex-direction: column;
+  }
+
+  .stats-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

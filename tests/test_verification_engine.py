@@ -11,7 +11,10 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from src.models.verification import VerificationEvidence, VerificationSource
+from src.models.verification import (
+    VerificationEvidence,
+    VerificationSource,
+)
 from src.services.verification.engine import (
     SchemeVerificationEngine,
     _MAX_TRUST_SCORE,
@@ -29,7 +32,7 @@ from src.services.verification.engine import (
 class FakeCache:
     """Minimal in-memory cache matching CacheManager interface."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._store: dict[str, object] = {}
 
     async def get(self, key: str, default: object = None) -> object | None:
@@ -43,7 +46,7 @@ class FakeCache:
 
 
 # ---------------------------------------------------------------------------
-# Evidence helper
+# Evidence helpers
 # ---------------------------------------------------------------------------
 
 
@@ -54,15 +57,20 @@ def _make_evidence(
     document_id: str = "doc-001",
     source_name: str = "Test Source",
 ) -> VerificationEvidence:
-    """Create a VerificationEvidence instance for testing."""
+    """Create a VerificationEvidence instance for testing.
+
+    The engine accesses ``ev.raw_metadata.get("status_indication")`` to
+    determine whether a scheme is active/revoked. This helper stores the
+    ``status_indication`` in ``raw_metadata`` so that the engine's
+    ``_compute_trust_score`` and ``_detect_conflicts`` methods work
+    correctly.
+    """
     return VerificationEvidence(
         source=VerificationSource(source),
         source_url="https://test.gov.in",
         document_type="notification",
         document_id=document_id,
-        document_date=None,
         title=source_name,
-        excerpt="",
         trust_weight=trust_weight,
         raw_metadata={"status_indication": status_indication},
     )
@@ -74,19 +82,14 @@ def _make_evidence(
 
 
 @pytest.fixture
-def mock_clients():
+def mock_clients() -> dict[str, AsyncMock]:
     """Create mock clients for all five verification sources."""
-    gazette_client = AsyncMock()
-    sansad_client = AsyncMock()
-    indiacode_client = AsyncMock()
-    myscheme_client = AsyncMock()
-    datagov_client = AsyncMock()
     return {
-        "gazette_client": gazette_client,
-        "sansad_client": sansad_client,
-        "indiacode_client": indiacode_client,
-        "myscheme_client": myscheme_client,
-        "datagov_client": datagov_client,
+        "gazette_client": AsyncMock(),
+        "sansad_client": AsyncMock(),
+        "indiacode_client": AsyncMock(),
+        "myscheme_client": AsyncMock(),
+        "datagov_client": AsyncMock(),
     }
 
 
@@ -96,7 +99,7 @@ def cache() -> FakeCache:
 
 
 @pytest.fixture
-def engine(mock_clients, cache) -> SchemeVerificationEngine:
+def engine(mock_clients: dict[str, AsyncMock], cache: FakeCache) -> SchemeVerificationEngine:
     return SchemeVerificationEngine(
         gazette_client=mock_clients["gazette_client"],
         sansad_client=mock_clients["sansad_client"],
@@ -146,7 +149,7 @@ class TestComputeTrustScore:
         assert status == "unverified"
 
     def test_single_gazette_evidence_partially_verified(
-        self, engine: SchemeVerificationEngine
+        self, engine: SchemeVerificationEngine,
     ) -> None:
         """Single gazette evidence: weight 1.0 / 3.95 ~ 0.253 -> partially_verified."""
         evidence = [_make_evidence(source="gazette_of_india", trust_weight=1.0)]
@@ -156,7 +159,7 @@ class TestComputeTrustScore:
         assert status == "partially_verified"
 
     def test_gazette_plus_indiacode_verified(
-        self, engine: SchemeVerificationEngine
+        self, engine: SchemeVerificationEngine,
     ) -> None:
         """Gazette (1.0) + IndiaCode (0.9) -> score (1.9/3.95 ~ 0.481), 2 sources."""
         evidence = [
@@ -175,7 +178,9 @@ class TestComputeTrustScore:
         evidence = [
             _make_evidence(source="gazette_of_india", trust_weight=1.0),
             _make_evidence(source="india_code", trust_weight=0.9, document_id="act-001"),
-            _make_evidence(source="sansad_parliament", trust_weight=0.85, document_id="bill-001"),
+            _make_evidence(
+                source="sansad_parliament", trust_weight=0.85, document_id="bill-001",
+            ),
         ]
         score, status = engine._compute_trust_score(evidence)
         expected_score = (1.0 + 0.9 + 0.85) / _MAX_TRUST_SCORE
@@ -188,7 +193,9 @@ class TestComputeTrustScore:
         evidence = [
             _make_evidence(source="gazette_of_india", trust_weight=1.0),
             _make_evidence(source="india_code", trust_weight=0.9, document_id="act-001"),
-            _make_evidence(source="sansad_parliament", trust_weight=0.85, document_id="bill-001"),
+            _make_evidence(
+                source="sansad_parliament", trust_weight=0.85, document_id="bill-001",
+            ),
             _make_evidence(source="myscheme_gov", trust_weight=0.7, document_id="ms-001"),
         ]
         score, status = engine._compute_trust_score(evidence)
@@ -198,18 +205,17 @@ class TestComputeTrustScore:
         assert status == "verified"
 
     def test_only_myscheme_partially_verified(
-        self, engine: SchemeVerificationEngine
+        self, engine: SchemeVerificationEngine,
     ) -> None:
-        """Only MyScheme evidence: weight 0.7 / 3.95 ~ 0.177 -> partially_verified (1 source)."""
+        """Only MyScheme evidence: weight 0.7 / 3.95 ~ 0.177 -> partially_verified."""
         evidence = [_make_evidence(source="myscheme_gov", trust_weight=0.7)]
         score, status = engine._compute_trust_score(evidence)
         expected_score = 0.7 / _MAX_TRUST_SCORE
         assert abs(score - expected_score) < 0.01
-        # 1 source >= 1 min source for partial -> partially_verified
         assert status == "partially_verified"
 
     def test_conflicting_evidence_disputed(
-        self, engine: SchemeVerificationEngine
+        self, engine: SchemeVerificationEngine,
     ) -> None:
         """One source says active, another says revoked -> disputed."""
         evidence = [
@@ -232,7 +238,7 @@ class TestComputeTrustScore:
         assert status == "disputed"
 
     def test_gazette_revocation_returns_revoked(
-        self, engine: SchemeVerificationEngine
+        self, engine: SchemeVerificationEngine,
     ) -> None:
         """Gazette evidence with revoked status_indication -> revoked."""
         evidence = [
@@ -247,7 +253,7 @@ class TestComputeTrustScore:
         assert status == "revoked"
 
     def test_gazette_repealed_returns_revoked(
-        self, engine: SchemeVerificationEngine
+        self, engine: SchemeVerificationEngine,
     ) -> None:
         evidence = [
             _make_evidence(
@@ -261,7 +267,7 @@ class TestComputeTrustScore:
         assert status == "revoked"
 
     def test_gazette_superseded_returns_revoked(
-        self, engine: SchemeVerificationEngine
+        self, engine: SchemeVerificationEngine,
     ) -> None:
         evidence = [
             _make_evidence(
@@ -275,7 +281,7 @@ class TestComputeTrustScore:
         assert status == "revoked"
 
     def test_gazette_cancelled_returns_revoked(
-        self, engine: SchemeVerificationEngine
+        self, engine: SchemeVerificationEngine,
     ) -> None:
         evidence = [
             _make_evidence(
@@ -289,7 +295,7 @@ class TestComputeTrustScore:
         assert status == "revoked"
 
     def test_non_gazette_revocation_not_revoked(
-        self, engine: SchemeVerificationEngine
+        self, engine: SchemeVerificationEngine,
     ) -> None:
         """Revocation from non-gazette source should NOT trigger revoked status."""
         evidence = [
@@ -300,18 +306,22 @@ class TestComputeTrustScore:
             ),
         ]
         score, status = engine._compute_trust_score(evidence)
-        # MyScheme revocation alone is not a gazette revocation
         assert status != "revoked"
 
     def test_duplicate_source_capped(self, engine: SchemeVerificationEngine) -> None:
         """Multiple evidence from the same source should be capped to best weight."""
         evidence = [
-            _make_evidence(source="gazette_of_india", trust_weight=1.0, document_id="gaz-1"),
-            _make_evidence(source="gazette_of_india", trust_weight=1.0, document_id="gaz-2"),
-            _make_evidence(source="gazette_of_india", trust_weight=1.0, document_id="gaz-3"),
+            _make_evidence(
+                source="gazette_of_india", trust_weight=1.0, document_id="gaz-1",
+            ),
+            _make_evidence(
+                source="gazette_of_india", trust_weight=1.0, document_id="gaz-2",
+            ),
+            _make_evidence(
+                source="gazette_of_india", trust_weight=1.0, document_id="gaz-3",
+            ),
         ]
         score, status = engine._compute_trust_score(evidence)
-        # Should be 1.0 / 3.95, not 3.0 / 3.95
         expected_score = 1.0 / _MAX_TRUST_SCORE
         assert abs(score - expected_score) < 0.01
 
@@ -320,7 +330,9 @@ class TestComputeTrustScore:
         evidence = [
             _make_evidence(source="gazette_of_india", trust_weight=1.0),
             _make_evidence(source="india_code", trust_weight=0.9, document_id="a1"),
-            _make_evidence(source="sansad_parliament", trust_weight=0.85, document_id="b1"),
+            _make_evidence(
+                source="sansad_parliament", trust_weight=0.85, document_id="b1",
+            ),
             _make_evidence(source="myscheme_gov", trust_weight=0.7, document_id="c1"),
             _make_evidence(source="data_gov_in", trust_weight=0.5, document_id="d1"),
         ]
@@ -373,7 +385,9 @@ class TestDetectConflicts:
         assert len(conflicts) >= 1
         assert "conflict" in conflicts[0].lower() or "active" in conflicts[0].lower()
 
-    def test_conflict_active_vs_repealed(self, engine: SchemeVerificationEngine) -> None:
+    def test_conflict_active_vs_repealed(
+        self, engine: SchemeVerificationEngine,
+    ) -> None:
         evidence = [
             _make_evidence(
                 source="india_code",
@@ -419,19 +433,16 @@ class TestDetectConflicts:
 class TestVerifyScheme:
     @pytest.mark.asyncio
     async def test_verify_scheme_with_gazette_evidence(
-        self, engine: SchemeVerificationEngine, mock_clients
+        self, engine: SchemeVerificationEngine, mock_clients: dict[str, AsyncMock],
     ) -> None:
-        """Mock source checks and trust score to test orchestration flow.
+        """Mock source checks, trust score, and conflicts to test orchestration.
 
         The engine collects evidence from all sources, then calls
-        _compute_trust_score and _detect_conflicts.  We mock the source
-        checks to return evidence and mock _compute_trust_score to return
-        a known score/status so we can verify the orchestration works.
+        _compute_trust_score and _detect_conflicts.  We mock everything
+        to verify the orchestration flow and VerificationResult construction.
         """
         gazette_evidence = _make_evidence(
-            source="gazette_of_india",
-            trust_weight=1.0,
-            status_indication="active",
+            source="gazette_of_india", trust_weight=1.0,
         )
         expected_score = 1.0 / _MAX_TRUST_SCORE
 
@@ -442,7 +453,8 @@ class TestVerifyScheme:
             patch.object(engine, "_check_myscheme", return_value=[]),
             patch.object(engine, "_check_datagov", return_value=[]),
             patch.object(
-                engine, "_compute_trust_score",
+                engine,
+                "_compute_trust_score",
                 return_value=(round(expected_score, 4), "partially_verified"),
             ),
             patch.object(engine, "_detect_conflicts", return_value=[]),
@@ -457,10 +469,11 @@ class TestVerifyScheme:
         assert result.status == "partially_verified"
         assert result.trust_score > 0.0
         assert result.trust_score == pytest.approx(expected_score, abs=0.01)
+        assert len(result.evidences) == 1
 
     @pytest.mark.asyncio
     async def test_verify_scheme_no_evidence(
-        self, engine: SchemeVerificationEngine, mock_clients
+        self, engine: SchemeVerificationEngine, mock_clients: dict[str, AsyncMock],
     ) -> None:
         """All sources return empty -> unverified."""
         with (
@@ -481,18 +494,18 @@ class TestVerifyScheme:
 
     @pytest.mark.asyncio
     async def test_verify_scheme_multiple_sources(
-        self, engine: SchemeVerificationEngine, mock_clients
+        self, engine: SchemeVerificationEngine, mock_clients: dict[str, AsyncMock],
     ) -> None:
         """Multiple sources confirm -> should reach verified with enough weight."""
         gazette_ev = _make_evidence(source="gazette_of_india", trust_weight=1.0)
         indiacode_ev = _make_evidence(
-            source="india_code", trust_weight=0.9, document_id="act-001"
+            source="india_code", trust_weight=0.9, document_id="act-001",
         )
         sansad_ev = _make_evidence(
-            source="sansad_parliament", trust_weight=0.85, document_id="bill-001"
+            source="sansad_parliament", trust_weight=0.85, document_id="bill-001",
         )
         myscheme_ev = _make_evidence(
-            source="myscheme_gov", trust_weight=0.7, document_id="ms-001"
+            source="myscheme_gov", trust_weight=0.7, document_id="ms-001",
         )
 
         with (
@@ -502,7 +515,8 @@ class TestVerifyScheme:
             patch.object(engine, "_check_myscheme", return_value=[myscheme_ev]),
             patch.object(engine, "_check_datagov", return_value=[]),
             patch.object(
-                engine, "_compute_trust_score",
+                engine,
+                "_compute_trust_score",
                 return_value=(0.873, "verified"),
             ),
             patch.object(engine, "_detect_conflicts", return_value=[]),
@@ -514,10 +528,11 @@ class TestVerifyScheme:
 
         assert result.trust_score >= _VERIFIED_THRESHOLD
         assert result.status == "verified"
+        assert len(result.evidences) == 4
 
     @pytest.mark.asyncio
     async def test_verify_scheme_source_exception_handled(
-        self, engine: SchemeVerificationEngine, mock_clients
+        self, engine: SchemeVerificationEngine, mock_clients: dict[str, AsyncMock],
     ) -> None:
         """If a source raises an exception, it should be handled gracefully.
 
@@ -526,7 +541,9 @@ class TestVerifyScheme:
         created with unverified status.
         """
         with (
-            patch.object(engine, "_check_gazette", side_effect=Exception("Network error")),
+            patch.object(
+                engine, "_check_gazette", side_effect=Exception("Network error"),
+            ),
             patch.object(engine, "_check_parliament", return_value=[]),
             patch.object(engine, "_check_india_code", return_value=[]),
             patch.object(engine, "_check_myscheme", return_value=[]),
@@ -543,7 +560,7 @@ class TestVerifyScheme:
 
     @pytest.mark.asyncio
     async def test_verify_scheme_uses_cache(
-        self, engine: SchemeVerificationEngine, cache: FakeCache
+        self, engine: SchemeVerificationEngine, cache: FakeCache,
     ) -> None:
         """If a cached result exists, it should be returned directly."""
         cached_data = {
@@ -580,7 +597,7 @@ class TestVerifyBatch:
 
     @pytest.mark.asyncio
     async def test_verify_batch_multiple_schemes(
-        self, engine: SchemeVerificationEngine
+        self, engine: SchemeVerificationEngine,
     ) -> None:
         schemes = [
             {"scheme_id": "scheme-1", "scheme_name": "Scheme One"},
@@ -605,7 +622,7 @@ class TestVerifyBatch:
 
     @pytest.mark.asyncio
     async def test_verify_batch_with_evidence(
-        self, engine: SchemeVerificationEngine
+        self, engine: SchemeVerificationEngine,
     ) -> None:
         schemes = [
             {"scheme_id": "pm-kisan", "scheme_name": "PM-KISAN"},
@@ -613,7 +630,7 @@ class TestVerifyBatch:
 
         gazette_ev = _make_evidence(source="gazette_of_india", trust_weight=1.0)
         myscheme_ev = _make_evidence(
-            source="myscheme_gov", trust_weight=0.7, document_id="ms-001"
+            source="myscheme_gov", trust_weight=0.7, document_id="ms-001",
         )
         expected_score = (1.0 + 0.7) / _MAX_TRUST_SCORE
 
@@ -624,7 +641,8 @@ class TestVerifyBatch:
             patch.object(engine, "_check_myscheme", return_value=[myscheme_ev]),
             patch.object(engine, "_check_datagov", return_value=[]),
             patch.object(
-                engine, "_compute_trust_score",
+                engine,
+                "_compute_trust_score",
                 return_value=(round(expected_score, 4), "partially_verified"),
             ),
             patch.object(engine, "_detect_conflicts", return_value=[]),
@@ -644,19 +662,19 @@ class TestVerifyBatch:
 class TestNameTokenOverlap:
     def test_identical_names(self) -> None:
         sim = SchemeVerificationEngine._name_token_overlap(
-            "PM KISAN Samman Nidhi", "PM KISAN Samman Nidhi"
+            "PM KISAN Samman Nidhi", "PM KISAN Samman Nidhi",
         )
         assert sim == 1.0
 
     def test_similar_names(self) -> None:
         sim = SchemeVerificationEngine._name_token_overlap(
-            "PM KISAN Samman Nidhi", "Kisan Samman Nidhi Yojana"
+            "PM KISAN Samman Nidhi", "Kisan Samman Nidhi Yojana",
         )
         assert sim > 0.5
 
     def test_different_names(self) -> None:
         sim = SchemeVerificationEngine._name_token_overlap(
-            "Ayushman Bharat PMJAY", "Sukanya Samriddhi"
+            "Ayushman Bharat PMJAY", "Sukanya Samriddhi",
         )
         assert sim < 0.5
 

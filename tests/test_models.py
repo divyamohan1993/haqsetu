@@ -81,12 +81,12 @@ class TestQueryIntent:
             "scheme_search", "eligibility_check", "application_guidance",
             "status_inquiry", "mandi_price", "weather_query", "soil_health",
             "document_help", "payment_status", "general_info", "greeting",
-            "complaint", "human_escalation",
+            "complaint", "human_escalation", "verification_status",
         }
-        assert {e.value for e in QueryIntent} == expected, "QueryIntent should have exactly 13 values"
+        assert {e.value for e in QueryIntent} == expected, "QueryIntent should have exactly 14 values"
 
     def test_length(self) -> None:
-        assert len(QueryIntent) == 13, "QueryIntent should have 13 members"
+        assert len(QueryIntent) == 14, "QueryIntent should have 14 members"
 
 
 class TestLanguageCode:

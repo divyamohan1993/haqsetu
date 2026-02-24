@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="HaqSetu (हक़सेतु) — Voice-First AI Civic Assistant for Rural India. Multilingual access to verified government scheme information across all 22 Scheduled Languages of India plus English.">
+  <meta name="theme-color" content="#1B3A5C">
+  <title>HaqSetu - हक़सेतु | Voice-First AI Civic Assistant</title>
+
+  <link rel="stylesheet" href="/static/css/skeuo.css">
+
+  <!-- Preconnect to Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;600;700&family=Source+Serif+4:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <!-- Inline critical CSS for initial load -->
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body.skeuo-body {
+      background: #F5F0E8;
+      font-family: 'Source Serif 4', 'Noto Sans Devanagari', Georgia, serif;
+      color: #2C1810;
+      min-height: 100vh;
+    }
+
+    .loading-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 10000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: #1B3A5C;
+      background-image:
+        radial-gradient(ellipse at 30% 20%, rgba(255, 153, 51, 0.08) 0%, transparent 60%),
+        radial-gradient(ellipse at 70% 80%, rgba(19, 136, 8, 0.06) 0%, transparent 60%);
+      transition: opacity 0.6s ease, visibility 0.6s ease;
+    }
+
+    .loading-overlay.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .chakra-spinner {
+      width: 96px;
+      height: 96px;
+      animation: spin-chakra 3s linear infinite;
+    }
+
+    @keyframes spin-chakra {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .loading-text {
+      margin-top: 1.5rem;
+      font-family: 'Noto Sans Devanagari', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #FF9933;
+      letter-spacing: 0.02em;
+    }
+
+    .loading-subtext {
+      margin-top: 0.375rem;
+      font-family: 'Source Serif 4', serif;
+      font-size: 0.875rem;
+      color: rgba(255, 255, 255, 0.7);
+      letter-spacing: 0.05em;
+    }
+  </style>
+</head>
+<body class="skeuo-body">
+
+  <!-- Loading overlay with spinning Ashoka Chakra -->
+  <div id="loading-overlay" class="loading-overlay" role="status" aria-live="polite" aria-label="Loading HaqSetu application">
+    <div class="chakra-spinner" aria-hidden="true">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="96" height="96">
+        <defs>
+          <style>
+            .chakra-rim { fill: none; stroke: #FF9933; stroke-width: 5; }
+            .chakra-hub { fill: #1B3A5C; stroke: #FF9933; stroke-width: 3; }
+            .chakra-spoke { stroke: #FF9933; stroke-width: 2.5; stroke-linecap: round; }
+            .chakra-inner-rim { fill: none; stroke: #FF9933; stroke-width: 2; }
+            .chakra-dot { fill: #FF9933; }
+          </style>
+        </defs>
+        <!-- Outer rim -->
+        <circle class="chakra-rim" cx="100" cy="100" r="90"/>
+        <!-- Inner rim -->
+        <circle class="chakra-inner-rim" cx="100" cy="100" r="70"/>
+        <!-- Central hub -->
+        <circle class="chakra-hub" cx="100" cy="100" r="16"/>
+        <!-- 24 spokes radiating from center, 15 degrees apart -->
+        <line class="chakra-spoke" x1="100.0" y1="84.0" x2="100.0" y2="30.0"/>
+        <line class="chakra-spoke" x1="104.14" y1="84.55" x2="118.12" y2="32.39"/>
+        <line class="chakra-spoke" x1="108.0" y1="86.14" x2="135.0" y2="39.38"/>
+        <line class="chakra-spoke" x1="111.31" y1="88.69" x2="149.5" y2="50.5"/>
+        <line class="chakra-spoke" x1="113.86" y1="92.0" x2="160.62" y2="65.0"/>
+        <line class="chakra-spoke" x1="115.45" y1="95.86" x2="167.61" y2="81.88"/>
+        <line class="chakra-spoke" x1="116.0" y1="100.0" x2="170.0" y2="100.0"/>
+        <line class="chakra-spoke" x1="115.45" y1="104.14" x2="167.61" y2="118.12"/>
+        <line class="chakra-spoke" x1="113.86" y1="108.0" x2="160.62" y2="135.0"/>
+        <line class="chakra-spoke" x1="111.31" y1="111.31" x2="149.5" y2="149.5"/>
+        <line class="chakra-spoke" x1="108.0" y1="113.86" x2="135.0" y2="160.62"/>
+        <line class="chakra-spoke" x1="104.14" y1="115.45" x2="118.12" y2="167.61"/>
+        <line class="chakra-spoke" x1="100.0" y1="116.0" x2="100.0" y2="170.0"/>
+        <line class="chakra-spoke" x1="95.86" y1="115.45" x2="81.88" y2="167.61"/>
+        <line class="chakra-spoke" x1="92.0" y1="113.86" x2="65.0" y2="160.62"/>
+        <line class="chakra-spoke" x1="88.69" y1="111.31" x2="50.5" y2="149.5"/>
+        <line class="chakra-spoke" x1="86.14" y1="108.0" x2="39.38" y2="135.0"/>
+        <line class="chakra-spoke" x1="84.55" y1="104.14" x2="32.39" y2="118.12"/>
+        <line class="chakra-spoke" x1="84.0" y1="100.0" x2="30.0" y2="100.0"/>
+        <line class="chakra-spoke" x1="84.55" y1="95.86" x2="32.39" y2="81.88"/>
+        <line class="chakra-spoke" x1="86.14" y1="92.0" x2="39.38" y2="65.0"/>
+        <line class="chakra-spoke" x1="88.69" y1="88.69" x2="50.5" y2="50.5"/>
+        <line class="chakra-spoke" x1="92.0" y1="86.14" x2="65.0" y2="39.38"/>
+        <line class="chakra-spoke" x1="95.86" y1="84.55" x2="81.88" y2="32.39"/>
+        <!-- 24 decorative dots on outer rim, between spokes -->
+        <circle class="chakra-dot" cx="111.75" cy="10.77" r="2.5"/>
+        <circle class="chakra-dot" cx="134.44" cy="16.85" r="2.5"/>
+        <circle class="chakra-dot" cx="154.79" cy="28.6" r="2.5"/>
+        <circle class="chakra-dot" cx="171.4" cy="45.21" r="2.5"/>
+        <circle class="chakra-dot" cx="183.15" cy="65.56" r="2.5"/>
+        <circle class="chakra-dot" cx="189.23" cy="88.25" r="2.5"/>
+        <circle class="chakra-dot" cx="189.23" cy="111.75" r="2.5"/>
+        <circle class="chakra-dot" cx="183.15" cy="134.44" r="2.5"/>
+        <circle class="chakra-dot" cx="171.4" cy="154.79" r="2.5"/>
+        <circle class="chakra-dot" cx="154.79" cy="171.4" r="2.5"/>
+        <circle class="chakra-dot" cx="134.44" cy="183.15" r="2.5"/>
+        <circle class="chakra-dot" cx="111.75" cy="189.23" r="2.5"/>
+        <circle class="chakra-dot" cx="88.25" cy="189.23" r="2.5"/>
+        <circle class="chakra-dot" cx="65.56" cy="183.15" r="2.5"/>
+        <circle class="chakra-dot" cx="45.21" cy="171.4" r="2.5"/>
+        <circle class="chakra-dot" cx="28.6" cy="154.79" r="2.5"/>
+        <circle class="chakra-dot" cx="16.85" cy="134.44" r="2.5"/>
+        <circle class="chakra-dot" cx="10.77" cy="111.75" r="2.5"/>
+        <circle class="chakra-dot" cx="10.77" cy="88.25" r="2.5"/>
+        <circle class="chakra-dot" cx="16.85" cy="65.56" r="2.5"/>
+        <circle class="chakra-dot" cx="28.6" cy="45.21" r="2.5"/>
+        <circle class="chakra-dot" cx="45.21" cy="28.6" r="2.5"/>
+        <circle class="chakra-dot" cx="65.56" cy="16.85" r="2.5"/>
+        <circle class="chakra-dot" cx="88.25" cy="10.77" r="2.5"/>
+      </svg>
+    </div>
+    <p class="loading-text" lang="hi">हक़सेतु लोड हो रहा है...</p>
+    <p class="loading-subtext">Loading HaqSetu...</p>
+  </div>
+
+  <!-- Top Navigation Bar (leather/wood toolbar) -->
+  <nav class="skeuo-navbar" id="navbar" role="navigation" aria-label="Main navigation">
+    <div class="navbar-brand">
+      <!-- Emblem-style logo: circular badge with Hindi text inside -->
+      <div class="brand-emblem" aria-hidden="true" lang="hi">हक़</div>
+      <div class="brand-text">
+        <h1 lang="hi">हक़सेतु</h1>
+        <span>HaqSetu</span>
+      </div>
+    </div>
+    <div class="navbar-links" role="tablist" aria-label="Application views">
+      <a href="#/dashboard" class="nav-tab active" data-view="dashboard" role="tab" aria-selected="true" aria-controls="view-dashboard">
+        <span class="tab-icon" aria-hidden="true">&#9776;</span> Dashboard
+      </a>
+      <a href="#/schemes" class="nav-tab" data-view="schemes" role="tab" aria-selected="false" aria-controls="view-schemes">
+        <span class="tab-icon" aria-hidden="true">&#128209;</span> Schemes
+      </a>
+      <a href="#/verification" class="nav-tab" data-view="verification" role="tab" aria-selected="false" aria-controls="view-verification">
+        <span class="tab-icon" aria-hidden="true">&#9989;</span> Verification
+      </a>
+      <a href="#/feedback" class="nav-tab" data-view="feedback" role="tab" aria-selected="false" aria-controls="view-feedback">
+        <span class="tab-icon" aria-hidden="true">&#128172;</span> Feedback
+      </a>
+    </div>
+    <div class="navbar-actions">
+      <button class="skeuo-btn btn-sm" id="dark-mode-toggle" title="Toggle dark mode" aria-label="Toggle dark mode">
+        &#9790;
+      </button>
+      <select id="language-selector" class="skeuo-select" aria-label="Select language">
+        <option value="en">English</option>
+        <option value="hi">हिन्दी</option>
+        <option value="bn">বাংলা</option>
+        <option value="ta">தமிழ்</option>
+        <option value="te">తెలుగు</option>
+        <option value="mr">मराठी</option>
+        <option value="gu">ગુજરાતી</option>
+        <option value="kn">ಕನ್ನಡ</option>
+        <option value="ml">മലയാളം</option>
+        <option value="pa">ਪੰਜਾਬੀ</option>
+        <option value="or">ଓଡ଼ିଆ</option>
+        <option value="as">অসমীয়া</option>
+        <option value="ur">اردو</option>
+        <option value="sa">संस्कृतम्</option>
+        <option value="sd">سنڌي</option>
+        <option value="ks">कॉशुर</option>
+        <option value="ne">नेपाली</option>
+        <option value="kok">कोंकणी</option>
+        <option value="mai">मैथिली</option>
+        <option value="doi">डोगरी</option>
+        <option value="mni">মৈতৈলোন্</option>
+        <option value="sat">ᱥᱟᱱᱛᱟᱲᱤ</option>
+        <option value="bo">བོད་སྐད</option>
+      </select>
+    </div>
+  </nav>
+
+  <!-- Main Content Area -->
+  <main class="skeuo-main" id="app" role="main">
+
+    <!-- Dashboard View -->
+    <section id="view-dashboard" class="view active" role="tabpanel" aria-labelledby="tab-dashboard">
+      <!-- Hero/banner area -->
+      <div class="hero-banner">
+        <div class="hero-content">
+          <h2 class="hero-title">Voice-First AI Civic Assistant</h2>
+          <p class="hero-subtitle">Empowering Rural India with verified government scheme information in 23 languages</p>
+          <div class="hero-search" role="search" aria-label="Search government schemes">
+            <input type="text" id="hero-search-input" class="skeuo-input search-input"
+                   placeholder="Search schemes... (e.g., PM Kisan, MGNREGA)"
+                   aria-label="Search schemes by name or keyword">
+            <button class="skeuo-btn btn-primary" id="hero-search-btn" aria-label="Search">Search</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stats Row -->
+      <div class="stats-row" id="stats-row" aria-label="Scheme statistics overview">
+        <div class="stat-card">
+          <div class="stat-icon" aria-hidden="true">&#128203;</div>
+          <div class="stat-value" id="stat-total" aria-live="polite">--</div>
+          <div class="stat-label">Total Schemes</div>
+        </div>
+        <div class="stat-card verified">
+          <div class="stat-icon" aria-hidden="true">&#9989;</div>
+          <div class="stat-value" id="stat-verified" aria-live="polite">--</div>
+          <div class="stat-label">Verified</div>
+        </div>
+        <div class="stat-card partial">
+          <div class="stat-icon" aria-hidden="true">&#9888;</div>
+          <div class="stat-value" id="stat-partial" aria-live="polite">--</div>
+          <div class="stat-label">Partially Verified</div>
+        </div>
+        <div class="stat-card unverified">
+          <div class="stat-icon" aria-hidden="true">&#10067;</div>
+          <div class="stat-value" id="stat-unverified" aria-live="polite">--</div>
+          <div class="stat-label">Unverified</div>
+        </div>
+      </div>
+
+      <!-- Trust Score Gauge + Source Status -->
+      <div class="dashboard-grid">
+        <div class="paper-card gauge-card">
+          <h3 class="card-title">Average Trust Score</h3>
+          <div id="trust-gauge" class="trust-gauge-container" role="img" aria-label="Trust score gauge">
+            <!-- SVG gauge rendered by JS -->
+          </div>
+        </div>
+        <div class="paper-card sources-card">
+          <h3 class="card-title">Verification Sources</h3>
+          <div class="source-list" id="source-status-list" role="list" aria-label="Verification source statuses">
+            <div class="source-item" role="listitem">
+              <span class="led led-green" aria-label="Status: online"></span>
+              <span>Gazette of India</span>
+              <span class="source-weight">Trust: 1.0</span>
+            </div>
+            <div class="source-item" role="listitem">
+              <span class="led led-green" aria-label="Status: online"></span>
+              <span>India Code</span>
+              <span class="source-weight">Trust: 0.9</span>
+            </div>
+            <div class="source-item" role="listitem">
+              <span class="led led-green" aria-label="Status: online"></span>
+              <span>Parliament (Sansad)</span>
+              <span class="source-weight">Trust: 0.85</span>
+            </div>
+            <div class="source-item" role="listitem">
+              <span class="led led-green" aria-label="Status: online"></span>
+              <span>MyScheme.gov.in</span>
+              <span class="source-weight">Trust: 0.7</span>
+            </div>
+            <div class="source-item" role="listitem">
+              <span class="led led-green" aria-label="Status: online"></span>
+              <span>data.gov.in</span>
+              <span class="source-weight">Trust: 0.5</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Activity -->
+      <div class="paper-card">
+        <h3 class="card-title">Recent Verification Activity</h3>
+        <div id="recent-activity" class="activity-feed" aria-live="polite" aria-label="Recent verification activity feed">
+          <p class="placeholder-text">Loading activity...</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Schemes View -->
+    <section id="view-schemes" class="view" role="tabpanel" aria-labelledby="tab-schemes">
+      <div class="view-header">
+        <h2>Government Schemes</h2>
+        <div class="view-controls">
+          <input type="text" id="scheme-search" class="skeuo-input" placeholder="Search schemes..." aria-label="Search schemes">
+          <select id="scheme-filter-status" class="skeuo-select" aria-label="Filter by verification status">
+            <option value="">All Statuses</option>
+            <option value="verified">Verified</option>
+            <option value="partially_verified">Partially Verified</option>
+            <option value="unverified">Unverified</option>
+            <option value="disputed">Disputed</option>
+          </select>
+          <div class="view-toggle" role="group" aria-label="Toggle view layout">
+            <button class="skeuo-btn btn-sm active" id="grid-view-btn" title="Grid view" aria-label="Grid view" aria-pressed="true">&#9638;</button>
+            <button class="skeuo-btn btn-sm" id="list-view-btn" title="List view" aria-label="List view" aria-pressed="false">&#9776;</button>
+          </div>
+        </div>
+      </div>
+      <div id="schemes-container" class="schemes-grid" aria-live="polite">
+        <p class="placeholder-text">Loading schemes...</p>
+      </div>
+      <div id="schemes-pagination" class="pagination" role="navigation" aria-label="Scheme list pagination"></div>
+    </section>
+
+    <!-- Scheme Detail View (overlay/slide-in) -->
+    <section id="view-scheme-detail" class="view" role="tabpanel" aria-label="Scheme details">
+      <div class="detail-back">
+        <a href="#/schemes" class="skeuo-btn btn-sm" aria-label="Back to schemes list">&larr; Back to Schemes</a>
+      </div>
+      <div id="scheme-detail-content" class="scheme-detail-layout" aria-live="polite">
+        <p class="placeholder-text">Loading scheme details...</p>
+      </div>
+    </section>
+
+    <!-- Verification Dashboard View -->
+    <section id="view-verification" class="view" role="tabpanel" aria-labelledby="tab-verification">
+      <div class="view-header">
+        <h2>Verification Dashboard</h2>
+      </div>
+      <div class="verification-layout">
+        <div class="paper-card">
+          <h3 class="card-title">Verification Status Distribution</h3>
+          <div id="verification-chart" class="chart-container" role="img" aria-label="Donut chart showing verification status distribution">
+            <!-- SVG donut chart rendered by JS -->
+          </div>
+        </div>
+        <div class="paper-card full-width">
+          <h3 class="card-title">All Schemes</h3>
+          <div class="table-wrapper">
+            <table class="skeuo-table" id="verification-table" aria-label="Scheme verification details">
+              <thead>
+                <tr>
+                  <th scope="col">Scheme</th>
+                  <th scope="col">Status</th>
+                  <th scope="col">Trust Score</th>
+                  <th scope="col">Sources</th>
+                  <th scope="col">Last Verified</th>
+                  <th scope="col">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="verification-table-body">
+                <tr><td colspan="6" class="placeholder-text">Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Feedback View -->
+    <section id="view-feedback" class="view" role="tabpanel" aria-labelledby="tab-feedback">
+      <div class="view-header">
+        <h2>Citizen Feedback</h2>
+        <p class="view-description">Report issues, suggest corrections, or provide feedback about government schemes</p>
+      </div>
+      <div class="feedback-layout">
+        <div class="paper-card feedback-form-card">
+          <h3 class="card-title stamp-header">Submit Feedback</h3>
+          <form id="feedback-form" class="skeuo-form" aria-label="Citizen feedback submission form">
+            <div class="form-group">
+              <label for="fb-scheme">Scheme ID</label>
+              <input type="text" id="fb-scheme" class="skeuo-input" placeholder="e.g., pm-kisan" required aria-required="true">
+            </div>
+            <div class="form-group">
+              <label for="fb-type">Feedback Type</label>
+              <select id="fb-type" class="skeuo-select" required aria-required="true">
+                <option value="">Select type...</option>
+                <option value="incorrect_info">Incorrect Information</option>
+                <option value="scheme_not_found">Scheme Not Found</option>
+                <option value="eligibility_issue">Eligibility Issue</option>
+                <option value="benefit_discrepancy">Benefit Discrepancy</option>
+                <option value="application_problem">Application Problem</option>
+                <option value="general_feedback">General Feedback</option>
+                <option value="appreciation">Appreciation</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="fb-description">Description</label>
+              <textarea id="fb-description" class="skeuo-input skeuo-textarea"
+                        rows="5" placeholder="Describe the issue in detail (minimum 10 characters)..."
+                        required minlength="10" maxlength="2000"
+                        aria-required="true"
+                        aria-describedby="fb-description-hint"></textarea>
+              <span class="char-count" id="fb-description-hint"><span id="fb-char-count">0</span>/2000</span>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="fb-name">Your Name (optional)</label>
+                <input type="text" id="fb-name" class="skeuo-input" placeholder="Name">
+              </div>
+              <div class="form-group">
+                <label for="fb-phone">Phone (optional)</label>
+                <input type="tel" id="fb-phone" class="skeuo-input" placeholder="+91 XXXXX XXXXX">
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="fb-language">Language</label>
+              <select id="fb-language" class="skeuo-select">
+                <option value="en">English</option>
+                <option value="hi">हिन्दी</option>
+                <option value="bn">বাংলা</option>
+                <option value="ta">தமிழ்</option>
+                <option value="te">తెలుగు</option>
+                <option value="mr">मराठी</option>
+              </select>
+            </div>
+            <button type="submit" class="skeuo-btn btn-primary btn-lg">
+              Submit Feedback
+            </button>
+          </form>
+        </div>
+        <div class="paper-card feedback-stats-card">
+          <h3 class="card-title">Feedback Statistics</h3>
+          <div id="feedback-stats" aria-live="polite">
+            <p class="placeholder-text">Loading stats...</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Toast notification container -->
+  <div id="toast-container" class="toast-container" role="alert" aria-live="assertive" aria-atomic="true"></div>
+
+  <!-- Footer (embossed) -->
+  <footer class="skeuo-footer" role="contentinfo">
+    <div class="footer-content">
+      <div class="footer-brand">
+        <span class="footer-emblem" aria-hidden="true" lang="hi">हक़</span>
+        <span>HaqSetu (<span lang="hi">हक़सेतु</span>) &mdash; Voice-First AI Civic Assistant for Rural India</span>
+      </div>
+      <div class="footer-links">
+        <span>Verification Sources: Gazette of India &bull; India Code &bull; Sansad &bull; MyScheme &bull; data.gov.in</span>
+      </div>
+      <div class="footer-disclaimer">
+        <small>Information verified against official government sources only. All data is for informational purposes.</small>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/static/js/app.js"></script>
+</body>
+</html>
