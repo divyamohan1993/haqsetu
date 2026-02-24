@@ -16,12 +16,14 @@ from src.models.response import (
     SuggestedAction,
 )
 from src.models.scheme import EligibilityCriteria, SchemeCategory, SchemeDocument
+from src.models.user_profile import FamilyMember, UserProfile
 
 __all__ = [
     "ChannelType",
     "ContentType",
     "DeviceType",
     "EligibilityCriteria",
+    "FamilyMember",
     "HaqSetuRequest",
     "HaqSetuResponse",
     "LanguageCode",
@@ -35,4 +37,5 @@ __all__ = [
     "SchemeReference",
     "ServiceProvider",
     "SuggestedAction",
+    "UserProfile",
 ]

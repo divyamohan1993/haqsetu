@@ -74,6 +74,12 @@ class Settings(BaseSettings):
     scheme_cache_ttl: int = Field(default=14_400, validation_alias="SCHEME_CACHE_TTL")  # 4 hours
     session_cache_ttl: int = Field(default=3_600, validation_alias="SESSION_CACHE_TTL")  # 1 hour
 
+    # ── Ingestion Pipeline ─────────────────────────────────────────────
+    data_gov_api_key: str | None = Field(default=None, validation_alias="DATA_GOV_API_KEY")
+    ingestion_interval_hours: int = 24
+    myscheme_rate_limit_delay: float = 1.5  # seconds between requests
+    enable_auto_ingestion: bool = True
+
     # ── Derived Properties ─────────────────────────────────────────────
 
     @property

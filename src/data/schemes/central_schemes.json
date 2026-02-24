@@ -8,7 +8,6 @@
     "state": null,
     "eligibility": {
       "occupation": "farmer",
-      "land_holding_acres": 0.01,
       "custom_criteria": [
         "Must have cultivable land as per land records of the state or UT",
         "Must not be an income tax payer",

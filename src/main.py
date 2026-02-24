@@ -7,6 +7,7 @@ RAG, SchemeSearch, Cache, Hinglish, Orchestrator).
 
 from __future__ import annotations
 
+import asyncio
 import time
 from contextlib import asynccontextmanager
 from typing import AsyncIterator
@@ -70,11 +71,13 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
       3. Initialise Speech-to-Text and Text-to-Speech services
       4. Initialise LLM, SchemeSearch, and Hinglish services
       5. Load and index scheme data
-      6. Create the QueryOrchestrator
-      7. Store everything on ``app.state``
+      6. Initialise ingestion pipeline and auto-update scheduler
+      7. Create the QueryOrchestrator
+      8. Store everything on ``app.state``
 
     On shutdown:
-      - Close all clients gracefully.
+      - Stop ingestion scheduler.
+      - Close all HTTP clients and caches gracefully.
     """
     _configure_logging()
     logger.info(
@@ -179,7 +182,49 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     except Exception:
         logger.warning("app.scheme_data_load_failed", exc_info=True)
 
-    # -- 8. Create orchestrator --------------------------------------------
+    # -- 8. Initialise ingestion pipeline for auto-updates ------------------
+    from src.services.ingestion import (
+        DataGovClient,
+        IngestionScheduler,
+        MySchemeClient,
+        SchemeIngestionPipeline,
+    )
+
+    ingestion_cache = CacheManager.for_namespace(
+        "ingestion:",
+        redis_url=settings.redis_url if settings.redis_url else None,
+    )
+
+    myscheme_client = MySchemeClient(
+        cache=ingestion_cache,
+        rate_limit_delay=settings.myscheme_rate_limit_delay,
+    )
+    datagov_client = DataGovClient(
+        cache=ingestion_cache,
+        api_key=settings.data_gov_api_key,
+    )
+    pipeline = SchemeIngestionPipeline(
+        myscheme=myscheme_client,
+        datagov=datagov_client,
+        cache=ingestion_cache,
+        translation=translation,
+    )
+    app.state.ingestion_pipeline = pipeline
+    app.state.myscheme_client = myscheme_client
+    app.state.datagov_client = datagov_client
+    logger.info("app.ingestion_pipeline_initialised")
+
+    # Start background scheduler in development mode
+    scheduler: IngestionScheduler | None = None
+    if not settings.is_production and settings.enable_auto_ingestion:
+        scheduler = IngestionScheduler(pipeline=pipeline, settings=settings)
+        asyncio.create_task(scheduler.start_background_scheduler())
+        app.state.scheduler = scheduler
+        logger.info("app.ingestion_scheduler_started")
+    else:
+        app.state.scheduler = None
+
+    # -- 9. Create orchestrator --------------------------------------------
     from src.pipeline.orchestrator import QueryOrchestrator
 
     # Use a fallback LLM service if the real one failed to initialise.
@@ -212,6 +257,15 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 
     # -- Shutdown -----------------------------------------------------------
     logger.info("app.shutdown_start")
+
+    # Stop ingestion scheduler
+    if scheduler is not None:
+        await scheduler.stop()
+
+    # Close ingestion HTTP clients
+    await myscheme_client.close()
+    await datagov_client.close()
+    await ingestion_cache.close()
 
     if stt is not None:
         await stt.close()
