@@ -1,0 +1,36 @@
+# Version control
+.git
+.gitignore
+
+# IDE / tooling
+.kiro
+.vscode
+.idea
+.ruff_cache
+
+# Python artifacts
+__pycache__
+*.pyc
+*.pyo
+*.egg-info
+dist/
+build/
+.venv
+venv
+
+# Environment secrets (NEVER ship to image)
+.env
+.env.*
+!.env.example
+
+# Tests and development files
+tests/
+infrastructure/
+scripts/
+Makefile
+docker-compose*.yml
+*.md
+
+# OS artifacts
+.DS_Store
+Thumbs.db

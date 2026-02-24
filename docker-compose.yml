@@ -1,0 +1,57 @@
+# =============================================================================
+# HaqSetu - Development Docker Compose
+# Usage: docker compose up
+# =============================================================================
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: haqsetu-app
+    ports:
+      - "8000:8000"
+    volumes:
+      # Live reload: mount source code for development
+      - ./src:/app/src:ro
+      - ./config:/app/config:ro
+    env_file:
+      - .env
+    environment:
+      - HAQSETU_ENV=development
+      - REDIS_URL=redis://redis:6379/0
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - haqsetu-network
+    # Override CMD for development with auto-reload
+    command: >
+      uvicorn src.main:app
+      --host 0.0.0.0
+      --port 8000
+      --reload
+      --reload-dir /app/src
+
+  redis:
+    image: redis:7-alpine
+    container_name: haqsetu-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - haqsetu-network
+
+volumes:
+  redis-data:
+    driver: local
+
+networks:
+  haqsetu-network:
+    driver: bridge

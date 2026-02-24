@@ -1,0 +1,929 @@
+[
+  {
+    "scheme_id": "pm-kisan",
+    "name": "PM-KISAN (Pradhan Mantri Kisan Samman Nidhi)",
+    "description": "Direct income support of ₹6,000 per year to all landholding farmer families across the country, transferred in three equal installments of ₹2,000 each directly into the bank accounts of beneficiaries via Direct Benefit Transfer. Launched on 24 February 2019, it is one of the largest DBT schemes in the world covering over 11 crore farmers.",
+    "category": "agriculture",
+    "ministry": "Ministry of Agriculture & Farmers Welfare",
+    "state": null,
+    "eligibility": {
+      "occupation": "farmer",
+      "land_holding_acres": 0.01,
+      "custom_criteria": [
+        "Must have cultivable land as per land records of the state or UT",
+        "Must not be an income tax payer",
+        "Must not be a serving or retired government employee",
+        "Must not receive monthly pension of ₹10,000 or more",
+        "Must not be a professional registered with professional bodies (doctors, engineers, lawyers, CAs etc.)",
+        "Not applicable to institutional landholders"
+      ]
+    },
+    "benefits": "₹6,000 per year in 3 installments of ₹2,000 each, directly transferred to bank account via DBT",
+    "application_process": "Apply online at pmkisan.gov.in or visit nearest Common Service Centre (CSC). Self-registration available through the PM-KISAN mobile app. State nodal officers can also register farmers.",
+    "documents_required": [
+      "Aadhaar Card",
+      "Bank Account Passbook (linked to Aadhaar)",
+      "Land Ownership Records / Khasra-Khatauni",
+      "Mobile Number"
+    ],
+    "helpline": "155261 or 011-24300606",
+    "website": "https://pmkisan.gov.in",
+    "last_updated": "2025-12-01T00:00:00Z",
+    "popularity_score": 0.95
+  },
+  {
+    "scheme_id": "pm-awas-yojana-gramin",
+    "name": "Pradhan Mantri Awas Yojana - Gramin (PMAY-G)",
+    "description": "Housing for All mission providing financial assistance to houseless and those living in kutcha or dilapidated houses in rural areas. Provides ₹1.20 lakh in plain areas and ₹1.30 lakh in hilly/difficult/IAP/LWE areas for construction of pucca houses with basic amenities including toilet, electricity, LPG connection, and drinking water.",
+    "category": "housing",
+    "ministry": "Ministry of Rural Development",
+    "state": null,
+    "eligibility": {
+      "is_bpl": true,
+      "custom_criteria": [
+        "Must be houseless or living in kutcha/dilapidated house",
+        "Beneficiary selected from SECC 2011 data validated by Gram Sabha",
+        "Must not own a pucca house anywhere in India",
+        "Priority to SC/ST, freed bonded labourers, minorities, and single women",
+        "Must not have received housing assistance under any other government scheme"
+      ]
+    },
+    "benefits": "₹1,20,000 in plain areas and ₹1,30,000 in hilly/difficult/IAP/LWE areas. Additional ₹12,000 for toilet construction under SBM. 90/95 days of unskilled labour wages under MGNREGA.",
+    "application_process": "Beneficiaries identified from SECC 2011 data. Apply through Gram Panchayat or Block Development Office. Online application available at pmayg.nic.in. Verification done by Gram Sabha.",
+    "documents_required": [
+      "Aadhaar Card",
+      "SECC 2011 Data Inclusion Proof",
+      "Bank Account Details",
+      "Photograph",
+      "Land Documents (if applicable)"
+    ],
+    "helpline": "1800-11-6446 (Toll Free)",
+    "website": "https://pmayg.nic.in",
+    "last_updated": "2025-11-15T00:00:00Z",
+    "popularity_score": 0.92
+  },
+  {
+    "scheme_id": "ayushman-bharat-pmjay",
+    "name": "Ayushman Bharat - Pradhan Mantri Jan Arogya Yojana (AB-PMJAY)",
+    "description": "World's largest government-funded health assurance scheme providing health cover of ₹5 lakh per family per year for secondary and tertiary care hospitalisation to over 12 crore poor and vulnerable families (approximately 55 crore beneficiaries). Provides cashless and paperless treatment at empanelled hospitals across India.",
+    "category": "health",
+    "ministry": "Ministry of Health & Family Welfare",
+    "state": null,
+    "eligibility": {
+      "is_bpl": true,
+      "custom_criteria": [
+        "Families identified based on deprivation and occupational criteria of SECC 2011",
+        "Rural: Families with kutcha house, no adult member aged 16-59, female-headed household with no male member aged 16-59, SC/ST households, landless manual casual labourers",
+        "Urban: Ragpicker, beggar, domestic worker, street vendor, construction worker, plumber, painter, sweeper, sanitation worker, transport worker, shop worker, electrician, mechanic, washer-man, chowkidar, coolie",
+        "All existing RSBY beneficiaries are automatically included",
+        "No restriction on family size, age, or gender"
+      ]
+    },
+    "benefits": "Health cover of ₹5,00,000 per family per year. Covers 3 days of pre-hospitalisation and 15 days of post-hospitalisation expenses. Over 1,900 treatment packages covering surgery, medical, and day care treatments. Cashless treatment at any empanelled hospital across India.",
+    "application_process": "Check eligibility at mera.pmjay.gov.in or call 14555. Visit nearest empanelled hospital or Ayushman Bharat Arogya Mitra at hospital help desk. E-card generated at point of service using Aadhaar authentication.",
+    "documents_required": [
+      "Aadhaar Card",
+      "Ration Card / SECC Letter",
+      "Mobile Number",
+      "Any Government ID for family identification"
+    ],
+    "helpline": "14555 or 1800-111-565 (Toll Free)",
+    "website": "https://pmjay.gov.in",
+    "last_updated": "2025-12-01T00:00:00Z",
+    "popularity_score": 0.94
+  },
+  {
+    "scheme_id": "mgnrega",
+    "name": "Mahatma Gandhi National Rural Employment Guarantee Act (MGNREGA)",
+    "description": "Provides legal guarantee of 100 days of wage employment per financial year to every rural household whose adult members volunteer to do unskilled manual work. One of India's most important social safety nets, covering over 15 crore households annually. Work includes water conservation, drought proofing, land development, flood control, and rural connectivity.",
+    "category": "employment",
+    "ministry": "Ministry of Rural Development",
+    "state": null,
+    "eligibility": {
+      "min_age": 18,
+      "custom_criteria": [
+        "Any adult member of a rural household willing to do unskilled manual work",
+        "Must be a resident of a rural area (Gram Panchayat level)",
+        "Must be above 18 years of age",
+        "Must apply for a Job Card at the Gram Panchayat",
+        "No income or BPL requirement — universal for rural households"
+      ]
+    },
+    "benefits": "100 days of guaranteed wage employment per household per year. Daily wage rate varies by state (₹234 to ₹374 per day as of 2025-26). Unemployment allowance if work not provided within 15 days of application. Worksite facilities including drinking water, shade, crèche, and first-aid.",
+    "application_process": "Apply for Job Card at Gram Panchayat office. Submit written application for work at least 14 days in advance. Work must be provided within 15 days of application, failing which unemployment allowance is payable.",
+    "documents_required": [
+      "Photograph",
+      "Proof of Residence (Aadhaar / Voter ID / Ration Card)",
+      "Bank Account / Post Office Account Details"
+    ],
+    "helpline": "1800-345-22-44 (Toll Free)",
+    "website": "https://nrega.nic.in",
+    "last_updated": "2025-12-01T00:00:00Z",
+    "popularity_score": 0.96
+  },
+  {
+    "scheme_id": "pm-ujjwala-yojana",
+    "name": "Pradhan Mantri Ujjwala Yojana (PMUY)",
+    "description": "Provides free LPG connections to women from Below Poverty Line (BPL) households, replacing unclean cooking fuels like firewood, coal, and cow-dung cakes with clean LPG fuel. Ujjwala 2.0 extended benefits to migrant workers and requires no address proof — self-declaration is accepted.",
+    "category": "social_security",
+    "ministry": "Ministry of Petroleum & Natural Gas",
+    "state": null,
+    "eligibility": {
+      "gender": "female",
+      "is_bpl": true,
+      "custom_criteria": [
+        "Adult woman from a BPL household (SECC 2011 list)",
+        "No existing LPG connection in the household",
+        "Under Ujjwala 2.0: Migrant workers can apply with self-declaration for address",
+        "Also covers SC/ST households, PMAY beneficiaries, AAY cardholders, forest dwellers, inhabitants of islands, tea garden tribes, and most backward classes"
+      ]
+    },
+    "benefits": "Free LPG connection with deposit-free first cylinder and free regulator. Financial assistance of ₹1,600 for each new connection. Option to get stove and first refill on EMI deducted from future subsidy.",
+    "application_process": "Apply at nearest LPG distributor (HP Gas, Bharat Gas, Indane). Fill Ujjwala KYC form. Online application available at pmuy.gov.in. Can also apply through CSC.",
+    "documents_required": [
+      "Aadhaar Card",
+      "BPL Card / SECC Letter",
+      "Bank Account Details",
+      "Passport Size Photograph",
+      "Self-declaration for address (Ujjwala 2.0)"
+    ],
+    "helpline": "1906 (LPG Helpline) or 1800-233-3555",
+    "website": "https://pmuy.gov.in",
+    "last_updated": "2025-10-01T00:00:00Z",
+    "popularity_score": 0.88
+  },
+  {
+    "scheme_id": "sukanya-samriddhi-yojana",
+    "name": "Sukanya Samriddhi Yojana (SSY)",
+    "description": "Small savings scheme for the girl child under the Beti Bachao Beti Padhao campaign. Offers one of the highest interest rates among government small savings schemes (8.2% per annum) with tax benefits under Section 80C. Account matures 21 years from opening or on the girl's marriage after age 18.",
+    "category": "women_child",
+    "ministry": "Ministry of Finance",
+    "state": null,
+    "eligibility": {
+      "gender": "female",
+      "max_age": 10,
+      "custom_criteria": [
+        "Girl child must be below 10 years of age at time of account opening",
+        "Only one account per girl child",
+        "Maximum two accounts per family (one per girl child)",
+        "Account opened by natural or legal guardian on behalf of the girl child",
+        "Exception for twins/triplets — third account allowed with proof"
+      ]
+    },
+    "benefits": "Interest rate of 8.2% per annum (Q1 FY2025-26, revised quarterly). Minimum deposit ₹250 per year, maximum ₹1,50,000 per year. Tax-free returns — EEE (Exempt-Exempt-Exempt) status under Section 80C. Maturity after 21 years from date of opening. Partial withdrawal (50%) allowed after girl turns 18 for higher education.",
+    "application_process": "Open account at any post office or authorised bank (SBI, PNB, BOB, ICICI, Axis etc.). Fill SSY account opening form. Deposit minimum ₹250 at the time of opening.",
+    "documents_required": [
+      "Birth Certificate of Girl Child",
+      "Identity Proof of Guardian (Aadhaar / PAN / Voter ID)",
+      "Address Proof of Guardian",
+      "Passport Size Photographs of Guardian and Girl Child"
+    ],
+    "helpline": "1800-266-6868 (SBI) or visit nearest post office",
+    "website": "https://www.india.gov.in/sukanya-samriddhi-yojna",
+    "last_updated": "2025-12-01T00:00:00Z",
+    "popularity_score": 0.82
+  },
+  {
+    "scheme_id": "pm-jan-dhan-yojana",
+    "name": "Pradhan Mantri Jan Dhan Yojana (PMJDY)",
+    "description": "National mission for financial inclusion ensuring access to financial services — banking, savings, deposit accounts, remittance, credit, insurance, and pension — in an affordable manner. Over 52 crore Jan Dhan accounts opened since launch in August 2014, with total deposit balance exceeding ₹2.2 lakh crore.",
+    "category": "financial_inclusion",
+    "ministry": "Ministry of Finance",
+    "state": null,
+    "eligibility": {
+      "min_age": 10,
+      "custom_criteria": [
+        "Any Indian citizen above 10 years of age who does not have a bank account",
+        "Minor accounts (10-18 years) to be operated by guardian",
+        "No minimum balance requirement",
+        "Small accounts can be opened with simplified KYC for those without standard documents"
+      ]
+    },
+    "benefits": "Zero balance savings account with RuPay debit card. Accidental insurance cover of ₹2,00,000 (for RuPay card holders). Life insurance cover of ₹30,000 (for accounts opened before 26.01.2015). Overdraft facility up to ₹10,000 for eligible account holders. Direct Benefit Transfer (DBT) of all government subsidies.",
+    "application_process": "Visit any bank branch or Banking Correspondent (BC) agent. Fill the simplified account opening form. Can also apply online through bank website.",
+    "documents_required": [
+      "Aadhaar Card (or Aadhaar Enrolment Slip)",
+      "If no Aadhaar: Voter ID / Driving License / PAN / MGNREGA Job Card / Letter from Gazetted Officer with photograph"
+    ],
+    "helpline": "1800-11-0001 or 1800-180-1111 (RBI Toll Free)",
+    "website": "https://pmjdy.gov.in",
+    "last_updated": "2025-11-01T00:00:00Z",
+    "popularity_score": 0.9
+  },
+  {
+    "scheme_id": "pm-mudra-yojana",
+    "name": "Pradhan Mantri MUDRA Yojana (PMMY)",
+    "description": "Provides collateral-free micro-credit loans up to ₹20 lakh to non-corporate, non-farm small/micro enterprises through MUDRA (Micro Units Development and Refinance Agency). Three categories: Shishu (up to ₹50,000), Kishore (₹50,001 to ₹5 lakh), and Tarun (₹5,00,001 to ₹10 lakh). Tarun Plus category provides up to ₹20 lakh.",
+    "category": "financial_inclusion",
+    "ministry": "Ministry of Finance",
+    "state": null,
+    "eligibility": {
+      "custom_criteria": [
+        "Any Indian citizen with a business plan for non-farm income generating activity",
+        "Small and micro enterprises in manufacturing, trading, and services sector",
+        "No collateral required for loans up to ₹10 lakh",
+        "Shishu: For start-ups and new entrepreneurs (up to ₹50,000)",
+        "Kishore: For existing enterprises seeking expansion (₹50,001 to ₹5 lakh)",
+        "Tarun: For established enterprises seeking growth capital (₹5 lakh to ₹10 lakh)",
+        "Tarun Plus: For additional growth financing (₹10 lakh to ₹20 lakh)"
+      ]
+    },
+    "benefits": "Shishu: Loans up to ₹50,000 at subsidised interest rates. Kishore: Loans from ₹50,001 to ₹5,00,000. Tarun: Loans from ₹5,00,001 to ₹10,00,000. Tarun Plus: Loans up to ₹20,00,000. No collateral or guarantee required. MUDRA Card for working capital facility.",
+    "application_process": "Apply at any commercial bank, RRB, small finance bank, cooperative bank, MFI, or NBFC. Submit business plan or project report. Online application available at udyamimitra.in.",
+    "documents_required": [
+      "Identity Proof (Aadhaar / Voter ID / PAN)",
+      "Address Proof",
+      "Business Plan / Project Report",
+      "Passport Size Photographs",
+      "Category Certificate (SC/ST/OBC if applicable)",
+      "Quotation for machinery/equipment (if applicable)"
+    ],
+    "helpline": "1800-180-1111 or 1800-11-0001",
+    "website": "https://www.mudra.org.in",
+    "last_updated": "2025-11-01T00:00:00Z",
+    "popularity_score": 0.87
+  },
+  {
+    "scheme_id": "pm-fasal-bima-yojana",
+    "name": "Pradhan Mantri Fasal Bima Yojana (PMFBY)",
+    "description": "Comprehensive crop insurance scheme covering all food and oilseed crops as well as annual commercial/horticultural crops with the lowest premium rates. Farmer pays only 2% for Kharif crops, 1.5% for Rabi crops, and 5% for commercial/horticultural crops. Remaining premium paid by central and state governments equally.",
+    "category": "agriculture",
+    "ministry": "Ministry of Agriculture & Farmers Welfare",
+    "state": null,
+    "eligibility": {
+      "occupation": "farmer",
+      "custom_criteria": [
+        "All farmers including sharecroppers and tenant farmers growing notified crops",
+        "Mandatory for loanee farmers (taken crop loans); voluntary for non-loanee farmers",
+        "Must sow the notified crop in the notified area during the notified season",
+        "Both land-owning and landless farmers growing notified crops are eligible"
+      ]
+    },
+    "benefits": "Farmer premium: 2% of sum insured for Kharif crops, 1.5% for Rabi crops, 5% for annual commercial/horticultural crops. Full sum insured with no capping on government subsidy. Coverage for prevented sowing, mid-season adversity, localised calamities, post-harvest losses, and crop failure. Claims settled via direct bank transfer.",
+    "application_process": "Apply through nearest bank branch, CSC, or PMFBY portal (pmfby.gov.in). Loanee farmers are automatically covered. Non-loanee farmers apply with crop sowing details and land records. Apply before the cut-off date notified for the season.",
+    "documents_required": [
+      "Aadhaar Card",
+      "Bank Account Details",
+      "Land Records / Khasra-Khatauni / Lease Agreement for tenant farmers",
+      "Crop Sowing Certificate from Patwari/Revenue Official",
+      "Self-declaration for sharecroppers"
+    ],
+    "helpline": "1800-200-7710 (Crop Insurance Helpline)",
+    "website": "https://pmfby.gov.in",
+    "last_updated": "2025-10-01T00:00:00Z",
+    "popularity_score": 0.8
+  },
+  {
+    "scheme_id": "atal-pension-yojana",
+    "name": "Atal Pension Yojana (APY)",
+    "description": "Government-backed pension scheme for workers in the unorganised sector. Provides guaranteed minimum monthly pension of ₹1,000 to ₹5,000 after attaining the age of 60 years, depending on the contribution amount and age of joining. The Government co-contributes 50% of the subscriber's contribution (up to ₹1,000/year) for eligible subscribers.",
+    "category": "social_security",
+    "ministry": "Ministry of Finance",
+    "state": null,
+    "eligibility": {
+      "min_age": 18,
+      "max_age": 40,
+      "custom_criteria": [
+        "Indian citizen between 18-40 years of age",
+        "Must have a savings bank account or Jan Dhan account",
+        "Must not be an income tax payer (for government co-contribution benefit)",
+        "Must not be a member of any statutory social security scheme (EPF, EPS, etc.)",
+        "Linked to Aadhaar and mobile number"
+      ]
+    },
+    "benefits": "Guaranteed monthly pension of ₹1,000 to ₹5,000 after age 60 (based on contribution). Same pension to spouse after subscriber's death. Return of corpus to nominee after death of both subscriber and spouse. Government co-contribution of 50% (up to ₹1,000/year) for 5 years for eligible subscribers who joined before 31.03.2016.",
+    "application_process": "Apply through any bank where the subscriber has a savings account. Fill APY registration form. Auto-debit consent for monthly/quarterly/half-yearly contribution. Can also enrol via net banking or through the APY mobile app.",
+    "documents_required": [
+      "Aadhaar Card",
+      "Bank Account / Jan Dhan Account",
+      "Mobile Number linked to bank account"
+    ],
+    "helpline": "1800-110-708 (PFRDA Toll Free) or 1800-222-080",
+    "website": "https://www.npscra.nsdl.co.in/atal-pension-yojana.php",
+    "last_updated": "2025-12-01T00:00:00Z",
+    "popularity_score": 0.78
+  },
+  {
+    "scheme_id": "pm-svanidhi",
+    "name": "PM SVANidhi (PM Street Vendor's AtmaNirbhar Nidhi)",
+    "description": "Micro-credit scheme providing affordable working capital loans to street vendors affected by COVID-19 to resume their livelihoods. Provides loans in three tranches: ₹10,000 (first), ₹20,000 (second), and ₹50,000 (third) with interest subsidy of 7% and cashback incentive for digital transactions.",
+    "category": "employment",
+    "ministry": "Ministry of Housing & Urban Affairs",
+    "state": null,
+    "eligibility": {
+      "occupation": "street vendor",
+      "custom_criteria": [
+        "Street vendors in possession of Certificate of Vending / Identity Card issued by ULB",
+        "Vendors identified in survey conducted by ULBs but not yet issued Certificate of Vending",
+        "Vendors who have been vending since or before 24 March 2020, identified by ULB or Town Vending Committee",
+        "Must have vending activity in urban areas",
+        "Must repay first loan to avail second tranche, and so on"
+      ]
+    },
+    "benefits": "First loan: ₹10,000. Second loan: ₹20,000 (on timely repayment). Third loan: ₹50,000 (on timely repayment). Interest subsidy of 7% per annum. Monthly cashback up to ₹1,200 for digital transactions. No collateral required. Tenure of 12 months for each tranche.",
+    "application_process": "Apply online at pmsvanidhi.mohua.gov.in or through the PM SVANidhi mobile app. ULBs assist in application submission. Banks and NBFCs process and sanction loans. Letter of Recommendation issued by ULB.",
+    "documents_required": [
+      "Aadhaar Card",
+      "Certificate of Vending / Street Vendor Identity Card",
+      "Bank Account Details",
+      "Mobile Number",
+      "Photograph"
+    ],
+    "helpline": "1800-11-6005 (Toll Free)",
+    "website": "https://pmsvanidhi.mohua.gov.in",
+    "last_updated": "2025-10-01T00:00:00Z",
+    "popularity_score": 0.72
+  },
+  {
+    "scheme_id": "pm-garib-kalyan-anna-yojana",
+    "name": "Pradhan Mantri Garib Kalyan Anna Yojana (PMGKAY)",
+    "description": "Free foodgrains distribution scheme providing 5 kg of foodgrains (rice or wheat) per person per month free of cost to approximately 81.35 crore beneficiaries covered under the National Food Security Act (NFSA). Extended as a comprehensive scheme from January 2024 for five years till December 2028.",
+    "category": "social_security",
+    "ministry": "Ministry of Consumer Affairs, Food & Public Distribution",
+    "state": null,
+    "eligibility": {
+      "is_bpl": true,
+      "custom_criteria": [
+        "All beneficiaries covered under NFSA — Antyodaya Anna Yojana (AAY) and Priority Household (PHH) ration card holders",
+        "Approximately 81.35 crore persons across the country",
+        "Identification done by State/UT governments based on SECC data and state-specific criteria",
+        "AAY families: Poorest of the poor including destitute, widows, terminally ill, disabled, 60+ aged households",
+        "PHH: Identified by states based on norms prescribed by the Central Government"
+      ]
+    },
+    "benefits": "5 kg of foodgrains (rice/wheat/coarse grains) per person per month completely free. AAY families get 35 kg per household per month free. Applicable from January 2024 for 5 years. Portability through One Nation One Ration Card (ONORC) system — can draw ration from any Fair Price Shop in India.",
+    "application_process": "Existing NFSA/ration card holders automatically covered. For new ration cards, apply at nearest Food & Civil Supplies office or through state food portal. One Nation One Ration Card enables portability across states using Aadhaar-linked biometric authentication.",
+    "documents_required": [
+      "Ration Card (AAY or PHH)",
+      "Aadhaar Card (for biometric authentication at Fair Price Shops)",
+      "No separate application needed for existing NFSA beneficiaries"
+    ],
+    "helpline": "1967 (Food Helpline) or 14445",
+    "website": "https://nfsa.gov.in",
+    "last_updated": "2025-12-01T00:00:00Z",
+    "popularity_score": 0.95
+  },
+  {
+    "scheme_id": "samagra-shiksha-abhiyan",
+    "name": "Samagra Shiksha Abhiyan",
+    "description": "Integrated centrally sponsored scheme for school education from pre-school to Class XII, aimed at improving quality of education with an inclusive approach. Subsumes the erstwhile Sarva Shiksha Abhiyan (SSA), Rashtriya Madhyamik Shiksha Abhiyan (RMSA), and Teacher Education (TE) schemes. Covers 11.6 lakh schools, over 15 crore students, and 57 lakh teachers.",
+    "category": "education",
+    "ministry": "Ministry of Education",
+    "state": null,
+    "eligibility": {
+      "custom_criteria": [
+        "All children in the age group of 3-18 years enrolled in government and government-aided schools",
+        "Focus on children from SC/ST, minority, and economically weaker section families",
+        "Children with Special Needs (CWSN) for inclusive education support",
+        "Girls' education interventions including Kasturba Gandhi Balika Vidyalaya (KGBV)",
+        "Implementation through State/UT governments in all districts"
+      ]
+    },
+    "benefits": "Free textbooks and uniforms for all children in government schools. Annual school grant of ₹5,000-₹50,000. Transport allowance for children with special needs (₹3,000/month for severe disability). Stipend of ₹3,500/month for KGBV girls. ₹6,000 per annum for vocational education. ICT labs, smart classrooms, sports equipment, and library grants to schools.",
+    "application_process": "Benefits delivered through schools. No individual application needed for students enrolled in government/aided schools. State and district education offices implement the scheme. Grants released to schools through School Management Committees.",
+    "documents_required": [
+      "School Enrolment / Student ID",
+      "Aadhaar Card (for students above 5 years)",
+      "Disability Certificate (for CWSN)",
+      "Caste Certificate (for SC/ST students)"
+    ],
+    "helpline": "011-23382587 (Department of School Education & Literacy)",
+    "website": "https://samagra.education.gov.in",
+    "last_updated": "2025-10-01T00:00:00Z",
+    "popularity_score": 0.75
+  },
+  {
+    "scheme_id": "pm-matru-vandana-yojana",
+    "name": "Pradhan Mantri Matru Vandana Yojana (PMMVY)",
+    "description": "Maternity benefit programme providing cash incentive to pregnant women and lactating mothers for the first living child (₹5,000) and ₹6,000 for the second child if it is a girl, for partial compensation for wage loss during pregnancy and childbirth. Under PMMVY 2.0, the total benefit for second girl child is ₹6,000.",
+    "category": "women_child",
+    "ministry": "Ministry of Women & Child Development",
+    "state": null,
+    "eligibility": {
+      "gender": "female",
+      "min_age": 19,
+      "custom_criteria": [
+        "Pregnant women and lactating mothers for first living child",
+        "For second child: Only if second child is a girl",
+        "Must be 19 years of age or above on the date of last menstrual period (LMP)",
+        "Not applicable to those in regular employment with Central/State Government or PSU",
+        "Not applicable to those who receive similar benefits under any other law"
+      ]
+    },
+    "benefits": "First child: ₹5,000 in three installments (₹1,000 on early registration, ₹2,000 after 6 months of pregnancy, ₹2,000 after child birth registration and first cycle of vaccination). Second girl child: ₹6,000 in single installment after birth. Additional ₹1,000 under Janani Suraksha Yojana for institutional delivery.",
+    "application_process": "Register at nearest Anganwadi Centre (AWC) or approved health facility. Apply online at pmmvy.wcd.gov.in. Submit Mother and Child Protection (MCP) card with requisite details for each installment.",
+    "documents_required": [
+      "Aadhaar Card",
+      "Bank / Post Office Account Passbook",
+      "MCP Card (Mother and Child Protection Card)",
+      "Proof of pregnancy (LMP date)",
+      "Child Birth Certificate (for final installment)"
+    ],
+    "helpline": "181 (Women Helpline) or 011-23381611",
+    "website": "https://pmmvy.wcd.gov.in",
+    "last_updated": "2025-10-01T00:00:00Z",
+    "popularity_score": 0.73
+  },
+  {
+    "scheme_id": "day-nrlm",
+    "name": "Deendayal Antyodaya Yojana - National Rural Livelihoods Mission (DAY-NRLM)",
+    "description": "Aims to reduce rural poverty by enabling poor households to access gainful self-employment and skilled wage employment through Self Help Groups (SHGs). The mission mobilises rural poor women into SHGs, provides them with long-term support for financial inclusion, livelihood enhancement, and social development. Over 9 crore women mobilised into 83 lakh SHGs.",
+    "category": "employment",
+    "ministry": "Ministry of Rural Development",
+    "state": null,
+    "eligibility": {
+      "gender": "female",
+      "custom_criteria": [
+        "Rural poor women from BPL households identified through Participatory Identification of Poor (PIP)",
+        "Priority to SC/ST, minority, and households with persons with disabilities",
+        "Women willing to form or join Self Help Groups (10-15 members per SHG)",
+        "At least 50% of SHGs from SC/ST households and 15% from minority households",
+        "Must be residents of rural areas"
+      ]
+    },
+    "benefits": "Revolving Fund of ₹15,000 per SHG. Community Investment Fund (CIF) up to ₹2,50,000 per SHG. Bank credit linkage facilitation — SHGs eligible for bank loans up to ₹10-20 lakh. Interest subvention on bank loans (3-5% reduction). Skill training and placement support. Lakhpati Didi initiative to help women earn ₹1 lakh+ per year.",
+    "application_process": "Contact Block Mission Management Unit (BMMU) or Gram Panchayat. Community Resource Persons (CRPs) facilitate mobilisation into SHGs. SHG formation support provided by the mission. Apply through State Rural Livelihood Mission (SRLM) office.",
+    "documents_required": [
+      "Aadhaar Card",
+      "BPL Certificate / Inclusion in PIP list",
+      "Bank Account (individual and SHG)",
+      "Photograph",
+      "SHG formation documents"
+    ],
+    "helpline": "1800-345-44-44 (DAY-NRLM Helpline)",
+    "website": "https://nrlm.gov.in",
+    "last_updated": "2025-11-01T00:00:00Z",
+    "popularity_score": 0.8
+  },
+  {
+    "scheme_id": "pm-suraksha-bima-yojana",
+    "name": "Pradhan Mantri Suraksha Bima Yojana (PMSBY)",
+    "description": "Accident insurance scheme offering accidental death and disability cover of ₹2 lakh at a premium of just ₹20 per year. Available to all savings bank account holders aged 18-70 years. The premium is auto-debited from the bank account annually. One of the most affordable insurance schemes in the world.",
+    "category": "social_security",
+    "ministry": "Ministry of Finance",
+    "state": null,
+    "eligibility": {
+      "min_age": 18,
+      "max_age": 70,
+      "custom_criteria": [
+        "Any individual aged 18-70 years with a savings bank account",
+        "Aadhaar must be primary KYC for the bank account",
+        "One policy per person; can join through one bank account only",
+        "Annual enrolment/renewal between 1st June to 31st May each year",
+        "Auto-debit consent required for ₹20 annual premium"
+      ]
+    },
+    "benefits": "₹2,00,000 for accidental death or total permanent disability (loss of both eyes, or loss of use of both hands or feet, or loss of one eye and one hand/foot). ₹1,00,000 for partial permanent disability (loss of one eye, or loss of use of one hand or foot). Premium of just ₹20 per annum.",
+    "application_process": "Apply at any bank branch where you have a savings account. Fill the PMSBY application/auto-debit form. Can also enrol through net banking, mobile banking, or the bank's app. Annual auto-renewal with consent.",
+    "documents_required": [
+      "Aadhaar Card",
+      "Savings Bank Account",
+      "Nominee Details",
+      "Auto-debit mandate form"
+    ],
+    "helpline": "1800-180-1111 or 1800-110-001",
+    "website": "https://www.jansuraksha.gov.in",
+    "last_updated": "2025-12-01T00:00:00Z",
+    "popularity_score": 0.83
+  },
+  {
+    "scheme_id": "pm-jeevan-jyoti-bima-yojana",
+    "name": "Pradhan Mantri Jeevan Jyoti Bima Yojana (PMJJBY)",
+    "description": "Life insurance scheme providing life cover of ₹2 lakh at a premium of ₹436 per year (increased from ₹330 in 2022). Available to all savings bank account holders aged 18-50 years (cover continues till age 55). Premium auto-debited from bank account annually. Pure term life insurance for the masses.",
+    "category": "social_security",
+    "ministry": "Ministry of Finance",
+    "state": null,
+    "eligibility": {
+      "min_age": 18,
+      "max_age": 50,
+      "custom_criteria": [
+        "Any individual aged 18-50 years with a savings bank account",
+        "Life cover continues till age 55 subject to payment of premium",
+        "Aadhaar must be primary KYC for the bank account",
+        "One policy per person; can join through one bank account only",
+        "Annual enrolment/renewal between 1st June to 31st May each year",
+        "Self-declaration of good health required"
+      ]
+    },
+    "benefits": "₹2,00,000 life insurance cover. Payable to nominee in case of death of the insured due to any reason. Premium of ₹436 per annum (₹1.25 per day approximately). No medical examination required.",
+    "application_process": "Apply at any bank branch where you have a savings account. Fill the PMJJBY application/auto-debit form. Can also enrol through net banking, mobile banking, or the bank's app. Annual auto-renewal with consent.",
+    "documents_required": [
+      "Aadhaar Card",
+      "Savings Bank Account",
+      "Nominee Details",
+      "Self-declaration of good health",
+      "Auto-debit mandate form"
+    ],
+    "helpline": "1800-180-1111 or 1800-110-001",
+    "website": "https://www.jansuraksha.gov.in",
+    "last_updated": "2025-12-01T00:00:00Z",
+    "popularity_score": 0.81
+  },
+  {
+    "scheme_id": "stand-up-india",
+    "name": "Stand-Up India Scheme",
+    "description": "Facilitates bank loans between ₹10 lakh and ₹1 crore to at least one SC/ST borrower and at least one woman borrower per bank branch for setting up a greenfield enterprise in manufacturing, services, agri-allied activities, or trading. Aims to leverage institutional credit for the underserved sections of society.",
+    "category": "financial_inclusion",
+    "ministry": "Ministry of Finance",
+    "state": null,
+    "eligibility": {
+      "min_age": 18,
+      "custom_criteria": [
+        "SC/ST and/or Women entrepreneurs above 18 years of age",
+        "Loan for greenfield (new) enterprise only",
+        "In case of non-individual enterprises, at least 51% of shareholding and controlling stake should be held by SC/ST or woman entrepreneur",
+        "Borrower should not be in default to any bank/financial institution",
+        "Enterprise can be in manufacturing, services, agri-allied activities, or trading sector"
+      ]
+    },
+    "benefits": "Composite loan between ₹10 lakh and ₹1 crore (covering 75% of project cost). Covers term loan and working capital. Repayment period up to 7 years with maximum moratorium of 18 months. Margin money of up to 25% (can include convergence with eligible schemes). Credit Guarantee cover through CGFSIL.",
+    "application_process": "Apply at any scheduled commercial bank branch. Online application through standupmitra.in portal. SIDBI coordination for handholding support. Submit detailed project report and business plan.",
+    "documents_required": [
+      "Identity Proof (Aadhaar / PAN / Voter ID)",
+      "Caste Certificate (for SC/ST applicants)",
+      "Address Proof",
+      "Business Plan / Project Report",
+      "Quotation for plant and machinery",
+      "Proof of business premises (owned/rented)"
+    ],
+    "helpline": "1800-180-1111 or visit standupmitra.in",
+    "website": "https://www.standupmitra.in",
+    "last_updated": "2025-10-01T00:00:00Z",
+    "popularity_score": 0.7
+  },
+  {
+    "scheme_id": "pm-vishwakarma-yojana",
+    "name": "PM Vishwakarma Yojana",
+    "description": "Central sector scheme launched on 17 September 2023 for traditional artisans and craftworkers (Vishwakarmas) working with their hands and tools in 18 identified trades. Provides recognition, skill training, toolkit incentive, credit support, and market linkage. Total outlay of ₹13,000 crore for 5 years (FY2024-2029).",
+    "category": "skill_development",
+    "ministry": "Ministry of Micro, Small & Medium Enterprises",
+    "state": null,
+    "eligibility": {
+      "min_age": 18,
+      "custom_criteria": [
+        "Traditional artisans and craftworkers working with hands and tools in 18 identified trades",
+        "18 trades: Carpenter, Boat Maker, Armourer, Blacksmith, Hammer and Toolkit Maker, Locksmith, Goldsmith, Potter, Sculptor/Stone Carver, Cobbler/Shoe Smith, Mason, Basket/Mat/Broom Maker, Doll & Toy Maker, Barber, Garland Maker, Washerman, Tailor, Fishing Net Maker",
+        "Must be engaged in the trade in self-employment or unorganised sector",
+        "Must be above 18 years of age on date of registration",
+        "Registration and verification done through Gram Panchayat/ULB with Aadhaar-based biometric"
+      ]
+    },
+    "benefits": "Recognition through PM Vishwakarma Certificate and ID Card. Skill training: Basic (5-7 days) and Advanced (15 days) with ₹500/day stipend. Toolkit incentive of up to ₹15,000 (e-voucher). Collateral-free credit: ₹1 lakh (first tranche) and ₹2 lakh (second tranche) at concessional interest rate of 5%. Marketing support through National Committee for Marketing. Digital transaction incentive of ₹1 per transaction (max ₹100/month).",
+    "application_process": "Register at pmvishwakarma.gov.in with Aadhaar-based biometric verification at CSC or Gram Panchayat. Verification by Gram Panchayat/ULB. Skill training at designated training centres. Apply for toolkit incentive and credit support after training.",
+    "documents_required": [
+      "Aadhaar Card",
+      "Bank Account Details",
+      "Mobile Number",
+      "Ration Card / Family ID",
+      "Proof of trade/occupation (self-declaration)"
+    ],
+    "helpline": "1800-599-3957 (PM Vishwakarma Helpline)",
+    "website": "https://pmvishwakarma.gov.in",
+    "last_updated": "2025-11-01T00:00:00Z",
+    "popularity_score": 0.76
+  },
+  {
+    "scheme_id": "pm-kusum",
+    "name": "PM-KUSUM (Pradhan Mantri Kisan Urja Suraksha evam Utthan Mahabhiyan)",
+    "description": "Scheme to promote solar energy among farmers through installation of solar pumps and grid-connected solar power plants. Three components: (A) 10,000 MW solar plants on barren/fallow lands, (B) standalone solar pumps of up to 7.5 HP capacity, and (C) solarisation of existing grid-connected agriculture pumps up to 7.5 HP.",
+    "category": "agriculture",
+    "ministry": "Ministry of New & Renewable Energy",
+    "state": null,
+    "eligibility": {
+      "occupation": "farmer",
+      "custom_criteria": [
+        "Component A: Individual farmers, group of farmers, cooperatives, panchayats, FPOs with barren/fallow/agricultural land",
+        "Component B: Individual farmers for standalone solar pumps in off-grid/water-scarce areas with pump capacity up to 7.5 HP",
+        "Component C: Individual farmers with existing grid-connected agriculture pumps",
+        "Land ownership documents required",
+        "Priority to small and marginal farmers, SC/ST farmers, and those in water-scarce areas"
+      ]
+    },
+    "benefits": "Component A: Installation of solar power plants (500 kW to 2 MW) on barren land with guaranteed income from selling power to DISCOM. Component B: Standalone solar pumps — Central subsidy of 30%, State subsidy of 30%, farmer pays 40% (can avail bank loan for 30%). Component C: Solarisation of existing pumps — Central subsidy of 30%, State subsidy of 30%, farmer pays 40%. Farmer can sell surplus solar power to DISCOM.",
+    "application_process": "Apply through State Nodal Agency or at the PM-KUSUM portal (mnre.gov.in/kusum). State implementation agencies manage the process. Contact nearest District Agriculture Office or DISCOM office.",
+    "documents_required": [
+      "Aadhaar Card",
+      "Land Ownership Documents",
+      "Bank Account Details",
+      "Existing electricity connection details (Component C)",
+      "Passport Size Photograph"
+    ],
+    "helpline": "011-2436-0707 (MNRE) or State Nodal Agency numbers",
+    "website": "https://pmkusum.mnre.gov.in",
+    "last_updated": "2025-10-01T00:00:00Z",
+    "popularity_score": 0.68
+  },
+  {
+    "scheme_id": "soil-health-card",
+    "name": "Soil Health Card Scheme",
+    "description": "Provides soil health cards to all farmers in the country every 2 years carrying crop-wise recommendations of nutrients and fertilisers required for the individual farms. Promotes balanced use of fertilisers to improve soil health and productivity. Over 23 crore soil health cards issued across both cycles.",
+    "category": "agriculture",
+    "ministry": "Ministry of Agriculture & Farmers Welfare",
+    "state": null,
+    "eligibility": {
+      "occupation": "farmer",
+      "custom_criteria": [
+        "All farmers with cultivable land in India",
+        "No income or landholding limit — universal for all farmers",
+        "Soil samples collected grid-wise (2.5 ha for irrigated and 10 ha for rainfed areas)",
+        "Both land-owning and tenant farmers are eligible",
+        "Cards issued cycle-wise (every 2 years)"
+      ]
+    },
+    "benefits": "Free soil testing for 12 parameters: pH, Electrical Conductivity (EC), Organic Carbon (OC), Nitrogen (N), Phosphorus (P), Potassium (K), Sulphur (S), Zinc (Zn), Boron (B), Iron (Fe), Manganese (Mn), and Copper (Cu). Crop-wise fertiliser recommendations. Advice on soil amendments. Digital access through soilhealth.dac.gov.in portal. Helps reduce input costs and improve crop yields.",
+    "application_process": "Soil samples collected by state agriculture department staff at the grid level. Farmers can also request soil testing through nearest Krishi Vigyan Kendra (KVK) or agriculture department office. Soil health cards delivered to farmers or available online.",
+    "documents_required": [
+      "Aadhaar Card (optional but recommended)",
+      "Land details (survey number, village, block, district)",
+      "No formal application needed — department conducts sampling drive"
+    ],
+    "helpline": "1800-180-1551 (Kisan Call Centre)",
+    "website": "https://soilhealth.dac.gov.in",
+    "last_updated": "2025-09-01T00:00:00Z",
+    "popularity_score": 0.62
+  },
+  {
+    "scheme_id": "nfsa",
+    "name": "National Food Security Act (NFSA)",
+    "description": "Landmark legislation providing legal entitlement to subsidised foodgrains to approximately two-thirds of India's population (about 81.35 crore persons). Under PMGKAY (2024-28), foodgrains are now provided completely free. AAY families get 35 kg/month per household and PHH beneficiaries get 5 kg/person/month.",
+    "category": "social_security",
+    "ministry": "Ministry of Consumer Affairs, Food & Public Distribution",
+    "state": null,
+    "eligibility": {
+      "custom_criteria": [
+        "Two categories: Antyodaya Anna Yojana (AAY) and Priority Household (PHH)",
+        "AAY: Poorest of the poor — destitute, widows, terminally ill, disabled, aged 60+ with no means of subsistence, primitive tribal groups",
+        "PHH: Identified by State/UT governments based on SECC data and state-specific criteria",
+        "Up to 75% of rural and 50% of urban population covered",
+        "Identification done by State/UT governments"
+      ]
+    },
+    "benefits": "Under PMGKAY (2024-28): Foodgrains completely FREE. PHH: 5 kg per person per month of rice/wheat/coarse grains. AAY: 35 kg per household per month. One Nation One Ration Card (ONORC) enables portability across India. Maternity benefit of ₹6,000 and mid-day meals for children also covered under NFSA.",
+    "application_process": "Apply for ration card at District Food & Civil Supplies Office or through state food portal. Online application available in many states. Existing ration card holders are covered automatically. Biometric (Aadhaar) authentication at Fair Price Shop for grain collection.",
+    "documents_required": [
+      "Aadhaar Card (for each family member)",
+      "Proof of Residence",
+      "Income Certificate / BPL Certificate",
+      "Photographs of all family members",
+      "Existing ration card (for modifications)"
+    ],
+    "helpline": "1967 (National Food Helpline) or 14445",
+    "website": "https://nfsa.gov.in",
+    "last_updated": "2025-12-01T00:00:00Z",
+    "popularity_score": 0.93
+  },
+  {
+    "scheme_id": "pm-kaushal-vikas-yojana",
+    "name": "Pradhan Mantri Kaushal Vikas Yojana (PMKVY)",
+    "description": "Flagship skill training scheme enabling Indian youth to take up industry-relevant skill training leading to better livelihood. PMKVY 4.0 (2023-2026) focuses on new-age skills including AI, IoT, drones, coding, 3D printing, along with traditional sectors. Training provided free of cost with certification by NSDC and sector skill councils.",
+    "category": "skill_development",
+    "ministry": "Ministry of Skill Development & Entrepreneurship",
+    "state": null,
+    "eligibility": {
+      "min_age": 15,
+      "custom_criteria": [
+        "Indian nationals aged 15 and above",
+        "Class 10/12 dropout or unemployed youth (for Short Term Training)",
+        "Existing workers/employees for Recognition of Prior Learning (RPL)",
+        "No upper age limit for RPL component",
+        "Aadhaar card mandatory for enrolment",
+        "Must be willing to undergo 200-600 hours of training depending on the course"
+      ]
+    },
+    "benefits": "Free skill training in 300+ job roles across 37 sectors. Training duration: 200-600 hours (Short Term Training). Certification by NSDC and sector skill councils. Placement assistance post-training. Boarding and lodging for residential training. Assessment and certification fee paid by government. ₹500 per month transport allowance in some courses.",
+    "application_process": "Register at skillindia.nsdcindia.org or PMKVY mobile app. Choose a training centre and course. Visit the nearest PMKVY Training Centre (TC) for enrolment. Training centres mapped on Skill India Digital portal.",
+    "documents_required": [
+      "Aadhaar Card",
+      "Bank Account Details",
+      "Educational Certificates (if available)",
+      "Passport Size Photographs",
+      "Mobile Number"
+    ],
+    "helpline": "1800-123-9626 (NSDC Toll Free) or 088000-55555",
+    "website": "https://www.pmkvyofficial.org",
+    "last_updated": "2025-11-01T00:00:00Z",
+    "popularity_score": 0.77
+  },
+  {
+    "scheme_id": "ignoaps",
+    "name": "Indira Gandhi National Old Age Pension Scheme (IGNOAPS)",
+    "description": "Non-contributory old age pension under the National Social Assistance Programme (NSAP) for destitute elderly citizens living below the poverty line. Central Government contributes ₹200/month for persons aged 60-79 years and ₹500/month for persons aged 80 and above. States typically add a top-up amount.",
+    "category": "social_security",
+    "ministry": "Ministry of Rural Development",
+    "state": null,
+    "eligibility": {
+      "min_age": 60,
+      "is_bpl": true,
+      "custom_criteria": [
+        "Must be 60 years of age or above",
+        "Must belong to a Below Poverty Line (BPL) household",
+        "BPL status as per criteria defined by the Government of India",
+        "Must not be receiving pension under any other scheme of the Central/State Government",
+        "Destitute — having little or no regular means of subsistence from own sources"
+      ]
+    },
+    "benefits": "₹200 per month for persons aged 60-79 years (Central share). ₹500 per month for persons aged 80 years and above (Central share). Most states provide additional top-up of ₹200-₹2,000 per month. Pension paid through bank/post office account or money order.",
+    "application_process": "Apply at Gram Panchayat (rural) or ULB/Municipality (urban). Application verified by Block/Taluka office. Sanctioned by District Collector/District Social Welfare Officer. Can also apply through NSAP portal or state pension portal.",
+    "documents_required": [
+      "Aadhaar Card",
+      "Age Proof (Voter ID / Birth Certificate / School Leaving Certificate)",
+      "BPL Certificate / Ration Card",
+      "Bank / Post Office Account Details",
+      "Passport Size Photograph"
+    ],
+    "helpline": "1800-345-44-44 or contact District Social Welfare Office",
+    "website": "https://nsap.nic.in",
+    "last_updated": "2025-10-01T00:00:00Z",
+    "popularity_score": 0.79
+  },
+  {
+    "scheme_id": "janani-suraksha-yojana",
+    "name": "Janani Suraksha Yojana (JSY)",
+    "description": "Safe motherhood intervention under the National Health Mission promoting institutional delivery among poor pregnant women. Provides cash assistance to eligible pregnant women for delivery in government or accredited private health institutions. Integrated with ASHA (Accredited Social Health Activist) support for antenatal care and referral transport.",
+    "category": "health",
+    "ministry": "Ministry of Health & Family Welfare",
+    "state": null,
+    "eligibility": {
+      "gender": "female",
+      "min_age": 19,
+      "is_bpl": true,
+      "custom_criteria": [
+        "All pregnant women delivering in government health centres (in LPS states — Low Performing States)",
+        "BPL/SC/ST pregnant women in HPS (High Performing States) delivering in government/accredited institutions",
+        "LPS: UP, UK, Bihar, Jharkhand, MP, Chhattisgarh, Rajasthan, Odisha, Assam, J&K and NE states",
+        "HPS: All other states",
+        "Age 19 years and above",
+        "Up to two live births"
+      ]
+    },
+    "benefits": "LPS (Low Performing States) — Rural: ₹1,400 to mother + ₹600 to ASHA. Urban: ₹1,000 to mother + ₹400 to ASHA. HPS (High Performing States) — Rural: ₹700 to mother + ₹600 to ASHA. Urban: ₹600 to mother + ₹400 to ASHA. Free delivery in government institutions. Referral transport arrangement. ASHA support for antenatal check-ups, institutional delivery, and post-natal care.",
+    "application_process": "Register with ASHA worker or at nearest government health centre/sub-centre during pregnancy. ASHA facilitates antenatal care and institutional delivery. Cash benefit disbursed at the health institution at the time of delivery.",
+    "documents_required": [
+      "JSY Card / MCH Card",
+      "Aadhaar Card",
+      "BPL Certificate (for HPS states)",
+      "Bank Account Details",
+      "Proof of delivery at government/accredited institution"
+    ],
+    "helpline": "104 (NHM Health Helpline) or 108 (Ambulance)",
+    "website": "https://nhm.gov.in/index1.php?lang=1&level=3&sublinkid=841&lid=309",
+    "last_updated": "2025-09-01T00:00:00Z",
+    "popularity_score": 0.76
+  },
+  {
+    "scheme_id": "national-apprenticeship-promotion-scheme",
+    "name": "National Apprenticeship Promotion Scheme (NAPS)",
+    "description": "Promotes apprenticeship training in industry by providing financial support to employers. Government shares 25% of the prescribed stipend (up to ₹1,500 per month per apprentice) with employers. Also provides basic training cost reimbursement of up to ₹7,500 per apprentice for employers providing in-house basic training. Aims to create a skilled workforce aligned to industry needs.",
+    "category": "skill_development",
+    "ministry": "Ministry of Skill Development & Entrepreneurship",
+    "state": null,
+    "eligibility": {
+      "min_age": 14,
+      "custom_criteria": [
+        "Youth aged 14 years and above (for designated trades) and 18 years and above (for optional trades)",
+        "Minimum educational qualification varies by trade (5th pass to ITI/Diploma as applicable)",
+        "Must be enrolled as an apprentice under the Apprentices Act, 1961",
+        "All establishments/employers with 4 or more workers can engage apprentices",
+        "Establishments must be registered on the Apprenticeship portal"
+      ]
+    },
+    "benefits": "Government shares 25% of prescribed stipend subject to maximum ₹1,500/month per apprentice for new apprentices. Basic training cost reimbursement up to ₹7,500 per apprentice (for 3 months / 500 hours). Stipend ranges from ₹5,000-₹9,000/month depending on qualification (5th pass to graduate). On-the-job training for 6 months to 3 years. National Council for Vocational Training (NCVT) certification.",
+    "application_process": "Register on the Apprenticeship portal at apprenticeshipindia.gov.in. Establishments post apprenticeship opportunities. Candidates apply online and get matched with establishments. Contract of apprenticeship registered with Regional Directorate of Skill Development & Entrepreneurship.",
+    "documents_required": [
+      "Aadhaar Card",
+      "Educational Certificates",
+      "Bank Account Details",
+      "Passport Size Photographs",
+      "Medical Fitness Certificate (for some trades)"
+    ],
+    "helpline": "1800-599-0019 (Apprenticeship Helpline)",
+    "website": "https://www.apprenticeshipindia.gov.in",
+    "last_updated": "2025-10-01T00:00:00Z",
+    "popularity_score": 0.6
+  },
+  {
+    "scheme_id": "rkvy",
+    "name": "Rashtriya Krishi Vikas Yojana - Remunerative Approaches for Agriculture and Allied Sector Rejuvenation (RKVY-RAFTAAR)",
+    "description": "Centrally sponsored scheme providing states and UTs with flexibility and autonomy to plan and execute agricultural development programmes as per their local needs and priorities. Aims to incentivise states to increase public investment in agriculture and allied sectors. Supports agri-infrastructure, value addition, agri-startups, and innovation.",
+    "category": "agriculture",
+    "ministry": "Ministry of Agriculture & Farmers Welfare",
+    "state": null,
+    "eligibility": {
+      "custom_criteria": [
+        "State/UT governments are the implementing agencies",
+        "Individual farmers and farmer groups benefit through state-level projects",
+        "Agri-entrepreneurs and startups under RKVY-RAFTAAR innovation and agripreneurship component",
+        "States must prepare State Agriculture Plan (SAP) and District Agriculture Plan (DAP)",
+        "20% of funds earmarked for agri-startups and innovation (RKVY-RAFTAAR)"
+      ]
+    },
+    "benefits": "Grants to states for agricultural development projects. Up to ₹25 lakh financial support for agri-startups (incubation phase). Up to ₹5 lakh for agri-startup ideas at ideation stage. Infrastructure support — cold chains, warehouses, food processing units. Flexi-funds for states to address local agricultural challenges. Convergence with other central and state schemes.",
+    "application_process": "State governments submit proposals through RKVY portal. Agri-startups apply through RKVY-RAFTAAR portal. Proposals reviewed by State Level Sanctioning Committee (SLSC). Individual beneficiaries access benefits through state agriculture department.",
+    "documents_required": [
+      "State Agriculture Plan (for state proposals)",
+      "Project Proposal / Business Plan (for startups)",
+      "Identity Proof",
+      "Land Records (for individual farmer components)",
+      "Registration under Startup India (for startup component)"
+    ],
+    "helpline": "1800-180-1551 (Kisan Call Centre) or 011-23382651",
+    "website": "https://rkvy.nic.in",
+    "last_updated": "2025-09-01T00:00:00Z",
+    "popularity_score": 0.58
+  },
+  {
+    "scheme_id": "pm-gram-sadak-yojana",
+    "name": "Pradhan Mantri Gram Sadak Yojana (PMGSY)",
+    "description": "Centrally sponsored scheme to provide all-weather road connectivity to unconnected habitations in rural areas. PMGSY-I focuses on connecting habitations with population of 500+ (250+ in hilly/tribal/desert areas). PMGSY-II upgrades existing rural roads. PMGSY-III consolidates Through Routes and Major Rural Links. Over 7.5 lakh km of roads constructed.",
+    "category": "infrastructure",
+    "ministry": "Ministry of Rural Development",
+    "state": null,
+    "eligibility": {
+      "custom_criteria": [
+        "PMGSY-I: Unconnected habitations with population of 500+ persons (250+ in NE, hilly, tribal, desert, and LWE areas)",
+        "PMGSY-II: Upgradation of existing Through Routes and Major Rural Links",
+        "PMGSY-III: Consolidation of 1,25,000 km of Through Routes and Major Rural Links connecting habitations to GBs, PHCs, schools, and markets",
+        "Rural habitations as per Census 2001 data (PMGSY-I) and Census 2011 (PMGSY-III)",
+        "Implementation through State Rural Roads Development Agencies (SRRDAs)"
+      ]
+    },
+    "benefits": "All-weather road connectivity for unconnected rural habitations. Road construction as per Indian Roads Congress specifications with 5-year post-construction maintenance. Green technology options (waste plastic, cold mix, geo-textiles, fly ash). Bridges and cross-drainage structures included. Community benefit: improved access to markets, hospitals, schools, and government services.",
+    "application_process": "No individual application needed. State government identifies eligible habitations from Core Network. District Rural Roads Plan (DRRP) prepared and proposals submitted to National Rural Roads Development Agency (NRRDA). Road construction contracts awarded through competitive bidding.",
+    "documents_required": [
+      "Not applicable for individual beneficiaries — scheme implemented through state agencies"
+    ],
+    "helpline": "1800-180-6763 (PMGSY Helpline)",
+    "website": "https://pmgsy.nic.in",
+    "last_updated": "2025-10-01T00:00:00Z",
+    "popularity_score": 0.7
+  },
+  {
+    "scheme_id": "agnipath-scheme",
+    "name": "Agnipath Scheme (Agniveer)",
+    "description": "Short-term military recruitment scheme for Indian youth aged 17.5-21 years to serve in the Armed Forces (Army, Navy, Air Force) as Agniveers for a period of 4 years. After 4 years, up to 25% of the batch will be enrolled in the regular cadre based on merit; the remaining 75% will be released with a Seva Nidhi package of approximately ₹11.71 lakh and priority in other government recruitments.",
+    "category": "other",
+    "ministry": "Ministry of Defence",
+    "state": null,
+    "eligibility": {
+      "min_age": 18,
+      "max_age": 21,
+      "custom_criteria": [
+        "Indian citizens aged 17.5 to 21 years (upper age limit relaxed to 23 for first batch in 2022)",
+        "Educational qualification: 10th pass (for General Duty), 12th pass (for technical and clerical trades)",
+        "Must meet physical fitness standards prescribed for each service",
+        "Medical fitness as per military medical standards",
+        "No prior criminal record",
+        "Both male and female candidates eligible (as per service-specific norms)"
+      ]
+    },
+    "benefits": "Starting monthly salary of ₹30,000 in first year, increasing to ₹40,000 by fourth year. Risk and hardship allowances applicable. Seva Nidhi package of approximately ₹11.71 lakh (tax-free) on completion of 4-year tenure. Non-contributory life insurance cover of ₹48 lakh during service. 25% retained in regular cadre. Skills certificate and diploma recognition. Priority in CAPFs, state police, and other government jobs after exit.",
+    "application_process": "Apply online at joinindianarmy.nic.in (Army), joinindiannavy.gov.in (Navy), or agnipathvayu.cdac.in (Air Force). Recruitment rallies and online examinations conducted periodically. Physical Fitness Test, Medical Examination, and Written Test/Merit-based selection.",
+    "documents_required": [
+      "Aadhaar Card",
+      "10th/12th Marksheet and Certificate",
+      "Domicile Certificate",
+      "Character Certificate",
+      "NCC Certificate (if applicable, for bonus marks)",
+      "Sports Certificate (if applicable)",
+      "Passport Size Photographs",
+      "Medical Fitness Certificate"
+    ],
+    "helpline": "011-26173215 (Army Recruiting Office) or visit nearest ARO/rally venue",
+    "website": "https://agnipathvayu.cdac.in",
+    "last_updated": "2025-11-01T00:00:00Z",
+    "popularity_score": 0.74
+  },
+  {
+    "scheme_id": "pm-awas-yojana-urban",
+    "name": "Pradhan Mantri Awas Yojana - Urban (PMAY-U)",
+    "description": "Housing for All (Urban) mission providing central assistance to urban poor for construction/purchase of houses. Four verticals: In-Situ Slum Redevelopment, Credit Linked Subsidy Scheme (CLSS), Affordable Housing in Partnership, and Beneficiary-Led Construction. PMAY-U 2.0 launched with interest subsidy for EWS/LIG families and ₹2.5 lakh central assistance.",
+    "category": "housing",
+    "ministry": "Ministry of Housing & Urban Affairs",
+    "state": null,
+    "eligibility": {
+      "custom_criteria": [
+        "EWS (Economically Weaker Section): Annual household income up to ₹3 lakh",
+        "LIG (Lower Income Group): Annual household income ₹3-6 lakh",
+        "MIG-I: Annual household income ₹6-12 lakh",
+        "MIG-II: Annual household income ₹12-18 lakh",
+        "Beneficiary family must not own a pucca house in any part of India",
+        "Preference to women ownership (female head of household or joint ownership)",
+        "Applicable in all statutory towns across India"
+      ]
+    },
+    "benefits": "EWS: Central assistance of ₹2.50 lakh for Beneficiary-Led Construction/Enhancement. CLSS for EWS/LIG: Interest subsidy of 6.5% on housing loans up to ₹6 lakh (for 20 years). MIG-I: Interest subsidy of 4% on loans up to ₹9 lakh. MIG-II: Interest subsidy of 3% on loans up to ₹12 lakh. In-Situ Slum Redevelopment: ₹1 lakh per house for eligible slum dwellers.",
+    "application_process": "Apply through City/ULB (Urban Local Body) office or PMAY-U portal (pmaymis.gov.in). Online application also available. For CLSS, apply through any primary lending institution (bank/HFC). Demand survey conducted by ULBs to identify beneficiaries.",
+    "documents_required": [
+      "Aadhaar Card",
+      "Income Certificate / Self-certification of income",
+      "Proof of non-ownership of pucca house (self-declaration)",
+      "Bank Account Details",
+      "Photograph",
+      "EWS/LIG Certificate from competent authority"
+    ],
+    "helpline": "1800-11-3377 or 1800-11-3388 (PMAY-U Toll Free)",
+    "website": "https://pmaymis.gov.in",
+    "last_updated": "2025-11-01T00:00:00Z",
+    "popularity_score": 0.89
+  }
+]

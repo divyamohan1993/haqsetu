@@ -1,0 +1,302 @@
+"""HaqSetu FastAPI application entry point.
+
+Creates the FastAPI app, configures middleware, includes routers, and
+manages the lifecycle of all backend services (Translation, Speech, LLM,
+RAG, SchemeSearch, Cache, Hinglish, Orchestrator).
+"""
+
+from __future__ import annotations
+
+import time
+from contextlib import asynccontextmanager
+from typing import AsyncIterator
+
+import structlog
+from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import ORJSONResponse
+
+from config.settings import settings
+from src.api.router import api_router
+from src.middleware.privacy import DPDPAMiddleware
+from src.middleware.rate_limit import RateLimitMiddleware
+
+logger: structlog.stdlib.BoundLogger = structlog.get_logger(__name__)
+
+
+# ---------------------------------------------------------------------------
+# Structured logging configuration
+# ---------------------------------------------------------------------------
+
+
+def _configure_logging() -> None:
+    """Set up structlog with JSON or console rendering based on settings."""
+    processors: list = [
+        structlog.contextvars.merge_contextvars,
+        structlog.processors.add_log_level,
+        structlog.processors.StackInfoRenderer(),
+        structlog.dev.set_exc_info,
+        structlog.processors.TimeStamper(fmt="iso"),
+    ]
+
+    if settings.log_format == "json":
+        processors.append(structlog.processors.JSONRenderer())
+    else:
+        processors.append(structlog.dev.ConsoleRenderer())
+
+    structlog.configure(
+        processors=processors,
+        wrapper_class=structlog.make_filtering_bound_logger(
+            structlog.get_level_from_name(settings.log_level),
+        ),
+        context_class=dict,
+        logger_factory=structlog.PrintLoggerFactory(),
+        cache_logger_on_first_use=True,
+    )
+
+
+# ---------------------------------------------------------------------------
+# Application lifespan
+# ---------------------------------------------------------------------------
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI) -> AsyncIterator[None]:
+    """Manage startup and shutdown of all HaqSetu services.
+
+    On startup:
+      1. Initialise cache manager
+      2. Initialise Translation service
+      3. Initialise Speech-to-Text and Text-to-Speech services
+      4. Initialise LLM, SchemeSearch, and Hinglish services
+      5. Load and index scheme data
+      6. Create the QueryOrchestrator
+      7. Store everything on ``app.state``
+
+    On shutdown:
+      - Close all clients gracefully.
+    """
+    _configure_logging()
+    logger.info(
+        "app.startup",
+        env=settings.env,
+        gcp_project=settings.gcp_project_id,
+        region=settings.gcp_region,
+    )
+
+    app.state.start_time = time.time()
+
+    # -- 1. Cache -----------------------------------------------------------
+    from src.services.cache import CacheManager
+
+    cache = CacheManager(
+        redis_url=settings.redis_url if settings.redis_url else None,
+        namespace="haqsetu:",
+    )
+    app.state.cache = cache
+    logger.info("app.cache_initialised")
+
+    # -- 2. Translation -----------------------------------------------------
+    from src.services.translation import TranslationService
+
+    translation = TranslationService(
+        project_id=settings.gcp_project_id,
+        region=settings.gcp_region,
+        cache=CacheManager.for_namespace(
+            "translation:",
+            redis_url=settings.redis_url if settings.redis_url else None,
+        ),
+    )
+    app.state.translation = translation
+    logger.info("app.translation_initialised")
+
+    # -- 3. Speech services -------------------------------------------------
+    from src.services.speech import SpeechToTextService, TextToSpeechService
+
+    stt: SpeechToTextService | None = None
+    tts: TextToSpeechService | None = None
+
+    if settings.gcp_project_id:
+        try:
+            stt = SpeechToTextService(
+                project_id=settings.gcp_project_id,
+                region=settings.gcp_region,
+            )
+            logger.info("app.stt_initialised")
+        except Exception:
+            logger.warning("app.stt_init_failed", exc_info=True)
+
+        try:
+            tts = TextToSpeechService(project_id=settings.gcp_project_id)
+            logger.info("app.tts_initialised")
+        except Exception:
+            logger.warning("app.tts_init_failed", exc_info=True)
+
+    app.state.stt = stt
+    app.state.tts = tts
+
+    # -- 4. LLM service (Vertex AI / Gemini) --------------------------------
+    from src.services.llm import LLMService
+
+    llm: LLMService | None = None
+    if settings.gcp_project_id:
+        try:
+            llm = LLMService(
+                project_id=settings.gcp_project_id,
+                region=settings.vertex_ai_location,
+                model_name=settings.vertex_ai_model,
+            )
+            logger.info("app.llm_initialised", model=settings.vertex_ai_model)
+        except Exception:
+            logger.warning("app.llm_init_failed", exc_info=True)
+
+    app.state.llm = llm
+
+    # -- 5. Hinglish processor (pure Python, no external deps) -------------
+    from src.services.hinglish import HinglishProcessor
+
+    hinglish = HinglishProcessor()
+    app.state.hinglish = hinglish
+    logger.info("app.hinglish_initialised")
+
+    # -- 6. RAG service and scheme search ------------------------------------
+    from src.services.rag import RAGService
+    from src.services.scheme_search import SchemeSearchService
+
+    rag = RAGService()
+    scheme_search = SchemeSearchService(rag=rag, cache=cache)
+    app.state.scheme_search = scheme_search
+    logger.info("app.scheme_search_initialised")
+
+    # -- 7. Load and index scheme data via seed module ----------------------
+    app.state.scheme_data = []
+    try:
+        from src.data.seed import seed_scheme_data
+
+        scheme_data = await seed_scheme_data(scheme_search)
+        app.state.scheme_data = scheme_data
+        logger.info("app.scheme_data_loaded", count=len(scheme_data))
+    except Exception:
+        logger.warning("app.scheme_data_load_failed", exc_info=True)
+
+    # -- 8. Create orchestrator --------------------------------------------
+    from src.pipeline.orchestrator import QueryOrchestrator
+
+    # Use a fallback LLM service if the real one failed to initialise.
+    # The orchestrator will handle errors gracefully during query processing.
+    if llm is None:
+        logger.warning("app.orchestrator_no_llm", note="LLM service not available; queries will use fallbacks")
+        from src.services.llm import LLMService as _LLMService
+
+        llm = _LLMService(
+            project_id=settings.gcp_project_id or "placeholder",
+            region=settings.vertex_ai_location,
+            model_name=settings.vertex_ai_model,
+        )
+
+    orchestrator = QueryOrchestrator(
+        translation=translation,
+        llm=llm,
+        scheme_search=scheme_search,
+        hinglish=hinglish,
+        cache=cache,
+        speech_to_text=stt,
+        text_to_speech=tts,
+    )
+    app.state.orchestrator = orchestrator
+    logger.info("app.orchestrator_initialised")
+
+    logger.info("app.startup_complete")
+
+    yield
+
+    # -- Shutdown -----------------------------------------------------------
+    logger.info("app.shutdown_start")
+
+    if stt is not None:
+        await stt.close()
+    if tts is not None:
+        await tts.close()
+    await cache.close()
+
+    logger.info("app.shutdown_complete")
+
+
+# ---------------------------------------------------------------------------
+# FastAPI application
+# ---------------------------------------------------------------------------
+
+app = FastAPI(
+    title="HaqSetu API",
+    description=(
+        "HaqSetu (हक़सेतु) -- Voice-First AI Civic Assistant for Rural India. "
+        "Provides multilingual access to government scheme information across "
+        "all 22 Scheduled Languages of India plus English."
+    ),
+    version="0.1.0",
+    lifespan=lifespan,
+    default_response_class=ORJSONResponse,
+    docs_url="/docs" if not settings.is_production else None,
+    redoc_url="/redoc" if not settings.is_production else None,
+)
+
+# -- CORS middleware --------------------------------------------------------
+if settings.is_production:
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["https://haqsetu.in", "https://www.haqsetu.in"],
+        allow_credentials=True,
+        allow_methods=["GET", "POST"],
+        allow_headers=["*"],
+    )
+else:
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+
+# -- Custom middleware ------------------------------------------------------
+app.add_middleware(DPDPAMiddleware)
+app.add_middleware(RateLimitMiddleware, max_requests_per_minute=settings.rate_limit_per_minute)
+
+# -- Prometheus metrics -----------------------------------------------------
+try:
+    from prometheus_fastapi_instrumentator import Instrumentator
+
+    Instrumentator(
+        should_group_status_codes=True,
+        should_ignore_untemplated=True,
+        excluded_handlers=["/metrics", "/api/v1/health"],
+    ).instrument(app).expose(app, endpoint="/metrics")
+    logger.info("app.prometheus_metrics_enabled")
+except ImportError:
+    logger.warning("app.prometheus_not_available")
+
+# -- Include routers -------------------------------------------------------
+app.include_router(api_router)
+
+
+# -- Root endpoint ----------------------------------------------------------
+
+
+@app.get("/")
+async def root() -> dict:
+    """API information endpoint."""
+    return {
+        "name": "HaqSetu API",
+        "description": "Voice-First AI Civic Assistant for Rural India",
+        "version": "0.1.0",
+        "docs": "/docs",
+        "health": "/api/v1/health",
+        "languages_supported": 23,
+        "endpoints": {
+            "query": "/api/v1/query",
+            "voice": "/api/v1/voice",
+            "schemes": "/api/v1/schemes",
+            "languages": "/api/v1/languages",
+            "health": "/api/v1/health",
+        },
+    }
