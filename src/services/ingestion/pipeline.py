@@ -34,6 +34,7 @@ same output.  Content-based checksums are used for change detection.
 
 from __future__ import annotations
 
+import asyncio
 import hashlib
 import json
 import time
@@ -46,9 +47,11 @@ import structlog
 
 if TYPE_CHECKING:
     from src.services.cache import CacheManager
+    from src.services.changelog import SchemeChangelogService
     from src.services.ingestion.data_gov_client import DataGovClient
     from src.services.ingestion.myscheme_client import MySchemeClient
     from src.services.translation import TranslationService
+    from src.services.verification.engine import SchemeVerificationEngine
 
 logger = structlog.get_logger(__name__)
 
@@ -93,6 +96,8 @@ class IngestionResult:
     duration_seconds: float = 0.0
     timestamp: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
     errors: list[str] = field(default_factory=list)
+    verification_queued: int = 0
+    changes_detected: int = 0
 
     def to_dict(self) -> dict:
         """Serialise to a JSON-compatible dictionary."""
@@ -105,6 +110,8 @@ class IngestionResult:
             "duration_seconds": round(self.duration_seconds, 2),
             "timestamp": self.timestamp.isoformat(),
             "errors": self.errors,
+            "verification_queued": self.verification_queued,
+            "changes_detected": self.changes_detected,
         }
 
 
@@ -164,6 +171,10 @@ class SchemeIngestionPipeline:
         Shared cache manager.
     translation:
         Optional translation service for multi-language support.
+    verification_engine:
+        Optional verification engine for auto-verifying ingested schemes.
+    changelog_service:
+        Optional changelog service for detecting scheme changes.
     """
 
     def __init__(
@@ -172,11 +183,15 @@ class SchemeIngestionPipeline:
         datagov: DataGovClient,
         cache: CacheManager,
         translation: TranslationService | None = None,
+        verification_engine: SchemeVerificationEngine | None = None,
+        changelog_service: SchemeChangelogService | None = None,
     ) -> None:
         self._myscheme = myscheme
         self._datagov = datagov
         self._cache = cache
         self._translation = translation
+        self._verification_engine = verification_engine
+        self._changelog_service = changelog_service
         self._last_result: IngestionResult | None = None
 
     # ------------------------------------------------------------------
@@ -299,14 +314,15 @@ class SchemeIngestionPipeline:
         # -- Step 7: Determine new vs updated counts -----------------------
         existing = await self._load_existing_schemes()
         existing_ids = {s.get("scheme_id") for s in existing}
+        existing_by_id: dict[str, dict] = {
+            s.get("scheme_id", ""): s for s in existing
+        }
 
         for scheme in validated:
             sid = scheme.get("scheme_id")
             if sid in existing_ids:
                 # Check if content actually changed
-                existing_scheme = next(
-                    (s for s in existing if s.get("scheme_id") == sid), None
-                )
+                existing_scheme = existing_by_id.get(sid)
                 if existing_scheme and self._compute_checksum(
                     scheme
                 ) != self._compute_checksum(existing_scheme):
@@ -315,6 +331,12 @@ class SchemeIngestionPipeline:
                 result.new_schemes += 1
 
         result.total_fetched = len(validated)
+
+        # -- Step 7b: Detect changes (if changelog service available) ------
+        if self._changelog_service is not None:
+            result.changes_detected = await self._detect_and_record_changes(
+                validated, existing_by_id
+            )
 
         # -- Step 8: Save -------------------------------------------------
         await self.save_schemes(validated)
@@ -338,6 +360,17 @@ class SchemeIngestionPipeline:
             result.to_dict(),
             ttl_seconds=_INGESTION_CACHE_TTL,
         )
+
+        # -- Step 9: Queue verification (non-blocking) --------------------
+        if self._verification_engine is not None and validated:
+            result.verification_queued = len(validated)
+            asyncio.create_task(
+                self._run_post_ingestion_verification(validated)
+            )
+            logger.info(
+                "ingestion.verification_queued",
+                scheme_count=result.verification_queued,
+            )
 
         return result
 
@@ -436,6 +469,12 @@ class SchemeIngestionPipeline:
                         exc_info=True,
                     )
 
+            # Detect changes (if changelog service available)
+            if self._changelog_service is not None:
+                result.changes_detected = await self._detect_and_record_changes(
+                    updated_schemes, existing_by_id
+                )
+
             await self.save_schemes(final)
 
         result.total_fetched = len(updated_schemes)
@@ -455,6 +494,17 @@ class SchemeIngestionPipeline:
             result.to_dict(),
             ttl_seconds=_INGESTION_CACHE_TTL,
         )
+
+        # Queue verification for updated schemes (non-blocking)
+        if self._verification_engine is not None and updated_schemes:
+            result.verification_queued = len(updated_schemes)
+            asyncio.create_task(
+                self._run_post_ingestion_verification(updated_schemes)
+            )
+            logger.info(
+                "ingestion.verification_queued",
+                scheme_count=result.verification_queued,
+            )
 
         return result
 
@@ -1002,3 +1052,129 @@ class SchemeIngestionPipeline:
         ]
         content_str = "|".join(content_fields)
         return hashlib.sha256(content_str.encode()).hexdigest()[:16]
+
+    # ------------------------------------------------------------------
+    # Post-ingestion verification
+    # ------------------------------------------------------------------
+
+    async def _run_post_ingestion_verification(
+        self, schemes: list[dict]
+    ) -> None:
+        """Verify ingested schemes in the background with bounded concurrency.
+
+        Uses a bounded semaphore (3 concurrent) to avoid overloading
+        upstream government APIs.  Runs as a fire-and-forget background
+        task so that the main ingestion is not blocked.
+
+        Parameters
+        ----------
+        schemes:
+            List of validated scheme dictionaries to verify.
+        """
+        if self._verification_engine is None:
+            return
+
+        semaphore = asyncio.BoundedSemaphore(3)
+
+        logger.info(
+            "ingestion.post_verification_start",
+            scheme_count=len(schemes),
+        )
+
+        async def _verify_one(scheme: dict) -> None:
+            async with semaphore:
+                sid = scheme.get("scheme_id", "")
+                name = scheme.get("name", "")
+                try:
+                    result = await self._verification_engine.verify_scheme(
+                        scheme_id=sid,
+                        scheme_name=name,
+                        ministry=scheme.get("ministry"),
+                    )
+                    logger.info(
+                        "ingestion.post_verification_result",
+                        scheme_id=sid,
+                        status=result.status,
+                        trust_score=round(result.trust_score, 4),
+                    )
+                except Exception as exc:
+                    logger.error(
+                        "ingestion.post_verification_failed",
+                        scheme_id=sid,
+                        error=str(exc),
+                    )
+
+        tasks = [_verify_one(scheme) for scheme in schemes]
+        await asyncio.gather(*tasks, return_exceptions=True)
+
+        logger.info(
+            "ingestion.post_verification_complete",
+            scheme_count=len(schemes),
+        )
+
+    # ------------------------------------------------------------------
+    # Changelog detection
+    # ------------------------------------------------------------------
+
+    async def _detect_and_record_changes(
+        self,
+        new_schemes: list[dict],
+        existing_by_id: dict[str, dict],
+    ) -> int:
+        """Compare new scheme data with existing data and record changes.
+
+        For each scheme that already exists, calls the changelog service's
+        :meth:`detect_changes` method and persists any detected changes
+        via :meth:`record_changes`.
+
+        Parameters
+        ----------
+        new_schemes:
+            List of newly ingested/validated scheme dictionaries.
+        existing_by_id:
+            Mapping from ``scheme_id`` to the previously stored scheme
+            dictionary.
+
+        Returns
+        -------
+        int
+            Total number of individual field-level changes detected.
+        """
+        if self._changelog_service is None:
+            return 0
+
+        total_changes = 0
+
+        for scheme in new_schemes:
+            sid = scheme.get("scheme_id", "")
+            old_scheme = existing_by_id.get(sid)
+            if old_scheme is None:
+                # New scheme -- no previous version to diff
+                continue
+
+            try:
+                changes = self._changelog_service.detect_changes(
+                    old_scheme, scheme
+                )
+                if changes:
+                    await self._changelog_service.record_changes(changes)
+                    total_changes += len(changes)
+                    logger.info(
+                        "ingestion.changelog_recorded",
+                        scheme_id=sid,
+                        change_count=len(changes),
+                    )
+            except Exception as exc:
+                logger.error(
+                    "ingestion.changelog_detection_failed",
+                    scheme_id=sid,
+                    error=str(exc),
+                )
+
+        if total_changes:
+            logger.info(
+                "ingestion.changelog_detection_complete",
+                total_changes=total_changes,
+            )
+
+        return total_changes

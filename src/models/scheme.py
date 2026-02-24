@@ -64,3 +64,16 @@ class SchemeDocument(BaseModel):
     last_updated: datetime
     popularity_score: float = 0.0
     embedding: list[float] | None = None  # for vector search
+
+    # -- Verification fields (populated by the verification engine) ----------
+    verification_status: str = "unverified"  # VerificationStatus value
+    trust_score: float = 0.0  # 0.0-1.0, computed by verification engine
+    gazette_notification_number: str | None = None
+    enabling_act: str | None = None
+    parliamentary_session: str | None = None
+    sources_confirmed: list[str] = Field(default_factory=list)
+    last_verified: datetime | None = None
+
+    # -- Supplementary data from data.gov.in ---------------------------------
+    expenditure_data: dict | None = None  # {amount, financial_year}
+    beneficiary_data: dict | None = None  # {count, year}
