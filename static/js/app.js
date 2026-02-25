@@ -70,7 +70,11 @@ class ApiClient {
         this._base = base;
         this._cache = new Map();          // key -> { data, ts }
         this._cacheTTL = 60_000;          // 60 seconds default TTL
+        this._adminApiKey = '';           // set via setAdminApiKey()
     }
+
+    /** Configure the admin API key for privileged operations. */
+    setAdminApiKey(key) { this._adminApiKey = key || ''; }
 
     /**
      * Perform a GET request.  Results are cached for `ttl` ms.
@@ -126,10 +130,11 @@ class ApiClient {
     }
 
     async _request(method, url, body) {
-        const opts = {
-            method,
-            headers: { 'Content-Type': 'application/json' },
-        };
+        const headers = { 'Content-Type': 'application/json' };
+        if (this._adminApiKey) {
+            headers['X-Admin-API-Key'] = this._adminApiKey;
+        }
+        const opts = { method, headers };
         if (body !== undefined) {
             opts.body = JSON.stringify(body);
         }
@@ -1042,8 +1047,10 @@ class HaqSetuApp {
                 e.preventDefault();
                 btn.disabled = true;
                 btn.textContent = 'Queued...';
+                const schemeId = btn.dataset.id;
                 try {
-                    await api.post('/verification/trigger', null);
+                    const params = schemeId ? `?scheme_id=${encodeURIComponent(schemeId)}` : '';
+                    await api.post(`/verification/trigger${params}`);
                     Toast.show('Verification queued.', 'success');
                 } catch {
                     btn.disabled = false;

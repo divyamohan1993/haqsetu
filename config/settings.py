@@ -60,6 +60,14 @@ class Settings(BaseSettings):
 
     # ── Rate Limiting ──────────────────────────────────────────────────
     rate_limit_per_minute: int = Field(default=60, validation_alias="RATE_LIMIT_PER_MINUTE")
+    trusted_proxy_count: int = Field(
+        default=1,
+        ge=0,
+        validation_alias="TRUSTED_PROXY_COUNT",
+    )
+
+    # ── Admin API Key ──────────────────────────────────────────────────
+    admin_api_key: str = Field(default="", validation_alias="ADMIN_API_KEY")
 
     # ── Logging ────────────────────────────────────────────────────────
     log_level: str = Field(default="INFO", validation_alias="LOG_LEVEL")

@@ -278,11 +278,11 @@ async def check_eligibility(
             else:
                 matched_criteria.append("category")
 
-        # State check
-        if state is not None and scheme.state is not None:
-            if scheme.state.lower() != state.lower():
+        # State check — central schemes (state=None) are available nationwide
+        if state is not None:
+            if scheme.state is not None and scheme.state.lower() != state.lower():
                 is_eligible = False
-            else:
+            elif scheme.state is not None:
                 matched_criteria.append("state")
 
         # Occupation check
