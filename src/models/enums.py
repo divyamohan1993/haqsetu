@@ -60,6 +60,7 @@ class QueryIntent(StrEnum):
     GREETING = "greeting"
     COMPLAINT = "complaint"
     HUMAN_ESCALATION = "human_escalation"
+    VERIFICATION_STATUS = "verification_status"
 
 
 class LanguageCode(StrEnum):

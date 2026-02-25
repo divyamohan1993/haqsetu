@@ -15,7 +15,8 @@ from typing import AsyncIterator
 import structlog
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import ORJSONResponse
+from fastapi.responses import HTMLResponse, ORJSONResponse
+from fastapi.staticfiles import StaticFiles
 
 from config.settings import settings
 from src.api.router import api_router
@@ -224,7 +225,58 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     else:
         app.state.scheduler = None
 
-    # -- 9. Create orchestrator --------------------------------------------
+    # -- 9. Initialise verification services ---------------------------------
+    from src.services.changelog import SchemeChangelogService
+    from src.services.verification.engine import SchemeVerificationEngine
+    from src.services.verification.gazette_client import GazetteClient
+
+    verification_cache = CacheManager.for_namespace(
+        "verification:",
+        redis_url=settings.redis_url if settings.redis_url else None,
+    )
+
+    gazette_client = GazetteClient(cache=verification_cache)
+
+    # Import optional clients (sansad, indiacode) — graceful if not yet available
+    sansad_client = None
+    indiacode_client = None
+    try:
+        from src.services.verification.sansad_client import SansadClient
+
+        sansad_client = SansadClient(cache=verification_cache)
+        logger.info("app.sansad_client_initialised")
+    except ImportError:
+        logger.warning("app.sansad_client_not_available")
+
+    try:
+        from src.services.verification.indiacode_client import IndiaCodeClient
+
+        indiacode_client = IndiaCodeClient(cache=verification_cache)
+        logger.info("app.indiacode_client_initialised")
+    except ImportError:
+        logger.warning("app.indiacode_client_not_available")
+
+    verification_engine = SchemeVerificationEngine(
+        gazette_client=gazette_client,
+        sansad_client=sansad_client,
+        indiacode_client=indiacode_client,
+        myscheme_client=myscheme_client,
+        datagov_client=datagov_client,
+        cache=verification_cache,
+    )
+    app.state.verification_engine = verification_engine
+    app.state.verification_results = {}  # scheme_id -> VerificationResult
+    app.state.gazette_client = gazette_client
+    app.state.sansad_client = sansad_client
+    app.state.indiacode_client = indiacode_client
+    logger.info("app.verification_engine_initialised")
+
+    # -- 10. Initialise changelog service -----------------------------------
+    changelog_service = SchemeChangelogService(cache=cache)
+    app.state.changelog_service = changelog_service
+    logger.info("app.changelog_service_initialised")
+
+    # -- 11. Create orchestrator --------------------------------------------
     from src.pipeline.orchestrator import QueryOrchestrator
 
     # Use a fallback LLM service if the real one failed to initialise.
@@ -261,6 +313,14 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     # Stop ingestion scheduler
     if scheduler is not None:
         await scheduler.stop()
+
+    # Close verification HTTP clients
+    await gazette_client.close()
+    if sansad_client is not None:
+        await sansad_client.close()
+    if indiacode_client is not None:
+        await indiacode_client.close()
+    await verification_cache.close()
 
     # Close ingestion HTTP clients
     await myscheme_client.close()
@@ -332,24 +392,59 @@ except ImportError:
 # -- Include routers -------------------------------------------------------
 app.include_router(api_router)
 
+# -- Static files ----------------------------------------------------------
+import pathlib
 
-# -- Root endpoint ----------------------------------------------------------
+_PROJECT_ROOT = pathlib.Path(__file__).resolve().parent.parent
+_STATIC_DIR = _PROJECT_ROOT / "static"
+_TEMPLATES_DIR = _PROJECT_ROOT / "templates"
+
+if _STATIC_DIR.exists():
+    app.mount("/static", StaticFiles(directory=str(_STATIC_DIR)), name="static")
+    logger.info("app.static_files_mounted", path=str(_STATIC_DIR))
 
 
-@app.get("/")
-async def root() -> dict:
+# -- Root endpoint (serves skeuomorphic dashboard) -------------------------
+
+
+@app.get("/", response_class=HTMLResponse)
+async def root() -> HTMLResponse:
+    """Serve the HaqSetu skeuomorphic dashboard."""
+    index_path = _TEMPLATES_DIR / "index.html"
+    if index_path.exists():
+        return HTMLResponse(content=index_path.read_text(encoding="utf-8"))
+    # Fallback to JSON API info if no template exists
+    return HTMLResponse(
+        content="<h1>HaqSetu API</h1><p>Dashboard template not found. "
+        'Visit <a href="/docs">/docs</a> for API documentation.</p>',
+        status_code=200,
+    )
+
+
+@app.get("/api", response_class=ORJSONResponse)
+async def api_info() -> dict:
     """API information endpoint."""
     return {
         "name": "HaqSetu API",
         "description": "Voice-First AI Civic Assistant for Rural India",
-        "version": "0.1.0",
+        "version": "0.2.0",
         "docs": "/docs",
         "health": "/api/v1/health",
         "languages_supported": 23,
+        "dashboard": "/",
+        "verification_sources": [
+            "Gazette of India (egazette.gov.in)",
+            "India Code (indiacode.nic.in)",
+            "Parliament (sansad.in)",
+            "MyScheme (myscheme.gov.in)",
+            "data.gov.in",
+        ],
         "endpoints": {
             "query": "/api/v1/query",
             "voice": "/api/v1/voice",
             "schemes": "/api/v1/schemes",
+            "verification": "/api/v1/verification",
+            "feedback": "/api/v1/feedback",
             "languages": "/api/v1/languages",
             "health": "/api/v1/health",
         },

@@ -7,6 +7,12 @@ from src.models.enums import (
     QueryIntent,
     ServiceProvider,
 )
+from src.models.feedback import (
+    CitizenFeedback,
+    FeedbackPriority,
+    FeedbackStatus,
+    FeedbackType,
+)
 from src.models.request import HaqSetuRequest, RequestMetadata
 from src.models.response import (
     HaqSetuResponse,
@@ -17,13 +23,26 @@ from src.models.response import (
 )
 from src.models.scheme import EligibilityCriteria, SchemeCategory, SchemeDocument
 from src.models.user_profile import FamilyMember, UserProfile
+from src.models.verification import (
+    SchemeChangelog,
+    VerificationDashboardStats,
+    VerificationEvidence,
+    VerificationResult,
+    VerificationSource,
+    VerificationStatus,
+    VerificationSummary,
+)
 
 __all__ = [
     "ChannelType",
+    "CitizenFeedback",
     "ContentType",
     "DeviceType",
     "EligibilityCriteria",
     "FamilyMember",
+    "FeedbackPriority",
+    "FeedbackStatus",
+    "FeedbackType",
     "HaqSetuRequest",
     "HaqSetuResponse",
     "LanguageCode",
@@ -33,9 +52,16 @@ __all__ = [
     "RequestMetadata",
     "ResponseMetadata",
     "SchemeCategory",
+    "SchemeChangelog",
     "SchemeDocument",
     "SchemeReference",
     "ServiceProvider",
     "SuggestedAction",
     "UserProfile",
+    "VerificationDashboardStats",
+    "VerificationEvidence",
+    "VerificationResult",
+    "VerificationSource",
+    "VerificationStatus",
+    "VerificationSummary",
 ]
