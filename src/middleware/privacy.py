@@ -118,28 +118,39 @@ class DPDPAMiddleware(BaseHTTPMiddleware):
         # -- Add security and privacy headers --------------------------------
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["X-Frame-Options"] = "DENY"
+        response.headers["X-XSS-Protection"] = "1; mode=block"
         response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
         response.headers["Strict-Transport-Security"] = "max-age=63072000; includeSubDomains; preload"
         response.headers["Content-Security-Policy"] = (
             "default-src 'self'; "
             "script-src 'self' 'unsafe-inline'; "
             "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
-            "img-src 'self' data:; "
+            "img-src 'self' data: blob:; "
             "font-src 'self' https://fonts.gstatic.com; "
             "connect-src 'self'; "
             "frame-ancestors 'none'; "
             "base-uri 'self'; "
-            "form-action 'self'"
+            "form-action 'self'; "
+            "object-src 'none'; "
+            "upgrade-insecure-requests"
         )
         response.headers["Permissions-Policy"] = (
             "camera=(), microphone=(self), geolocation=(), payment=(), "
-            "usb=(), magnetometer=(), gyroscope=(), accelerometer=()"
+            "usb=(), magnetometer=(), gyroscope=(), accelerometer=(), "
+            "interest-cohort=()"
         )
         response.headers["X-Permitted-Cross-Domain-Policies"] = "none"
         response.headers["X-DPDPA-Compliant"] = "true"
         response.headers["X-Data-Processing-Purpose"] = "government-scheme-assistance"
         response.headers["X-Data-Retention-Policy"] = "session-only"
-        response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, private"
-        response.headers["Pragma"] = "no-cache"
+        response.headers["Cross-Origin-Opener-Policy"] = "same-origin"
+        response.headers["Cross-Origin-Resource-Policy"] = "same-origin"
+
+        # Cache control: allow caching for static assets, no-store for API
+        if path.startswith("/static/"):
+            response.headers["Cache-Control"] = "public, max-age=86400, immutable"
+        else:
+            response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, private"
+            response.headers["Pragma"] = "no-cache"
 
         return response

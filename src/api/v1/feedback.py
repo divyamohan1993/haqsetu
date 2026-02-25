@@ -45,6 +45,37 @@ _feedback_index: list[str] = []
 # ---------------------------------------------------------------------------
 
 
+def _validate_gov_url(url: str | None) -> str | None:
+    """Validate that evidence URLs point to known government domains only.
+
+    Prevents open redirect and SSRF attacks by restricting evidence URLs
+    to a whitelist of official Indian government domains.
+    """
+    if url is None or url.strip() == "":
+        return None
+    import re
+    from urllib.parse import urlparse
+
+    url = url.strip()
+    parsed = urlparse(url)
+    if parsed.scheme not in ("http", "https"):
+        return None
+    host = (parsed.hostname or "").lower()
+    gov_patterns = [
+        r"\.gov\.in$",
+        r"\.nic\.in$",
+        r"\.india\.gov\.in$",
+        r"^sansad\.in$",
+        r"^indiacode\.nic\.in$",
+        r"^egazette\.gov\.in$",
+        r"^myscheme\.gov\.in$",
+        r"^data\.gov\.in$",
+    ]
+    if any(re.search(pat, host) for pat in gov_patterns):
+        return url
+    return None
+
+
 class SubmitFeedbackRequest(BaseModel):
     """Request body for submitting citizen feedback."""
 
@@ -55,12 +86,12 @@ class SubmitFeedbackRequest(BaseModel):
             "incorrect_info, scheme_expired, grievance, suggestion, appreciation"
         ),
     )
-    scheme_id: str | None = Field(default=None, description="ID of the scheme this feedback is about")
-    scheme_name: str | None = Field(default=None, description="Name of the scheme this feedback is about")
+    scheme_id: str | None = Field(default=None, max_length=100, description="ID of the scheme this feedback is about")
+    scheme_name: str | None = Field(default=None, max_length=500, description="Name of the scheme this feedback is about")
     description: str = Field(..., min_length=10, max_length=2000, description="Detailed feedback description")
-    expected_correction: str | None = Field(default=None, description="What the citizen believes the correct information is")
-    evidence_url: str | None = Field(default=None, description="Government URL as evidence supporting the feedback")
-    language: str = Field(default="en", description="Language code for the feedback")
+    expected_correction: str | None = Field(default=None, max_length=2000, description="What the citizen believes the correct information is")
+    evidence_url: str | None = Field(default=None, max_length=500, description="Government URL (.gov.in/.nic.in) as evidence")
+    language: str = Field(default="en", max_length=10, description="Language code for the feedback")
 
 
 # ---------------------------------------------------------------------------
@@ -94,13 +125,21 @@ async def submit_feedback(
             ),
         )
 
+    # Sanitise evidence URL: only accept official government domains
+    safe_evidence_url = _validate_gov_url(body.evidence_url)
+    if body.evidence_url and safe_evidence_url is None:
+        logger.warning(
+            "api.feedback.rejected_evidence_url",
+            original_url=body.evidence_url[:120],
+        )
+
     feedback = CitizenFeedback(
         feedback_type=body.feedback_type,
         scheme_id=body.scheme_id,
         scheme_name=body.scheme_name,
         description=body.description,
         expected_correction=body.expected_correction,
-        evidence_url=body.evidence_url,
+        evidence_url=safe_evidence_url,
         language=body.language,
     )
 

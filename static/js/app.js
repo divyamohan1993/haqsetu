@@ -445,6 +445,7 @@ class HaqSetuApp {
         this.router.on('/scheme/:id',      (p) => this._activateView('scheme-detail', p));
         this.router.on('/verification',    () => this._activateView('verification'));
         this.router.on('/feedback',        () => this._activateView('feedback'));
+        this.router.on('/admin',           () => this._activateView('admin'));
     }
 
     // ---- view switching -------------------------------------------------
@@ -488,17 +489,26 @@ class HaqSetuApp {
             case 'feedback':
                 this._initFeedbackForm();
                 break;
+            case 'admin':
+                this._loadAdminPanel();
+                break;
         }
     }
 
     // ---- global event listeners -----------------------------------------
 
     _bindGlobalListeners() {
-        // Dark mode toggle
+        // Dark mode toggle with local storage persistence
         const darkToggle = document.getElementById('dark-mode-toggle');
         if (darkToggle) {
+            // Restore dark mode state from storage
+            if (localStorage.getItem('haqsetu-dark-mode') === 'true') {
+                document.body.classList.add('dark-mode');
+            }
             darkToggle.addEventListener('click', () => {
                 document.body.classList.toggle('dark-mode');
+                const isDark = document.body.classList.contains('dark-mode');
+                localStorage.setItem('haqsetu-dark-mode', isDark ? 'true' : 'false');
             });
         }
 
@@ -1095,6 +1105,545 @@ class HaqSetuApp {
 
         // Load feedback stats
         this._loadFeedbackStats();
+    }
+
+    // =====================================================================
+    //  VIEW: ADMIN PANEL -- Disaster Recovery & System Management
+    // =====================================================================
+
+    async _loadAdminPanel() {
+        this._loadAdminStatus();
+        this._loadAdminSnapshots();
+        this._loadAdminAuditLog();
+        this._loadClaudeCLIStatus();
+        this._bindAdminButtons();
+    }
+
+    async _loadAdminStatus() {
+        const container = document.getElementById('admin-system-status');
+        if (!container) return;
+
+        try {
+            const data = await api.get('/admin/recovery/status');
+
+            const subsystems = data.subsystems || {};
+            let html = '';
+            for (const [key, value] of Object.entries(subsystems)) {
+                const label = key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+                let badgeClass = 'healthy';
+                let displayVal = String(value);
+                if (value === true) { displayVal = 'Active'; badgeClass = 'degraded'; }
+                else if (value === false) { displayVal = 'Inactive'; badgeClass = 'healthy'; }
+                else if (typeof value === 'string') {
+                    if (value.includes('error') || value.includes('unhealthy')) badgeClass = 'error';
+                    else if (value.includes('degraded') || value.includes('no_data') || value.includes('inactive')) badgeClass = 'degraded';
+                }
+                html += `
+                    <div class="admin-stat">
+                        <span class="stat-label">${esc(label)}</span>
+                        <span class="status-badge ${badgeClass}">${esc(displayVal)}</span>
+                    </div>`;
+            }
+
+            // Data integrity
+            const integrity = data.data_integrity || {};
+            html += `
+                <div class="admin-stat">
+                    <span class="stat-label">Schemes Loaded</span>
+                    <span class="stat-value">${integrity.schemes_loaded || 0}</span>
+                </div>
+                <div class="admin-stat">
+                    <span class="stat-label">Verification Coverage</span>
+                    <span class="stat-value">${integrity.verification_coverage_pct || 0}%</span>
+                </div>
+                <div class="admin-stat">
+                    <span class="stat-label">Snapshots Available</span>
+                    <span class="stat-value">${integrity.snapshots_available || 0}</span>
+                </div>`;
+
+            container.innerHTML = html;
+
+            // Show recommendations
+            if (data.recommendations && data.recommendations.length) {
+                const recsHtml = data.recommendations.map(r =>
+                    `<p style="margin:0.3rem 0;font-size:0.85rem">${esc(r)}</p>`
+                ).join('');
+                container.insertAdjacentHTML('afterend',
+                    `<div style="margin-top:0.75rem;padding:0.5rem;background:rgba(255,153,51,0.08);border-radius:6px">${recsHtml}</div>`
+                );
+            }
+        } catch {
+            container.innerHTML = '<p class="placeholder-text">Failed to load system status. Admin API key may be required.</p>';
+        }
+    }
+
+    async _loadAdminSnapshots() {
+        const container = document.getElementById('admin-snapshots');
+        if (!container) return;
+
+        try {
+            const data = await api.get('/admin/recovery/snapshots');
+            const snapshots = data.snapshots || [];
+
+            if (snapshots.length === 0) {
+                container.innerHTML = '<p class="placeholder-text">No snapshots yet. Create one to enable disaster recovery.</p>';
+                return;
+            }
+
+            let html = '<div class="table-wrapper"><table class="skeuo-table"><thead><tr>' +
+                '<th>Snapshot ID</th><th>Created</th><th>Components</th><th>Checksum</th><th>Actions</th>' +
+                '</tr></thead><tbody>';
+
+            snapshots.forEach(s => {
+                html += `<tr>
+                    <td><code>${esc(s.snapshot_id)}</code></td>
+                    <td>${fmtDate(s.created_at)}</td>
+                    <td>${(s.components || []).map(c => esc(c)).join(', ')}</td>
+                    <td><code>${esc(s.checksum || '')}</code></td>
+                    <td>
+                        <button class="skeuo-btn btn-sm admin-rollback-btn"
+                                data-id="${esc(s.snapshot_id)}">
+                            Rollback
+                        </button>
+                    </td>
+                </tr>`;
+            });
+
+            html += '</tbody></table></div>';
+            container.innerHTML = html;
+
+            // Wire rollback buttons
+            container.querySelectorAll('.admin-rollback-btn').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    if (!confirm('Are you sure you want to rollback to this snapshot? This will replace current data.')) return;
+                    btn.disabled = true;
+                    btn.textContent = 'Rolling back...';
+                    try {
+                        const result = await api.post('/admin/recovery/rollback', {
+                            snapshot_id: btn.dataset.id,
+                            components: ['all'],
+                        });
+                        Toast.show(result.message || 'Rollback completed.', result.success ? 'success' : 'warning');
+                        this._loadAdminPanel();
+                    } catch {
+                        btn.disabled = false;
+                        btn.textContent = 'Rollback';
+                    }
+                });
+            });
+        } catch {
+            container.innerHTML = '<p class="placeholder-text">Failed to load snapshots.</p>';
+        }
+    }
+
+    async _loadAdminAuditLog() {
+        const container = document.getElementById('admin-audit-log');
+        if (!container) return;
+
+        try {
+            const data = await api.get('/admin/recovery/audit-log?limit=30');
+            const entries = data.entries || [];
+
+            if (entries.length === 0) {
+                container.innerHTML = '<p class="placeholder-text">No audit entries yet.</p>';
+                return;
+            }
+
+            container.innerHTML = entries.map(e => `
+                <div class="audit-entry">
+                    <span class="audit-time">${fmtDate(e.timestamp)}</span>
+                    <span class="audit-action">${esc(e.action)}</span>
+                    <span class="audit-details">${esc(e.details)}</span>
+                </div>
+            `).join('');
+        } catch {
+            container.innerHTML = '<p class="placeholder-text">Failed to load audit log.</p>';
+        }
+    }
+
+    /** Render AI orchestrator results into the results container. */
+    _renderAIResults(data) {
+        const container = document.getElementById('admin-ai-results');
+        if (!container) return;
+
+        let html = `<div style="margin-bottom:0.5rem">
+            <strong>${esc(data.summary || '')}</strong>
+            <span class="status-badge ${data.fixes_failed ? 'degraded' : 'healthy'}" style="margin-left:0.5rem">
+                ${data.diagnosis_source || 'rules'} &mdash; ${data.issues_found || 0} issues
+            </span>
+        </div>`;
+
+        const actions = data.actions || [];
+        if (actions.length) {
+            actions.forEach(a => {
+                const statusIcon = a.status === 'completed' ? '&#10004;' :
+                    a.status === 'failed' ? '&#10008;' :
+                    a.status === 'skipped' ? '&#8212;' : '&#9679;';
+                const sevClass = a.severity === 'critical' ? 'error' :
+                    a.severity === 'high' ? 'degraded' : 'healthy';
+                html += `<div class="audit-entry">
+                    <span style="min-width:20px">${statusIcon}</span>
+                    <span class="status-badge ${sevClass}" style="min-width:60px">${esc(a.severity)}</span>
+                    <span class="audit-action">${esc(a.action_name)}</span>
+                    <span class="audit-details">${esc(a.description)}${a.result ? ' — ' + esc(a.result) : ''}</span>
+                </div>`;
+            });
+        } else {
+            html += '<p class="placeholder-text">No issues detected.</p>';
+        }
+        container.innerHTML = html;
+    }
+
+    // =====================================================================
+    //  CLAUDE CLI — Status, Auth, Run from GUI
+    // =====================================================================
+
+    async _loadClaudeCLIStatus() {
+        const installedBadge = document.getElementById('claude-installed-badge');
+        const authBadge = document.getElementById('claude-auth-badge');
+        if (!installedBadge || !authBadge) return;
+
+        try {
+            const data = await api.get('/admin/recovery/claude/status');
+
+            installedBadge.textContent = data.installed ? 'Yes' : 'No';
+            installedBadge.className = 'status-badge ' + (data.installed ? 'healthy' : 'error');
+
+            if (!data.installed) {
+                authBadge.textContent = 'N/A';
+                authBadge.className = 'status-badge degraded';
+                return;
+            }
+
+            if (data.authenticated) {
+                authBadge.textContent = 'Authenticated';
+                authBadge.className = 'status-badge healthy';
+            } else if (data.auth_pending) {
+                authBadge.textContent = 'Pending...';
+                authBadge.className = 'status-badge degraded';
+            } else {
+                authBadge.textContent = 'Not authenticated';
+                authBadge.className = 'status-badge error';
+            }
+
+            // If there's an active device login, show the info
+            if (data.summary && data.summary.auth_device_code && data.summary.auth_verification_url) {
+                this._showClaudeAuthInfo(data.summary.auth_device_code, data.summary.auth_verification_url);
+            }
+        } catch {
+            installedBadge.textContent = 'Error';
+            installedBadge.className = 'status-badge error';
+            authBadge.textContent = 'Error';
+            authBadge.className = 'status-badge error';
+        }
+    }
+
+    _showClaudeAuthInfo(code, url) {
+        const infoBox = document.getElementById('claude-auth-info');
+        const urlEl = document.getElementById('claude-auth-url');
+        const codeEl = document.getElementById('claude-auth-code');
+        if (!infoBox || !urlEl || !codeEl) return;
+
+        urlEl.href = url;
+        urlEl.textContent = url;
+        codeEl.textContent = code;
+        infoBox.style.display = 'block';
+    }
+
+    _renderClaudeOutput(lines, status) {
+        const container = document.getElementById('claude-cli-output');
+        if (!container) return;
+
+        let html = '';
+        if (status) {
+            const statusClass = status === 'completed' ? 'healthy' : status === 'failed' ? 'error' : 'degraded';
+            html += `<div style="margin-bottom:0.5rem"><span class="status-badge ${statusClass}">${esc(status)}</span></div>`;
+        }
+        if (lines && lines.length > 0) {
+            html += '<pre style="font-size:0.8rem;white-space:pre-wrap;word-break:break-word;max-height:250px;overflow-y:auto;background:rgba(0,0,0,0.05);padding:0.5rem;border-radius:4px">';
+            lines.forEach(l => { html += esc(l) + '\n'; });
+            html += '</pre>';
+        } else {
+            html += '<p class="placeholder-text">No output.</p>';
+        }
+        container.innerHTML = html;
+    }
+
+    _bindAdminButtons() {
+        // Claude CLI — Check Status
+        const claudeStatusBtn = document.getElementById('claude-check-status');
+        if (claudeStatusBtn && !claudeStatusBtn._bound) {
+            claudeStatusBtn._bound = true;
+            claudeStatusBtn.addEventListener('click', async () => {
+                claudeStatusBtn.disabled = true;
+                claudeStatusBtn.textContent = 'Checking...';
+                await this._loadClaudeCLIStatus();
+                Toast.show('Claude CLI status refreshed.', 'info');
+                claudeStatusBtn.disabled = false;
+                claudeStatusBtn.textContent = 'Check Status';
+            });
+        }
+
+        // Claude CLI — Start Device Login
+        const claudeAuthBtn = document.getElementById('claude-start-auth');
+        if (claudeAuthBtn && !claudeAuthBtn._bound) {
+            claudeAuthBtn._bound = true;
+            claudeAuthBtn.addEventListener('click', async () => {
+                claudeAuthBtn.disabled = true;
+                claudeAuthBtn.textContent = 'Starting login...';
+                const output = document.getElementById('claude-cli-output');
+                if (output) output.innerHTML = '<p class="placeholder-text">Starting Claude CLI device login...</p>';
+                try {
+                    const data = await api.post('/admin/recovery/claude/auth');
+                    if (data.success) {
+                        if (data.device_code && data.verification_url) {
+                            this._showClaudeAuthInfo(data.device_code, data.verification_url);
+                        }
+                        this._renderClaudeOutput(data.output || [], 'auth_pending');
+                        Toast.show('Device login started. See instructions above.', 'success');
+                    } else {
+                        Toast.show(data.error || 'Failed to start auth.', 'error');
+                        this._renderClaudeOutput([data.error || 'Auth failed.'], 'failed');
+                    }
+                    this._loadAdminAuditLog();
+                } catch {
+                    if (output) output.innerHTML = '<p class="placeholder-text">Failed to start device login.</p>';
+                }
+                claudeAuthBtn.disabled = false;
+                claudeAuthBtn.textContent = 'Start Device Login';
+            });
+        }
+
+        // Claude CLI — Run Auto-Fix
+        const claudeRunBtn = document.getElementById('claude-run-autofix');
+        if (claudeRunBtn && !claudeRunBtn._bound) {
+            claudeRunBtn._bound = true;
+            claudeRunBtn.addEventListener('click', async () => {
+                if (!confirm('Run Claude CLI auto-fix? This will analyze and fix issues using Claude AI.')) return;
+                claudeRunBtn.disabled = true;
+                claudeRunBtn.textContent = 'Running Claude...';
+                const output = document.getElementById('claude-cli-output');
+                if (output) output.innerHTML = '<p class="placeholder-text">Running Claude CLI auto-fix... This may take several minutes.</p>';
+                try {
+                    const data = await api.post('/admin/recovery/claude/run', {}, 660_000);
+                    const session = data.session || {};
+                    this._renderClaudeOutput(session.output_tail || [], session.status);
+                    if (data.success) {
+                        Toast.show(`Claude auto-fix completed (${session.duration_seconds}s).`, 'success');
+                    } else {
+                        Toast.show(`Claude auto-fix ${session.status} (${session.duration_seconds}s).`, 'warning');
+                    }
+                    this._loadAdminStatus();
+                    this._loadAdminAuditLog();
+                } catch {
+                    if (output) output.innerHTML = '<p class="placeholder-text">Claude auto-fix failed. Is Claude CLI authenticated?</p>';
+                }
+                claudeRunBtn.disabled = false;
+                claudeRunBtn.textContent = 'Run Claude Auto-Fix';
+            });
+        }
+
+        // Claude CLI — View History
+        const claudeHistBtn = document.getElementById('claude-view-history');
+        if (claudeHistBtn && !claudeHistBtn._bound) {
+            claudeHistBtn._bound = true;
+            claudeHistBtn.addEventListener('click', async () => {
+                claudeHistBtn.disabled = true;
+                const output = document.getElementById('claude-cli-output');
+                try {
+                    const data = await api.get('/admin/recovery/claude/history?limit=10');
+                    const history = data.history || [];
+                    if (!history.length) {
+                        if (output) output.innerHTML = '<p class="placeholder-text">No Claude CLI sessions yet.</p>';
+                    } else {
+                        let html = '';
+                        history.forEach(h => {
+                            const statusClass = h.status === 'completed' ? 'healthy' : h.status === 'failed' ? 'error' : 'degraded';
+                            html += `<div class="audit-entry">
+                                <span class="audit-time">${fmtDate(h.started_at)}</span>
+                                <span class="status-badge ${statusClass}">${esc(h.status)}</span>
+                                <span class="audit-details">${h.duration_seconds}s, exit=${h.exit_code}, ${h.output_lines_count} lines</span>
+                            </div>`;
+                        });
+                        if (output) output.innerHTML = html;
+                    }
+                } catch {
+                    if (output) output.innerHTML = '<p class="placeholder-text">Failed to load Claude history.</p>';
+                }
+                claudeHistBtn.disabled = false;
+            });
+        }
+
+        // AI Diagnose Only
+        const diagBtn = document.getElementById('admin-ai-diagnose');
+        if (diagBtn && !diagBtn._bound) {
+            diagBtn._bound = true;
+            diagBtn.addEventListener('click', async () => {
+                diagBtn.disabled = true;
+                diagBtn.textContent = 'Diagnosing...';
+                const results = document.getElementById('admin-ai-results');
+                if (results) results.innerHTML = '<p class="placeholder-text">Running AI diagnosis...</p>';
+                try {
+                    const data = await api.post('/admin/recovery/orchestrator/diagnose-only');
+                    this._renderAIResults(data);
+                    Toast.show(`Diagnosis: ${data.issues_found} issue(s). Source: ${data.diagnosis_source}`, 'info');
+                } catch { if (results) results.innerHTML = '<p class="placeholder-text">Diagnosis failed. Check admin API key.</p>'; }
+                diagBtn.disabled = false;
+                diagBtn.textContent = 'Diagnose Only';
+            });
+        }
+
+        // AI Auto-Fix (Gemini 3 Pro)
+        const aiFixBtn = document.getElementById('admin-ai-autofix');
+        if (aiFixBtn && !aiFixBtn._bound) {
+            aiFixBtn._bound = true;
+            aiFixBtn.addEventListener('click', async () => {
+                if (!confirm('Run AI auto-fix? This will analyze and fix system issues.')) return;
+                aiFixBtn.disabled = true;
+                aiFixBtn.textContent = 'Running AI Fix...';
+                const results = document.getElementById('admin-ai-results');
+                if (results) results.innerHTML = '<p class="placeholder-text">Running AI auto-fix with Gemini 3 Pro...</p>';
+                try {
+                    const data = await api.post('/admin/recovery/orchestrator/run', {
+                        execute_fixes: true,
+                        auto_approve: false,
+                    });
+                    this._renderAIResults(data);
+                    Toast.show(
+                        `AI Fix: ${data.fixes_succeeded}/${data.fixes_executed} succeeded (${data.diagnosis_source})`,
+                        data.fixes_failed > 0 ? 'warning' : 'success'
+                    );
+                    this._loadAdminStatus();
+                    this._loadAdminAuditLog();
+                } catch { if (results) results.innerHTML = '<p class="placeholder-text">Auto-fix failed.</p>'; }
+                aiFixBtn.disabled = false;
+                aiFixBtn.textContent = 'Run AI Auto-Fix';
+            });
+        }
+
+        // AI History
+        const histBtn = document.getElementById('admin-ai-history');
+        if (histBtn && !histBtn._bound) {
+            histBtn._bound = true;
+            histBtn.addEventListener('click', async () => {
+                histBtn.disabled = true;
+                const results = document.getElementById('admin-ai-results');
+                try {
+                    const data = await api.get('/admin/recovery/orchestrator/history?limit=10');
+                    const history = data.history || [];
+                    if (!history.length) {
+                        if (results) results.innerHTML = '<p class="placeholder-text">No auto-fix history yet.</p>';
+                    } else {
+                        let html = '';
+                        history.forEach(h => {
+                            html += `<div class="audit-entry">
+                                <span class="audit-time">${fmtDate(h.created_at)}</span>
+                                <span class="audit-action">${esc(h.diagnosis_source)}</span>
+                                <span class="audit-details">${esc(h.summary)} — ${h.fixes_succeeded}/${h.fixes_executed} fixed (${h.duration_seconds}s)</span>
+                            </div>`;
+                        });
+                        if (results) results.innerHTML = html;
+                    }
+                } catch { if (results) results.innerHTML = '<p class="placeholder-text">Failed to load history.</p>'; }
+                histBtn.disabled = false;
+            });
+        }
+
+        // Create Snapshot
+        const snapshotBtn = document.getElementById('admin-create-snapshot');
+        if (snapshotBtn && !snapshotBtn._bound) {
+            snapshotBtn._bound = true;
+            snapshotBtn.addEventListener('click', async () => {
+                snapshotBtn.disabled = true;
+                snapshotBtn.textContent = 'Creating...';
+                try {
+                    const result = await api.post('/admin/recovery/snapshot');
+                    Toast.show(`Snapshot ${result.snapshot_id} created (${result.size_estimate}).`, 'success');
+                    this._loadAdminSnapshots();
+                    this._loadAdminAuditLog();
+                } catch { /* handled */ }
+                snapshotBtn.disabled = false;
+                snapshotBtn.textContent = 'Create Snapshot';
+            });
+        }
+
+        // Validate Data
+        const validateBtn = document.getElementById('admin-validate-data');
+        if (validateBtn && !validateBtn._bound) {
+            validateBtn._bound = true;
+            validateBtn.addEventListener('click', async () => {
+                validateBtn.disabled = true;
+                validateBtn.textContent = 'Validating...';
+                try {
+                    const result = await api.post('/admin/recovery/data/validate');
+                    const msg = `Data ${result.status}: ${result.issues.length} issues, ${result.warnings.length} warnings.`;
+                    Toast.show(msg, result.status === 'healthy' ? 'success' : 'warning');
+                    this._loadAdminAuditLog();
+                } catch { /* handled */ }
+                validateBtn.disabled = false;
+                validateBtn.textContent = 'Validate Data';
+            });
+        }
+
+        // Auto-Fix
+        const fixBtn = document.getElementById('admin-auto-fix');
+        if (fixBtn && !fixBtn._bound) {
+            fixBtn._bound = true;
+            fixBtn.addEventListener('click', async () => {
+                fixBtn.disabled = true;
+                fixBtn.textContent = 'Fixing...';
+                try {
+                    const result = await api.post('/admin/recovery/auto-fix');
+                    Toast.show(`Auto-fix: ${result.fixes_applied.join('; ')}`, 'success');
+                    this._loadAdminStatus();
+                    this._loadAdminAuditLog();
+                } catch { /* handled */ }
+                fixBtn.disabled = false;
+                fixBtn.textContent = 'Auto-Fix Issues';
+            });
+        }
+
+        // Flush Cache
+        const cacheBtn = document.getElementById('admin-flush-cache');
+        if (cacheBtn && !cacheBtn._bound) {
+            cacheBtn._bound = true;
+            cacheBtn.addEventListener('click', async () => {
+                if (!confirm('This will flush all cached data. Proceed?')) return;
+                cacheBtn.disabled = true;
+                cacheBtn.textContent = 'Flushing...';
+                try {
+                    const result = await api.post('/admin/recovery/cache/flush');
+                    Toast.show(result.message, result.flushed ? 'success' : 'info');
+                    this._loadAdminAuditLog();
+                } catch { /* handled */ }
+                cacheBtn.disabled = false;
+                cacheBtn.textContent = 'Flush Cache';
+            });
+        }
+
+        // Toggle Maintenance
+        const maintBtn = document.getElementById('admin-toggle-maintenance');
+        if (maintBtn && !maintBtn._bound) {
+            maintBtn._bound = true;
+            maintBtn.addEventListener('click', async () => {
+                maintBtn.disabled = true;
+                maintBtn.textContent = 'Toggling...';
+                try {
+                    // Check current state first
+                    const status = await api.get('/admin/recovery/status');
+                    const currentlyEnabled = status.maintenance_mode?.enabled || false;
+                    const result = await api.post('/admin/recovery/maintenance', {
+                        enabled: !currentlyEnabled,
+                        message: 'System is undergoing scheduled maintenance. Please try again shortly.',
+                    });
+                    Toast.show(result.message, 'success');
+                    this._loadAdminStatus();
+                    this._loadAdminAuditLog();
+                } catch { /* handled */ }
+                maintBtn.disabled = false;
+                maintBtn.textContent = 'Toggle Maintenance';
+            });
+        }
     }
 
     async _loadFeedbackStats() {

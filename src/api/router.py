@@ -23,6 +23,7 @@ from fastapi import APIRouter
 
 from src.api.v1 import (
     accessibility,
+    admin_recovery,
     document_scanner,
     emergency,
     feedback,
@@ -63,3 +64,4 @@ api_router.include_router(grievance.router)
 api_router.include_router(nearby.router)
 api_router.include_router(accessibility.router)
 api_router.include_router(self_sustaining.router)
+api_router.include_router(admin_recovery.router)
