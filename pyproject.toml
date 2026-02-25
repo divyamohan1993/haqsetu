@@ -1,6 +1,6 @@
 [project]
 name = "haqsetu"
-version = "0.1.0"
+version = "0.2.0"
 description = "HaqSetu (\u0939\u0915\u093c\u0938\u0947\u0924\u0941) \u2014 Voice-First AI Civic Assistant for Rural India"
 requires-python = ">=3.11"
 license = { text = "MIT" }
@@ -9,17 +9,28 @@ dependencies = [
     "uvicorn[standard]>=0.34.0",
     "pydantic>=2.10.0",
     "pydantic-settings>=2.7.0",
+    # -- GCP Core Services ---------------------------------------------------
     "google-cloud-translate>=3.18.0",
     "google-cloud-speech>=2.28.0",
     "google-cloud-texttospeech>=2.22.0",
     "google-cloud-aiplatform>=1.75.0",
     "google-cloud-firestore>=2.19.0",
     "google-cloud-storage>=2.19.0",
+    # -- GCP New Services (Self-Sustaining + Document Scanner) ---------------
+    "google-cloud-vision>=3.7.0",
+    "google-cloud-scheduler>=2.13.0",
+    "google-cloud-tasks>=2.16.0",
+    "google-cloud-pubsub>=2.23.0",
+    "google-cloud-monitoring>=2.21.0",
+    "google-cloud-billing>=1.13.0",
+    # -- Data & Caching ------------------------------------------------------
     "redis>=5.2.0",
     "numpy>=1.26.0",
+    # -- HTTP & Serialisation ------------------------------------------------
     "httpx>=0.28.0",
     "orjson>=3.10.0",
     "python-multipart>=0.0.18",
+    # -- Observability & Reliability -----------------------------------------
     "structlog>=24.4.0",
     "prometheus-fastapi-instrumentator>=7.0.0",
     "tenacity>=9.0.0",

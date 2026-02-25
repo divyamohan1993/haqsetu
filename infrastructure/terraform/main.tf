@@ -377,3 +377,202 @@ resource "google_cloud_run_v2_service_iam_member" "public" {
   role     = "roles/run.invoker"
   member   = "allUsers"
 }
+
+# =============================================================================
+# Self-Sustaining Infrastructure
+# =============================================================================
+
+# Enable additional APIs for self-sustaining features
+resource "google_project_service" "self_sustaining_apis" {
+  for_each = toset([
+    "cloudscheduler.googleapis.com",
+    "cloudtasks.googleapis.com",
+    "vision.googleapis.com",
+    "pubsub.googleapis.com",
+    "billingbudgets.googleapis.com",
+    "monitoring.googleapis.com",
+    "cloudfunctions.googleapis.com",
+  ])
+
+  project                    = var.project_id
+  service                    = each.value
+  disable_dependent_services = false
+  disable_on_destroy         = false
+}
+
+# -- Pub/Sub Topics for Event-Driven Architecture --------------------------
+
+resource "google_pubsub_topic" "scheme_updates" {
+  name    = "${var.app_name}-scheme-updates"
+  project = var.project_id
+  labels  = local.labels
+
+  message_retention_duration = "86400s"  # 24 hours
+
+  depends_on = [google_project_service.self_sustaining_apis["pubsub.googleapis.com"]]
+}
+
+resource "google_pubsub_topic" "gazette_notifications" {
+  name    = "${var.app_name}-gazette-notifications"
+  project = var.project_id
+  labels  = local.labels
+
+  message_retention_duration = "86400s"
+
+  depends_on = [google_project_service.self_sustaining_apis["pubsub.googleapis.com"]]
+}
+
+resource "google_pubsub_topic" "user_notifications" {
+  name    = "${var.app_name}-user-notifications"
+  project = var.project_id
+  labels  = local.labels
+
+  message_retention_duration = "86400s"
+
+  depends_on = [google_project_service.self_sustaining_apis["pubsub.googleapis.com"]]
+}
+
+# -- Cloud Scheduler Jobs (Self-Sustaining Automation) ----------------------
+# 3 free jobs per billing account
+
+resource "google_cloud_scheduler_job" "daily_ingestion" {
+  name        = "${var.app_name}-daily-ingestion"
+  description = "Trigger daily scheme data ingestion from MyScheme and data.gov.in"
+  schedule    = "0 3 * * *"  # 3:00 AM IST daily
+  time_zone   = "Asia/Kolkata"
+  project     = var.project_id
+  region      = var.region
+
+  retry_config {
+    retry_count          = 3
+    min_backoff_duration = "30s"
+    max_backoff_duration = "300s"
+  }
+
+  http_target {
+    http_method = "POST"
+    uri         = "${google_cloud_run_v2_service.app.uri}/api/v1/admin/ingest/incremental"
+    headers = {
+      "Content-Type"   = "application/json"
+      "X-Admin-API-Key" = "{{SECRET}}"  # Replace with actual key or use Secret Manager
+    }
+  }
+
+  depends_on = [
+    google_project_service.self_sustaining_apis["cloudscheduler.googleapis.com"],
+    google_cloud_run_v2_service.app,
+  ]
+}
+
+resource "google_cloud_scheduler_job" "weekly_verification" {
+  name        = "${var.app_name}-weekly-verification"
+  description = "Trigger weekly scheme verification against government sources"
+  schedule    = "0 4 * * 0"  # 4:00 AM IST every Sunday
+  time_zone   = "Asia/Kolkata"
+  project     = var.project_id
+  region      = var.region
+
+  retry_config {
+    retry_count          = 3
+    min_backoff_duration = "60s"
+    max_backoff_duration = "600s"
+  }
+
+  http_target {
+    http_method = "POST"
+    uri         = "${google_cloud_run_v2_service.app.uri}/api/v1/verification/trigger"
+    headers = {
+      "Content-Type"   = "application/json"
+      "X-Admin-API-Key" = "{{SECRET}}"
+    }
+  }
+
+  depends_on = [
+    google_project_service.self_sustaining_apis["cloudscheduler.googleapis.com"],
+    google_cloud_run_v2_service.app,
+  ]
+}
+
+resource "google_cloud_scheduler_job" "health_check" {
+  name        = "${var.app_name}-health-check"
+  description = "Run comprehensive health check every 6 hours"
+  schedule    = "0 */6 * * *"  # Every 6 hours
+  time_zone   = "Asia/Kolkata"
+  project     = var.project_id
+  region      = var.region
+
+  retry_config {
+    retry_count          = 2
+    min_backoff_duration = "10s"
+    max_backoff_duration = "60s"
+  }
+
+  http_target {
+    http_method = "POST"
+    uri         = "${google_cloud_run_v2_service.app.uri}/api/v1/sustainability/health-check"
+    headers = {
+      "Content-Type"   = "application/json"
+      "X-Admin-API-Key" = "{{SECRET}}"
+    }
+  }
+
+  depends_on = [
+    google_project_service.self_sustaining_apis["cloudscheduler.googleapis.com"],
+    google_cloud_run_v2_service.app,
+  ]
+}
+
+# -- Cloud Monitoring Uptime Checks ----------------------------------------
+
+resource "google_monitoring_uptime_check_config" "api_health" {
+  display_name = "${var.app_name}-api-health"
+  timeout      = "10s"
+  period       = "300s"  # Every 5 minutes
+  project      = var.project_id
+
+  http_check {
+    path         = "/api/v1/health"
+    port         = 443
+    use_ssl      = true
+    validate_ssl = true
+  }
+
+  monitored_resource {
+    type = "uptime_url"
+    labels = {
+      project_id = var.project_id
+      host       = trimprefix(google_cloud_run_v2_service.app.uri, "https://")
+    }
+  }
+
+  depends_on = [
+    google_project_service.self_sustaining_apis["monitoring.googleapis.com"],
+    google_cloud_run_v2_service.app,
+  ]
+}
+
+# -- IAM roles for new services --------------------------------------------
+
+resource "google_project_iam_member" "vision_ai" {
+  project = var.project_id
+  role    = "roles/visionai.user"
+  member  = "serviceAccount:${google_service_account.app.email}"
+
+  depends_on = [google_project_service.self_sustaining_apis["vision.googleapis.com"]]
+}
+
+resource "google_project_iam_member" "pubsub_publisher" {
+  project = var.project_id
+  role    = "roles/pubsub.publisher"
+  member  = "serviceAccount:${google_service_account.app.email}"
+
+  depends_on = [google_project_service.self_sustaining_apis["pubsub.googleapis.com"]]
+}
+
+resource "google_project_iam_member" "scheduler_admin" {
+  project = var.project_id
+  role    = "roles/cloudscheduler.admin"
+  member  = "serviceAccount:${google_service_account.app.email}"
+
+  depends_on = [google_project_service.self_sustaining_apis["cloudscheduler.googleapis.com"]]
+}

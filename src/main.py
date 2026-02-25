@@ -303,6 +303,159 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     app.state.orchestrator = orchestrator
     logger.info("app.orchestrator_initialised")
 
+    # -- 12. Voice Agent service -----------------------------------------------
+    voice_agent_service = None
+    if settings.voice_agent_enabled and llm is not None:
+        try:
+            from src.services.voice_agent import VoiceAgentService
+
+            voice_agent_service = VoiceAgentService(
+                llm=llm,
+                translation=translation,
+            )
+            logger.info("app.voice_agent_initialised")
+        except Exception:
+            logger.warning("app.voice_agent_init_failed", exc_info=True)
+    app.state.voice_agent = voice_agent_service
+
+    # -- 13. Document Scanner service ------------------------------------------
+    doc_scanner = None
+    if settings.document_scanner_enabled and llm is not None:
+        try:
+            from src.services.document_scanner import DocumentScannerService
+
+            doc_scanner = DocumentScannerService(
+                project_id=settings.gcp_project_id,
+                llm=llm,
+                translation=translation,
+            )
+            logger.info("app.document_scanner_initialised")
+        except Exception:
+            logger.warning("app.document_scanner_init_failed", exc_info=True)
+    app.state.document_scanner = doc_scanner
+
+    # -- 14. Legal Rights / BNS service ----------------------------------------
+    legal_rights_service = None
+    if settings.legal_rights_enabled and llm is not None:
+        try:
+            from src.services.legal_rights import LegalRightsService
+
+            legal_rights_service = LegalRightsService(llm=llm)
+            logger.info("app.legal_rights_initialised")
+        except Exception:
+            logger.warning("app.legal_rights_init_failed", exc_info=True)
+    app.state.legal_rights = legal_rights_service
+
+    # -- 15. RTI Generator service ---------------------------------------------
+    rti_service = None
+    if settings.rti_generator_enabled and llm is not None:
+        try:
+            from src.services.rti_generator import RTIGeneratorService
+
+            rti_service = RTIGeneratorService(llm=llm, translation=translation)
+            logger.info("app.rti_generator_initialised")
+        except Exception:
+            logger.warning("app.rti_generator_init_failed", exc_info=True)
+    app.state.rti_generator = rti_service
+
+    # -- 16. Emergency SOS service ---------------------------------------------
+    sos_service = None
+    if settings.emergency_sos_enabled:
+        try:
+            from src.services.emergency_sos import EmergencySOSService
+
+            sos_service = EmergencySOSService()
+            logger.info("app.emergency_sos_initialised")
+        except Exception:
+            logger.warning("app.emergency_sos_init_failed", exc_info=True)
+    app.state.emergency_sos = sos_service
+
+    # -- 17. Grievance Tracker service -----------------------------------------
+    grievance_service = None
+    if settings.grievance_tracker_enabled and llm is not None:
+        try:
+            from src.services.grievance_tracker import GrievanceTrackerService
+
+            grievance_service = GrievanceTrackerService(llm=llm)
+            logger.info("app.grievance_tracker_initialised")
+        except Exception:
+            logger.warning("app.grievance_tracker_init_failed", exc_info=True)
+    app.state.grievance_tracker = grievance_service
+
+    # -- 18. Nearby Services locator -------------------------------------------
+    nearby_service = None
+    if settings.nearby_services_enabled:
+        try:
+            from src.services.nearby_services import NearbyServicesLocator
+
+            nearby_service = NearbyServicesLocator()
+            logger.info("app.nearby_services_initialised")
+        except Exception:
+            logger.warning("app.nearby_services_init_failed", exc_info=True)
+    app.state.nearby_services = nearby_service
+
+    # -- 19. Accessibility service ---------------------------------------------
+    a11y_service = None
+    if settings.accessibility_enabled:
+        try:
+            from src.services.accessibility import AccessibilityService
+
+            a11y_service = AccessibilityService(
+                translation=translation,
+                tts=tts,
+            )
+            logger.info("app.accessibility_initialised")
+        except Exception:
+            logger.warning("app.accessibility_init_failed", exc_info=True)
+    app.state.accessibility = a11y_service
+
+    # -- 20. Compliance Audit service ------------------------------------------
+    compliance_service = None
+    if settings.compliance_audit_enabled:
+        try:
+            from src.services.compliance_audit import ComplianceAuditService
+
+            compliance_service = ComplianceAuditService(
+                retention_days=settings.audit_log_retention_days,
+            )
+            logger.info("app.compliance_audit_initialised")
+        except Exception:
+            logger.warning("app.compliance_audit_init_failed", exc_info=True)
+    app.state.compliance_audit = compliance_service
+
+    # -- 21. Self-Sustaining automation service --------------------------------
+    self_sustaining_service = None
+    if settings.self_sustaining_enabled:
+        try:
+            from src.services.self_sustaining import SelfSustainingService
+
+            self_sustaining_service = SelfSustainingService(
+                project_id=settings.gcp_project_id,
+                budget_limit=settings.monthly_budget_limit_usd,
+                stale_threshold_days=settings.stale_data_threshold_days,
+            )
+            logger.info("app.self_sustaining_initialised")
+        except Exception:
+            logger.warning("app.self_sustaining_init_failed", exc_info=True)
+    app.state.self_sustaining = self_sustaining_service
+
+    # -- 22. WhatsApp/SMS Messaging service ------------------------------------
+    messaging_service = None
+    if settings.whatsapp_enabled:
+        try:
+            from src.services.whatsapp_sms import MessagingService
+
+            messaging_service = MessagingService(
+                whatsapp_phone_id=settings.whatsapp_phone_number_id,
+                whatsapp_token=settings.whatsapp_access_token,
+                sms_provider=settings.sms_provider,
+                sms_api_key=settings.sms_api_key,
+            )
+            logger.info("app.messaging_initialised")
+        except Exception:
+            logger.warning("app.messaging_init_failed", exc_info=True)
+    app.state.messaging = messaging_service
+
     logger.info("app.startup_complete")
 
     yield
@@ -460,5 +613,30 @@ async def api_info() -> dict:
             "feedback": "/api/v1/feedback",
             "languages": "/api/v1/languages",
             "health": "/api/v1/health",
+            "voice_agent": "/api/v1/voice-agent",
+            "document_scanner": "/api/v1/document",
+            "legal_rights": "/api/v1/legal-rights",
+            "rti_generator": "/api/v1/rti",
+            "emergency_sos": "/api/v1/emergency",
+            "grievance_tracker": "/api/v1/grievance",
+            "nearby_services": "/api/v1/nearby",
+            "accessibility": "/api/v1/accessibility",
+            "sustainability": "/api/v1/sustainability",
         },
+        "features": [
+            "Voice-first conversational agent with proactive rights detection",
+            "Document scanner & plain-language explainer (Vision AI OCR)",
+            "BNS/BNSS/BSA legal rights narrator",
+            "Automated RTI application generator",
+            "Emergency SOS legal distress system",
+            "Cross-portal grievance tracker",
+            "Nearby CSC/DLSA/office finder",
+            "Accessibility: ISL sign language, screen reader, haptic, Braille",
+            "Family-level scheme eligibility matching",
+            "Multi-source scheme verification (5 government sources)",
+            "Self-sustaining GCP automation (auto-heal, cost monitor, stale data)",
+            "DPDPA compliance audit trail",
+            "WhatsApp/SMS integration for feature phones",
+            "23 Indian language support",
+        ],
     }
