@@ -6,7 +6,7 @@
 # ---------------------------------------------------------------------------
 # Stage 1: Builder - install dependencies in an isolated layer
 # ---------------------------------------------------------------------------
-FROM python:3.12-slim AS builder
+FROM python:3.13-slim AS builder
 
 WORKDIR /app
 
@@ -19,13 +19,14 @@ RUN apt-get update && \
 COPY pyproject.toml .
 
 # Install the package and its dependencies
-RUN pip install --no-cache-dir build && \
+RUN pip install --no-cache-dir --upgrade pip setuptools && \
+    pip install --no-cache-dir build && \
     pip install --no-cache-dir .
 
 # ---------------------------------------------------------------------------
 # Stage 2: Runtime - minimal image with only what's needed
 # ---------------------------------------------------------------------------
-FROM python:3.12-slim AS runtime
+FROM python:3.13-slim AS runtime
 
 # Security labels
 LABEL org.opencontainers.image.title="HaqSetu" \
@@ -40,16 +41,15 @@ WORKDIR /app
 # SECURITY: Install security updates and minimal packages only
 RUN apt-get update && \
     apt-get upgrade -y && \
+    apt-get dist-upgrade -y && \
     apt-get install -y --no-install-recommends \
         curl \
         ca-certificates && \
     rm -rf /var/lib/apt/lists/* && \
-    # Remove package manager cache and lists to reduce attack surface
-    apt-get purge -y --auto-remove && \
     rm -rf /tmp/* /var/tmp/*
 
 # Copy installed Python packages from builder
-COPY --from=builder /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
+COPY --from=builder /usr/local/lib/python3.13/site-packages /usr/local/lib/python3.13/site-packages
 COPY --from=builder /usr/local/bin/uvicorn /usr/local/bin/uvicorn
 
 # Create non-root user BEFORE copying app code

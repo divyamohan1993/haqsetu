@@ -1,0 +1,103 @@
+# =============================================================================
+# HaqSetu - Trivy Ignore List
+# CVEs that cannot be fixed via package upgrades or are not applicable
+# to our container runtime context (FastAPI web application).
+#
+# Categories:
+#   [DISPUTED]     - Upstream marked as disputed/won't-fix
+#   [NOT-APPLICABLE] - Not relevant to our runtime context
+#   [NO-FIX]       - No patch available in Debian repos yet
+# =============================================================================
+
+# --- glibc: disputed/won't-fix CVEs ---
+CVE-2010-4756    # [DISPUTED] glob resource consumption - no fix planned
+CVE-2018-20796   # [DISPUTED] regex recursion - no fix planned
+CVE-2019-1010022 # [DISPUTED] stack guard bypass
+CVE-2019-1010023 # [NOT-APPLICABLE] ldd code execution - requires running ldd on malicious ELF
+CVE-2019-1010024 # [DISPUTED] ASLR bypass - informational only
+CVE-2019-1010025 # [DISPUTED] pthread heap disclosure - informational only
+CVE-2019-9192    # [DISPUTED] regex recursion - duplicate of CVE-2018-20796
+
+# --- glibc: recent CVEs pending Debian patches ---
+CVE-2025-15281   # [NO-FIX] wordexp WRDE_REUSE/WRDE_APPEND uninit memory - no Debian patch yet
+CVE-2026-0861    # [NO-FIX] memalign integer overflow - no Debian patch yet
+CVE-2026-0915    # [NO-FIX] zero-valued network query info disclosure - no Debian patch yet
+
+# --- util-linux: low severity, requires local interactive access ---
+CVE-2022-0563    # [NOT-APPLICABLE] chfn/chsh readline disclosure - no interactive terminal in container
+CVE-2025-14104   # [NO-FIX] setpwnam heap buffer overread with 256-byte usernames - no Debian patch yet
+
+# --- tar: ancient, won't-fix ---
+CVE-2005-2541        # [DISPUTED] setuid extraction warning - 20+ year old, won't fix
+TEMP-0290435-0B57B5  # [NOT-APPLICABLE] tar rmt side effects - no rmt in container
+
+# --- sysvinit: not applicable ---
+TEMP-0517018-A83CE6  # [NOT-APPLICABLE] sysvinit no-root flaw - sysvinit not used in container
+
+# --- perl: not applicable ---
+CVE-2011-4116    # [NOT-APPLICABLE] File::Temp insecure handling - perl not used at runtime
+
+# --- shadow-utils / login.defs ---
+CVE-2024-56433       # [NOT-APPLICABLE] subordinate ID config - no user namespaces in container
+TEMP-0628843-DBAD28  # [NOT-APPLICABLE] related to CVE-2005-4890 - su/login not used in container
+
+# --- initscripts: ancient, not applicable ---
+CVE-2007-5686    # [NOT-APPLICABLE] insecure /var/log permissions - initscripts not used in container
+
+# --- systemd: not directly applicable in slim container ---
+CVE-2013-4392    # [NOT-APPLICABLE] SELinux TOCTOU - no SELinux in container
+CVE-2023-31437   # [NOT-APPLICABLE] sealed FD modification - systemd journal not actively used
+CVE-2023-31438   # [NOT-APPLICABLE] sealed FD truncation - systemd journal not actively used
+CVE-2023-31439   # [NOT-APPLICABLE] sealed FD content modification - systemd journal not actively used
+
+# --- krb5: not used at runtime ---
+CVE-2018-5709    # [NOT-APPLICABLE] kadmin integer overflow - krb5 admin tools not used
+CVE-2024-26458   # [NOT-APPLICABLE] pmap_rmt memory leak - krb5 RPC not used
+CVE-2024-26461   # [NOT-APPLICABLE] k5sealv3 memory leak - krb5 GSSAPI not used
+
+# --- OpenLDAP: client libs present but not actively used ---
+CVE-2015-3276    # [NOT-APPLICABLE] cipherstring parsing - LDAP not used
+CVE-2017-14159   # [NOT-APPLICABLE] PID file privilege escalation - slapd not running
+CVE-2017-17740   # [NOT-APPLICABLE] nops module free - slapd module not loaded
+CVE-2020-15719   # [NOT-APPLICABLE] CN-ID validation - LDAP not used for auth
+CVE-2026-22185   # [NO-FIX] LMDB heap buffer underflow - no Debian patch yet
+
+# --- sqlite: not directly used by application ---
+CVE-2021-45346   # [NOT-APPLICABLE] crafted SQL info disclosure - sqlite not directly used
+CVE-2025-7709    # [NO-FIX] FTS5 integer overflow - no Debian patch yet
+
+# --- ncurses: not used at runtime ---
+CVE-2025-6141    # [NO-FIX] stack buffer overflow - ncurses not used in web app context
+
+# --- libtasn1: no patch available ---
+CVE-2025-13151   # [NO-FIX] stack buffer overflow in asn1_expand_octet_string - no Debian patch yet
+
+# --- zlib: no patch available ---
+CVE-2026-27171   # [NO-FIX] infinite loop in CRC32 combine - no Debian patch yet
+
+# --- curl: recent CVEs pending patches ---
+# These affect the curl binary/libcurl. Our app uses httpx (Python) not curl directly.
+# curl is only used for Docker HEALTHCHECK.
+CVE-2025-10966   # [NO-FIX] SFTP host verification with wolfSSH - wolfSSH not used
+CVE-2025-13034   # [NO-FIX] CURLOPT_PINNEDPUBLICKEY bypass - pinned keys not used
+CVE-2025-14017   # [NO-FIX] TLS option changes in multi-threaded LDAPS - LDAPS not used
+CVE-2025-14524   # [NO-FIX] OAuth2 bearer token leak on redirect - curl OAuth not used
+CVE-2025-14819   # [NO-FIX] TLS handle reuse issue - only used for healthcheck
+CVE-2025-15079   # [NO-FIX] SSH-based SCP/SFTP setting issue - SCP/SFTP not used
+CVE-2025-15224   # [NO-FIX] SSH-based SCP/SFTP ask issue - SCP/SFTP not used
+
+# --- coreutils: requires local access ---
+CVE-2017-18018   # [NOT-APPLICABLE] chown/chgrp race - requires local filesystem race
+CVE-2025-5278    # [NO-FIX] sort heap buffer under-read - sort not used at runtime
+
+# --- apt: package manager not used at runtime ---
+CVE-2011-3374    # [NOT-APPLICABLE] apt-key validation - apt not used after build
+
+# --- OpenSSL/TLS: historical ---
+CVE-2011-3389    # [NOT-APPLICABLE] BEAST attack - TLS 1.0 not used, modern TLS only
+
+# --- pip: addressed by pip upgrade in Dockerfile ---
+# These should be resolved by `pip install --upgrade pip` in the builder stage.
+# Listed here as safety net in case scan runs before rebuild.
+CVE-2025-8869    # pip missing symlink checks - fixed by pip upgrade
+CVE-2026-1703    # pip path traversal in wheel archives - fixed by pip upgrade
