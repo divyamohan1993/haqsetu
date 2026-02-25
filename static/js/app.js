@@ -20,6 +20,21 @@
 
 const API_BASE = '/api/v1';
 
+/**
+ * Escape HTML special characters to prevent XSS when inserting dynamic
+ * content via innerHTML.  All API-sourced strings (scheme names, descriptions,
+ * user-provided text) MUST be passed through this function before rendering.
+ */
+function esc(str) {
+    if (str == null) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
 /** Scheme categories from the backend SchemeCategory enum. */
 const CATEGORIES = [
     'agriculture', 'health', 'education', 'housing', 'employment',
@@ -641,8 +656,8 @@ class HaqSetuApp {
         recent.forEach(item => {
             html += `
                 <div class="activity-item">
-                    <a href="#/scheme/${item.scheme_id}" class="activity-link">
-                        <strong>${item.scheme_name || item.scheme_id}</strong>
+                    <a href="#/scheme/${esc(item.scheme_id)}" class="activity-link">
+                        <strong>${esc(item.scheme_name || item.scheme_id)}</strong>
                         ${trustBar(item.trust_score)}
                         <time class="activity-time">${fmtDate(item.last_verified)}</time>
                     </a>
@@ -716,16 +731,16 @@ class HaqSetuApp {
         const status   = scheme.verification_status || '';
 
         return `
-            <article class="scheme-card paper-card" data-id="${id}" tabindex="0"
-                     role="button" aria-label="View ${name}"
-                     onclick="window.location.hash='#/scheme/${id}'">
+            <article class="scheme-card paper-card" data-id="${esc(id)}" tabindex="0"
+                     role="button" aria-label="View ${esc(name)}"
+                     onclick="window.location.hash='#/scheme/${esc(id)}'">
                 <div class="scheme-card__header">
-                    <h3 class="scheme-card__name">${name}</h3>
+                    <h3 class="scheme-card__name">${esc(name)}</h3>
                     ${status ? verificationBadge(status) : ''}
                 </div>
-                <p class="scheme-card__ministry">${ministry}</p>
-                <span class="scheme-card__cat">${cat}</span>
-                <p class="scheme-card__desc">${desc}</p>
+                <p class="scheme-card__ministry">${esc(ministry)}</p>
+                <span class="scheme-card__cat">${esc(cat)}</span>
+                <p class="scheme-card__desc">${esc(desc)}</p>
                 ${trustBar(score)}
             </article>`;
     }
@@ -783,12 +798,12 @@ class HaqSetuApp {
                 let val = elig[k];
                 if (typeof val === 'boolean') val = val ? 'Yes' : 'No';
                 if (k === 'income_limit') val = `Rs. ${Number(val).toLocaleString('en-IN')}`;
-                eligRows += `<tr><td><strong>${label}</strong></td><td>${val}</td></tr>`;
+                eligRows += `<tr><td><strong>${esc(label)}</strong></td><td>${esc(val)}</td></tr>`;
             }
         }
         if (elig.custom_criteria && elig.custom_criteria.length) {
             elig.custom_criteria.forEach(cr => {
-                eligRows += `<tr><td><strong>Criteria</strong></td><td>${cr}</td></tr>`;
+                eligRows += `<tr><td><strong>Criteria</strong></td><td>${esc(cr)}</td></tr>`;
             });
         }
 
@@ -797,18 +812,20 @@ class HaqSetuApp {
         const chain = evidence?.evidence_chain || verification?.evidence_chain || [];
         if (chain.length) {
             evidenceHTML = '<div class="evidence-timeline">' +
-                chain.map(ev => `
+                chain.map(ev => {
+                    const srcUrl = ev.source_url && /^https?:\/\//.test(ev.source_url) ? esc(ev.source_url) : '';
+                    return `
                     <div class="evidence-card paper-card">
                         <div class="evidence-card__header">
-                            <strong>${SOURCE_LABELS[ev.source] || ev.source || 'Unknown'}</strong>
+                            <strong>${esc(SOURCE_LABELS[ev.source] || ev.source || 'Unknown')}</strong>
                             <span class="evidence-card__date">${fmtDate(ev.verified_at || ev.document_date)}</span>
                         </div>
-                        <p class="evidence-card__title">${ev.title || ''}</p>
-                        <p class="evidence-card__excerpt">${truncate(ev.excerpt, 200)}</p>
-                        ${ev.source_url ? `<a href="${ev.source_url}" target="_blank" rel="noopener" class="evidence-card__link">View Source</a>` : ''}
+                        <p class="evidence-card__title">${esc(ev.title || '')}</p>
+                        <p class="evidence-card__excerpt">${esc(truncate(ev.excerpt, 200))}</p>
+                        ${srcUrl ? `<a href="${srcUrl}" target="_blank" rel="noopener" class="evidence-card__link">View Source</a>` : ''}
                         <span class="evidence-card__weight">Weight: ${(ev.trust_weight ?? 0).toFixed(2)}</span>
-                    </div>
-                `).join('') +
+                    </div>`;
+                }).join('') +
                 '</div>';
         }
 
@@ -824,9 +841,9 @@ class HaqSetuApp {
                             ${changes.map(ch => `
                                 <tr>
                                     <td>${fmtDate(ch.detected_at)}</td>
-                                    <td>${ch.change_type || ''}</td>
-                                    <td>${ch.field_changed || ''}</td>
-                                    <td>${ch.new_value ? truncate(ch.new_value, 80) : ''}</td>
+                                    <td>${esc(ch.change_type || '')}</td>
+                                    <td>${esc(ch.field_changed || '')}</td>
+                                    <td>${esc(ch.new_value ? truncate(ch.new_value, 80) : '')}</td>
                                 </tr>
                             `).join('')}
                         </tbody>
@@ -838,21 +855,21 @@ class HaqSetuApp {
             <div class="detail-grid">
                 <!-- Left column: main info -->
                 <div class="detail-main">
-                    <h2>${scheme.name}</h2>
+                    <h2>${esc(scheme.name)}</h2>
                     <div class="detail-meta">
-                        <span class="scheme-card__cat">${categoryLabel(scheme.category)}</span>
+                        <span class="scheme-card__cat">${esc(categoryLabel(scheme.category))}</span>
                         ${verificationBadge(status)}
-                        ${scheme.ministry ? `<span>${scheme.ministry}</span>` : ''}
+                        ${scheme.ministry ? `<span>${esc(scheme.ministry)}</span>` : ''}
                     </div>
 
                     <div class="detail-section">
                         <h3 class="card-title">Description</h3>
-                        <p>${scheme.description || 'No description available.'}</p>
+                        <p>${esc(scheme.description || 'No description available.')}</p>
                     </div>
 
                     <div class="detail-section">
                         <h3 class="card-title">Benefits</h3>
-                        <p>${scheme.benefits || 'Not specified.'}</p>
+                        <p>${esc(scheme.benefits || 'Not specified.')}</p>
                     </div>
 
                     <div class="detail-section">
@@ -864,17 +881,17 @@ class HaqSetuApp {
 
                     <div class="detail-section">
                         <h3 class="card-title">Application Process</h3>
-                        <p>${scheme.application_process || 'Not specified.'}</p>
+                        <p>${esc(scheme.application_process || 'Not specified.')}</p>
                     </div>
 
                     ${scheme.documents_required && scheme.documents_required.length ? `
                         <div class="detail-section">
                             <h3 class="card-title">Documents Required</h3>
-                            <ul>${scheme.documents_required.map(d => `<li>${d}</li>`).join('')}</ul>
+                            <ul>${scheme.documents_required.map(d => `<li>${esc(d)}</li>`).join('')}</ul>
                         </div>` : ''}
 
-                    ${scheme.helpline ? `<p>Helpline: <strong>${scheme.helpline}</strong></p>` : ''}
-                    ${scheme.website ? `<p>Website: <a href="${scheme.website}" target="_blank" rel="noopener">${scheme.website}</a></p>` : ''}
+                    ${scheme.helpline ? `<p>Helpline: <strong>${esc(scheme.helpline)}</strong></p>` : ''}
+                    ${scheme.website && /^https?:\/\//.test(scheme.website) ? `<p>Website: <a href="${esc(scheme.website)}" target="_blank" rel="noopener">${esc(scheme.website)}</a></p>` : ''}
                 </div>
 
                 <!-- Right column: trust gauge + evidence -->
@@ -900,7 +917,7 @@ class HaqSetuApp {
                             </div>
                         </div>` : ''}
 
-                    <a href="#/feedback?scheme_id=${scheme.scheme_id}" class="skeuo-btn btn-primary" style="width:100%;text-align:center;margin-top:1rem;">
+                    <a href="#/feedback?scheme_id=${esc(scheme.scheme_id)}" class="skeuo-btn btn-primary" style="width:100%;text-align:center;margin-top:1rem;">
                         Report Issue
                     </a>
                 </aside>
@@ -1022,14 +1039,14 @@ class HaqSetuApp {
 
         tbody.innerHTML = unique.map(s => `
             <tr>
-                <td><a href="#/scheme/${s.scheme_id}">${s.scheme_name || s.scheme_id}</a></td>
+                <td><a href="#/scheme/${esc(s.scheme_id)}">${esc(s.scheme_name || s.scheme_id)}</a></td>
                 <td>${verificationBadge(s.status || 'unverified')}</td>
                 <td>${trustBar(s.trust_score)}</td>
                 <td>${s.sources_confirmed ? s.sources_confirmed.length : '--'}</td>
                 <td>${fmtDate(s.last_verified)}</td>
                 <td>
                     <button class="skeuo-btn btn-sm trigger-verif"
-                            data-id="${s.scheme_id}" data-name="${s.scheme_name || ''}">
+                            data-id="${esc(s.scheme_id)}" data-name="${esc(s.scheme_name || '')}">
                         Verify
                     </button>
                 </td>

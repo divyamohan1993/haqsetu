@@ -370,8 +370,8 @@ else:
         CORSMiddleware,
         allow_origins=["http://localhost:3000", "http://localhost:8000", "http://127.0.0.1:8000"],
         allow_credentials=False,
-        allow_methods=["*"],
-        allow_headers=["*"],
+        allow_methods=["GET", "POST", "OPTIONS", "HEAD"],
+        allow_headers=["Content-Type", "Accept", "Authorization", "X-DPDPA-Consent", "X-Admin-API-Key"],
     )
 
 # -- Custom middleware ------------------------------------------------------

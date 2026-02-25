@@ -192,7 +192,7 @@ resource "google_storage_bucket" "data" {
   }
 
   cors {
-    origin          = ["*"]
+    origin          = var.cors_allowed_origins
     method          = ["GET", "HEAD", "PUT", "POST"]
     response_header = ["Content-Type"]
     max_age_seconds = 3600
@@ -320,7 +320,7 @@ resource "google_cloud_run_v2_service" "app" {
 
       startup_probe {
         http_get {
-          path = "/health"
+          path = "/api/v1/health"
           port = 8000
         }
         initial_delay_seconds = 5
@@ -330,7 +330,7 @@ resource "google_cloud_run_v2_service" "app" {
 
       liveness_probe {
         http_get {
-          path = "/health"
+          path = "/api/v1/health"
           port = 8000
         }
         period_seconds    = 30

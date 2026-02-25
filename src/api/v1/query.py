@@ -157,18 +157,27 @@ async def voice_query(
         except ValueError:
             logger.warning("api.invalid_language_code", code=language)
 
-    # Read audio bytes
+    # Read audio bytes with streaming size enforcement to prevent memory
+    # exhaustion from oversized uploads (the check must happen DURING read,
+    # not after loading the entire file into memory).
+    max_audio_size = 10 * 1024 * 1024  # 10 MB
     try:
-        audio_bytes = await audio.read()
+        size = 0
+        chunks: list[bytes] = []
+        while chunk := await audio.read(64 * 1024):  # 64 KB chunks
+            size += len(chunk)
+            if size > max_audio_size:
+                raise HTTPException(status_code=413, detail="Audio file too large. Maximum size is 10 MB.")
+            chunks.append(chunk)
+        audio_bytes = b"".join(chunks)
+    except HTTPException:
+        raise
     except Exception:
         logger.error("api.audio_read_failed", exc_info=True)
-        raise HTTPException(status_code=400, detail="Failed to read audio file.")
+        raise HTTPException(status_code=400, detail="Failed to read audio file.") from None
 
     if not audio_bytes:
         raise HTTPException(status_code=400, detail="Empty audio file.")
-
-    if len(audio_bytes) > 10 * 1024 * 1024:  # 10 MB limit
-        raise HTTPException(status_code=413, detail="Audio file too large. Maximum size is 10 MB.")
 
     # Build internal request
     from src.models.request import HaqSetuRequest, RequestMetadata

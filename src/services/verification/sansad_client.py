@@ -30,6 +30,7 @@ from __future__ import annotations
 import asyncio
 import time
 from typing import TYPE_CHECKING, Any
+from urllib.parse import urlparse
 
 import httpx
 import structlog
@@ -38,6 +39,14 @@ if TYPE_CHECKING:
     from src.services.cache import CacheManager
 
 logger = structlog.get_logger(__name__)
+
+# Allowed domains for external URL fetching (SSRF protection)
+_ALLOWED_EXTERNAL_DOMAINS: frozenset[str] = frozenset({
+    "sansad.in",
+    "www.sansad.in",
+    "rajyasabha.nic.in",
+    "loksabha.nic.in",
+})
 
 # ---------------------------------------------------------------------------
 # Constants
@@ -638,11 +647,21 @@ class SansadClient:
 
         # Normalise URL -- accept both full URLs and relative paths
         if bill_url.startswith("http"):
+            # SECURITY: Enforce HTTPS and validate against allowed domains
+            if not bill_url.startswith("https://"):
+                logger.warning("sansad.bill_detail_http_rejected", url=bill_url)
+                return None
+
+            parsed = urlparse(bill_url)
+            if ".." in parsed.path:
+                logger.warning("sansad.bill_detail_path_traversal", url=bill_url)
+                return None
+
             # Extract relative path from full URL
             if self.BASE_URL in bill_url:
                 url_path = bill_url.replace(self.BASE_URL, "")
-            else:
-                # External URL -- fetch directly via absolute URL
+            elif parsed.netloc in _ALLOWED_EXTERNAL_DOMAINS:
+                # Allowed external government domain -- fetch directly
                 try:
                     async with self._semaphore:
                         elapsed = time.monotonic() - self._last_request_time
@@ -656,7 +675,7 @@ class SansadClient:
                                 "User-Agent": "HaqSetu/1.0",
                                 "Accept": "text/html,application/json",
                             },
-                            follow_redirects=True,
+                            follow_redirects=False,
                         ) as temp_client:
                             response = await temp_client.get(bill_url)
                 except Exception:
@@ -676,6 +695,13 @@ class SansadClient:
                         cache_key, detail, ttl_seconds=_PAGE_CACHE_TTL
                     )
                 return detail
+            else:
+                logger.warning(
+                    "sansad.bill_detail_domain_rejected",
+                    url=bill_url,
+                    domain=parsed.netloc,
+                )
+                return None
         else:
             url_path = bill_url
 
