@@ -639,6 +639,22 @@ async def auto_fix_issues(request: Request) -> dict[str, Any]:
 # ---------------------------------------------------------------------------
 
 
+class ClaudeRunRequest(BaseModel):
+    """Request body for running Claude CLI auto-fix."""
+
+    prompt: str | None = Field(
+        default=None,
+        max_length=2000,
+        description="Custom prompt for Claude CLI. Uses default auto-fix prompt if omitted.",
+    )
+    timeout: int = Field(
+        default=600,
+        ge=30,
+        le=1800,
+        description="Maximum execution time in seconds (30-1800)",
+    )
+
+
 class OrchestratorRunRequest(BaseModel):
     """Request body for running the AI auto-fix orchestrator."""
 
@@ -787,6 +803,149 @@ async def diagnose_only(request: Request) -> dict[str, Any]:
             for a in report.actions
         ],
     }
+
+
+# ---------------------------------------------------------------------------
+# Claude CLI Bridge Endpoints (Device Login + Auto-Fix from GUI)
+# ---------------------------------------------------------------------------
+
+
+def _get_claude_bridge(request: Request):
+    """Get or create the Claude CLI bridge instance."""
+    bridge = getattr(request.app.state, "claude_cli_bridge", None)
+    if bridge is None:
+        from src.services.claude_cli_bridge import ClaudeCLIBridge
+
+        bridge = ClaudeCLIBridge()
+        request.app.state.claude_cli_bridge = bridge
+    return bridge
+
+
+@router.get("/claude/status")
+async def claude_cli_status(request: Request) -> dict[str, Any]:
+    """Get Claude CLI installation and authentication status.
+
+    Returns whether Claude is installed, authenticated, and any
+    pending device login information.
+    """
+    admin_ip = request.client.host if request.client else "unknown"
+    _record_audit("claude_status_check", "Claude CLI status checked", admin_ip)
+
+    bridge = _get_claude_bridge(request)
+    auth_status = await bridge.check_auth_status()
+    summary = bridge.get_status_summary()
+
+    return {
+        **auth_status,
+        "summary": summary,
+    }
+
+
+@router.post("/claude/auth")
+async def claude_cli_start_auth(request: Request) -> dict[str, Any]:
+    """Start Claude CLI device-code authentication flow.
+
+    Initiates ``claude auth login`` and returns the device code + URL.
+    The super admin must visit the URL and enter the code to authorize
+    this server's Claude CLI installation.
+
+    This enables running Claude auto-fix directly from the admin panel
+    without SSH access to the VM.
+    """
+    admin_ip = request.client.host if request.client else "unknown"
+    _record_audit(
+        "claude_auth_started",
+        "Claude CLI device login initiated from admin panel",
+        admin_ip,
+    )
+
+    bridge = _get_claude_bridge(request)
+    result = await bridge.start_auth_login()
+
+    if result.get("success"):
+        _record_audit(
+            "claude_auth_flow",
+            f"Device code: {result.get('device_code', 'N/A')}, "
+            f"URL: {result.get('verification_url', 'N/A')}",
+            admin_ip,
+        )
+
+    return result
+
+
+@router.post("/claude/run")
+async def claude_cli_run_autofix(
+    body: ClaudeRunRequest,
+    request: Request,
+) -> dict[str, Any]:
+    """Run Claude CLI auto-fix from the admin panel.
+
+    Executes Claude CLI with the specified prompt (or default auto-fix
+    prompt) and returns the session results.
+
+    Requires Claude CLI to be installed and authenticated.
+    """
+    admin_ip = request.client.host if request.client else "unknown"
+
+    bridge = _get_claude_bridge(request)
+
+    # Check auth first
+    auth = await bridge.check_auth_status()
+    if not auth.get("installed"):
+        raise HTTPException(
+            status_code=503,
+            detail="Claude CLI is not installed on this server. "
+            "Re-deploy with --with-claude flag.",
+        )
+
+    _record_audit(
+        "claude_run_started",
+        f"Claude CLI auto-fix started (timeout={body.timeout}s)",
+        admin_ip,
+    )
+
+    result = await bridge.run_autofix(
+        prompt=body.prompt,
+        timeout=body.timeout,
+    )
+
+    session = result.get("session", {})
+    _record_audit(
+        "claude_run_completed",
+        f"Session {session.get('session_id')}: {session.get('status')} "
+        f"({session.get('duration_seconds', 0)}s, "
+        f"exit={session.get('exit_code')})",
+        admin_ip,
+    )
+
+    return result
+
+
+@router.get("/claude/history")
+async def claude_cli_history(
+    request: Request,
+    limit: int = 20,
+) -> dict[str, Any]:
+    """Get Claude CLI session history."""
+    bridge = _get_claude_bridge(request)
+    history = bridge.get_history(limit=limit)
+    return {"history": history, "total": len(history)}
+
+
+@router.get("/claude/session/{session_id}")
+async def claude_cli_session_detail(
+    session_id: str,
+    request: Request,
+) -> dict[str, Any]:
+    """Get details of a specific Claude CLI session."""
+    bridge = _get_claude_bridge(request)
+    session = bridge.get_session(session_id)
+    if session is None:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Session '{session_id}' not found.",
+        )
+    return session
 
 
 # ---------------------------------------------------------------------------

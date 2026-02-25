@@ -517,6 +517,57 @@
           <div id="admin-ai-results" class="audit-log" style="margin-top:0.75rem" aria-live="polite"></div>
         </div>
 
+        <!-- Claude CLI — Device Login & Auto-Fix from GUI -->
+        <div class="paper-card admin-section">
+          <h3 class="card-title">Claude CLI — Remote Login &amp; Auto-Fix</h3>
+          <p style="font-size:0.85rem;opacity:0.8;margin-bottom:0.75rem">
+            Authenticate and run Claude CLI directly from this panel.
+            No SSH required — start device login, authorize from your Anthropic account, then run auto-fix.
+          </p>
+
+          <!-- Claude CLI Status -->
+          <div id="claude-cli-status" class="admin-grid" style="margin-bottom:0.75rem" aria-live="polite">
+            <div class="admin-stat">
+              <span class="stat-label">Installed</span>
+              <span class="status-badge" id="claude-installed-badge">Checking...</span>
+            </div>
+            <div class="admin-stat">
+              <span class="stat-label">Authenticated</span>
+              <span class="status-badge" id="claude-auth-badge">Checking...</span>
+            </div>
+          </div>
+
+          <!-- Device Login Info (shown when auth is pending) -->
+          <div id="claude-auth-info" style="display:none;margin-bottom:0.75rem;padding:1rem;background:rgba(255,153,51,0.1);border-radius:8px;border:1px solid rgba(255,153,51,0.3)">
+            <p style="font-weight:600;margin-bottom:0.5rem">Device Login Instructions:</p>
+            <ol style="margin:0 0 0.5rem 1.5rem;font-size:0.9rem">
+              <li>Visit: <a id="claude-auth-url" href="#" target="_blank" rel="noopener" style="color:var(--accent-saffron);font-weight:600"></a></li>
+              <li>Enter code: <code id="claude-auth-code" style="font-size:1.1rem;font-weight:700;letter-spacing:0.1em;background:rgba(0,0,0,0.1);padding:0.2rem 0.5rem;border-radius:4px"></code></li>
+              <li>Authorize the device on your Anthropic account</li>
+            </ol>
+            <p style="font-size:0.8rem;opacity:0.7">After authorizing, click "Check Status" to confirm.</p>
+          </div>
+
+          <!-- Claude CLI Actions -->
+          <div class="admin-actions">
+            <button class="skeuo-btn" id="claude-check-status" aria-label="Check Claude CLI status">
+              Check Status
+            </button>
+            <button class="skeuo-btn btn-primary" id="claude-start-auth" aria-label="Start Claude device login">
+              Start Device Login
+            </button>
+            <button class="skeuo-btn btn-primary" id="claude-run-autofix" aria-label="Run Claude auto-fix">
+              Run Claude Auto-Fix
+            </button>
+            <button class="skeuo-btn" id="claude-view-history" aria-label="View Claude session history">
+              View History
+            </button>
+          </div>
+
+          <!-- Claude CLI Output -->
+          <div id="claude-cli-output" class="audit-log" style="margin-top:0.75rem;max-height:300px;overflow-y:auto" aria-live="polite"></div>
+        </div>
+
         <!-- Snapshots & Rollback -->
         <div class="paper-card admin-section">
           <h3 class="card-title">Snapshots &amp; Rollback Points</h3>

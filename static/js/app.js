@@ -1115,6 +1115,7 @@ class HaqSetuApp {
         this._loadAdminStatus();
         this._loadAdminSnapshots();
         this._loadAdminAuditLog();
+        this._loadClaudeCLIStatus();
         this._bindAdminButtons();
     }
 
@@ -1293,7 +1294,186 @@ class HaqSetuApp {
         container.innerHTML = html;
     }
 
+    // =====================================================================
+    //  CLAUDE CLI — Status, Auth, Run from GUI
+    // =====================================================================
+
+    async _loadClaudeCLIStatus() {
+        const installedBadge = document.getElementById('claude-installed-badge');
+        const authBadge = document.getElementById('claude-auth-badge');
+        if (!installedBadge || !authBadge) return;
+
+        try {
+            const data = await api.get('/admin/recovery/claude/status');
+
+            installedBadge.textContent = data.installed ? 'Yes' : 'No';
+            installedBadge.className = 'status-badge ' + (data.installed ? 'healthy' : 'error');
+
+            if (!data.installed) {
+                authBadge.textContent = 'N/A';
+                authBadge.className = 'status-badge degraded';
+                return;
+            }
+
+            if (data.authenticated) {
+                authBadge.textContent = 'Authenticated';
+                authBadge.className = 'status-badge healthy';
+            } else if (data.auth_pending) {
+                authBadge.textContent = 'Pending...';
+                authBadge.className = 'status-badge degraded';
+            } else {
+                authBadge.textContent = 'Not authenticated';
+                authBadge.className = 'status-badge error';
+            }
+
+            // If there's an active device login, show the info
+            if (data.summary && data.summary.auth_device_code && data.summary.auth_verification_url) {
+                this._showClaudeAuthInfo(data.summary.auth_device_code, data.summary.auth_verification_url);
+            }
+        } catch {
+            installedBadge.textContent = 'Error';
+            installedBadge.className = 'status-badge error';
+            authBadge.textContent = 'Error';
+            authBadge.className = 'status-badge error';
+        }
+    }
+
+    _showClaudeAuthInfo(code, url) {
+        const infoBox = document.getElementById('claude-auth-info');
+        const urlEl = document.getElementById('claude-auth-url');
+        const codeEl = document.getElementById('claude-auth-code');
+        if (!infoBox || !urlEl || !codeEl) return;
+
+        urlEl.href = url;
+        urlEl.textContent = url;
+        codeEl.textContent = code;
+        infoBox.style.display = 'block';
+    }
+
+    _renderClaudeOutput(lines, status) {
+        const container = document.getElementById('claude-cli-output');
+        if (!container) return;
+
+        let html = '';
+        if (status) {
+            const statusClass = status === 'completed' ? 'healthy' : status === 'failed' ? 'error' : 'degraded';
+            html += `<div style="margin-bottom:0.5rem"><span class="status-badge ${statusClass}">${esc(status)}</span></div>`;
+        }
+        if (lines && lines.length > 0) {
+            html += '<pre style="font-size:0.8rem;white-space:pre-wrap;word-break:break-word;max-height:250px;overflow-y:auto;background:rgba(0,0,0,0.05);padding:0.5rem;border-radius:4px">';
+            lines.forEach(l => { html += esc(l) + '\n'; });
+            html += '</pre>';
+        } else {
+            html += '<p class="placeholder-text">No output.</p>';
+        }
+        container.innerHTML = html;
+    }
+
     _bindAdminButtons() {
+        // Claude CLI — Check Status
+        const claudeStatusBtn = document.getElementById('claude-check-status');
+        if (claudeStatusBtn && !claudeStatusBtn._bound) {
+            claudeStatusBtn._bound = true;
+            claudeStatusBtn.addEventListener('click', async () => {
+                claudeStatusBtn.disabled = true;
+                claudeStatusBtn.textContent = 'Checking...';
+                await this._loadClaudeCLIStatus();
+                Toast.show('Claude CLI status refreshed.', 'info');
+                claudeStatusBtn.disabled = false;
+                claudeStatusBtn.textContent = 'Check Status';
+            });
+        }
+
+        // Claude CLI — Start Device Login
+        const claudeAuthBtn = document.getElementById('claude-start-auth');
+        if (claudeAuthBtn && !claudeAuthBtn._bound) {
+            claudeAuthBtn._bound = true;
+            claudeAuthBtn.addEventListener('click', async () => {
+                claudeAuthBtn.disabled = true;
+                claudeAuthBtn.textContent = 'Starting login...';
+                const output = document.getElementById('claude-cli-output');
+                if (output) output.innerHTML = '<p class="placeholder-text">Starting Claude CLI device login...</p>';
+                try {
+                    const data = await api.post('/admin/recovery/claude/auth');
+                    if (data.success) {
+                        if (data.device_code && data.verification_url) {
+                            this._showClaudeAuthInfo(data.device_code, data.verification_url);
+                        }
+                        this._renderClaudeOutput(data.output || [], 'auth_pending');
+                        Toast.show('Device login started. See instructions above.', 'success');
+                    } else {
+                        Toast.show(data.error || 'Failed to start auth.', 'error');
+                        this._renderClaudeOutput([data.error || 'Auth failed.'], 'failed');
+                    }
+                    this._loadAdminAuditLog();
+                } catch {
+                    if (output) output.innerHTML = '<p class="placeholder-text">Failed to start device login.</p>';
+                }
+                claudeAuthBtn.disabled = false;
+                claudeAuthBtn.textContent = 'Start Device Login';
+            });
+        }
+
+        // Claude CLI — Run Auto-Fix
+        const claudeRunBtn = document.getElementById('claude-run-autofix');
+        if (claudeRunBtn && !claudeRunBtn._bound) {
+            claudeRunBtn._bound = true;
+            claudeRunBtn.addEventListener('click', async () => {
+                if (!confirm('Run Claude CLI auto-fix? This will analyze and fix issues using Claude AI.')) return;
+                claudeRunBtn.disabled = true;
+                claudeRunBtn.textContent = 'Running Claude...';
+                const output = document.getElementById('claude-cli-output');
+                if (output) output.innerHTML = '<p class="placeholder-text">Running Claude CLI auto-fix... This may take several minutes.</p>';
+                try {
+                    const data = await api.post('/admin/recovery/claude/run', {}, 660_000);
+                    const session = data.session || {};
+                    this._renderClaudeOutput(session.output_tail || [], session.status);
+                    if (data.success) {
+                        Toast.show(`Claude auto-fix completed (${session.duration_seconds}s).`, 'success');
+                    } else {
+                        Toast.show(`Claude auto-fix ${session.status} (${session.duration_seconds}s).`, 'warning');
+                    }
+                    this._loadAdminStatus();
+                    this._loadAdminAuditLog();
+                } catch {
+                    if (output) output.innerHTML = '<p class="placeholder-text">Claude auto-fix failed. Is Claude CLI authenticated?</p>';
+                }
+                claudeRunBtn.disabled = false;
+                claudeRunBtn.textContent = 'Run Claude Auto-Fix';
+            });
+        }
+
+        // Claude CLI — View History
+        const claudeHistBtn = document.getElementById('claude-view-history');
+        if (claudeHistBtn && !claudeHistBtn._bound) {
+            claudeHistBtn._bound = true;
+            claudeHistBtn.addEventListener('click', async () => {
+                claudeHistBtn.disabled = true;
+                const output = document.getElementById('claude-cli-output');
+                try {
+                    const data = await api.get('/admin/recovery/claude/history?limit=10');
+                    const history = data.history || [];
+                    if (!history.length) {
+                        if (output) output.innerHTML = '<p class="placeholder-text">No Claude CLI sessions yet.</p>';
+                    } else {
+                        let html = '';
+                        history.forEach(h => {
+                            const statusClass = h.status === 'completed' ? 'healthy' : h.status === 'failed' ? 'error' : 'degraded';
+                            html += `<div class="audit-entry">
+                                <span class="audit-time">${fmtDate(h.started_at)}</span>
+                                <span class="status-badge ${statusClass}">${esc(h.status)}</span>
+                                <span class="audit-details">${h.duration_seconds}s, exit=${h.exit_code}, ${h.output_lines_count} lines</span>
+                            </div>`;
+                        });
+                        if (output) output.innerHTML = html;
+                    }
+                } catch {
+                    if (output) output.innerHTML = '<p class="placeholder-text">Failed to load Claude history.</p>';
+                }
+                claudeHistBtn.disabled = false;
+            });
+        }
+
         // AI Diagnose Only
         const diagBtn = document.getElementById('admin-ai-diagnose');
         if (diagBtn && !diagBtn._bound) {
