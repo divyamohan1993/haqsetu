@@ -355,21 +355,23 @@ app = FastAPI(
 )
 
 # -- CORS middleware --------------------------------------------------------
+# SECURITY: allow_credentials=True must NOT be combined with allow_origins=["*"]
+# per the CORS specification (browsers will reject it).
 if settings.is_production:
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["https://haqsetu.in", "https://www.haqsetu.in"],
+        allow_origins=settings.cors_origin_list,
         allow_credentials=True,
         allow_methods=["GET", "POST"],
-        allow_headers=["*"],
+        allow_headers=["Content-Type", "Authorization", "X-DPDPA-Consent", "X-Admin-API-Key"],
     )
 else:
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["*"],
-        allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
+        allow_origins=["http://localhost:3000", "http://localhost:8000", "http://127.0.0.1:8000"],
+        allow_credentials=False,
+        allow_methods=["GET", "POST", "OPTIONS", "HEAD"],
+        allow_headers=["Content-Type", "Accept", "Authorization", "X-DPDPA-Consent", "X-Admin-API-Key"],
     )
 
 # -- Custom middleware ------------------------------------------------------
@@ -381,6 +383,9 @@ app.add_middleware(
 )
 
 # -- Prometheus metrics -----------------------------------------------------
+# SECURITY: In production, metrics are exposed only internally (scraped by
+# Prometheus within the cluster).  The endpoint is not rate-limited but
+# is excluded from public documentation.
 try:
     from prometheus_fastapi_instrumentator import Instrumentator
 
@@ -388,7 +393,11 @@ try:
         should_group_status_codes=True,
         should_ignore_untemplated=True,
         excluded_handlers=["/metrics", "/api/v1/health"],
-    ).instrument(app).expose(app, endpoint="/metrics")
+    ).instrument(app).expose(
+        app,
+        endpoint="/metrics",
+        include_in_schema=not settings.is_production,
+    )
     logger.info("app.prometheus_metrics_enabled")
 except ImportError:
     logger.warning("app.prometheus_not_available")

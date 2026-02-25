@@ -50,3 +50,9 @@ variable "vpc_connector_name" {
   default     = ""
   description = "Optional VPC connector name for Cloud Run to access Memorystore Redis. If empty, VPC access is not configured."
 }
+
+variable "cors_allowed_origins" {
+  type        = list(string)
+  default     = ["https://haqsetu.in", "https://www.haqsetu.in"]
+  description = "Allowed CORS origins for the Cloud Storage bucket. Restrict to your actual domains."
+}

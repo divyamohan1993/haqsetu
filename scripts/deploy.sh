@@ -192,12 +192,26 @@ run_terraform() {
 
     # Plan and apply
     log_info "Applying Terraform configuration..."
-    terraform apply \
-        -auto-approve \
-        -var="project_id=${GCP_PROJECT_ID}" \
-        -var="region=${GCP_REGION}" \
-        -var="environment=${ENVIRONMENT}" \
+    local tf_args=(
+        -var="project_id=${GCP_PROJECT_ID}"
+        -var="region=${GCP_REGION}"
+        -var="environment=${ENVIRONMENT}"
         -var="app_name=${APP_NAME}"
+    )
+
+    if [[ "${ENVIRONMENT}" == "production" ]]; then
+        log_warn "Production deployment -- Terraform will prompt for approval."
+        log_info "Running terraform plan first..."
+        terraform plan "${tf_args[@]}"
+        echo ""
+        read -r -p "$(echo -e "${YELLOW}Apply these changes to PRODUCTION? (yes/no): ${NC}")" confirm
+        if [[ "${confirm}" != "yes" ]]; then
+            die "Deployment aborted by user."
+        fi
+        terraform apply "${tf_args[@]}"
+    else
+        terraform apply -auto-approve "${tf_args[@]}"
+    fi
 
     # Capture outputs
     CLOUD_RUN_URL="$(terraform output -raw cloud_run_url 2>/dev/null || echo 'pending')"
@@ -248,6 +262,9 @@ deploy_to_cloud_run() {
     local image_url="${GCP_REGION}-docker.pkg.dev/${GCP_PROJECT_ID}/${REPO_NAME}/${APP_NAME}:latest"
 
     # Cloud Run deploy (idempotent - updates or creates)
+    # NOTE: --allow-unauthenticated is intentional -- HaqSetu is a public-facing
+    # civic assistant. Access control is handled at the application layer via
+    # admin API keys for privileged endpoints and rate limiting for public ones.
     gcloud run deploy "${APP_NAME}" \
         --image="${image_url}" \
         --region="${GCP_REGION}" \
@@ -286,7 +303,7 @@ print_summary() {
     fi
     echo ""
     echo "  Next steps:"
-    echo "    - Verify health: curl ${cloud_run_url}/health"
+    echo "    - Verify health: curl ${cloud_run_url}/api/v1/health"
     echo "    - View logs:     gcloud run logs read ${APP_NAME} --region=${GCP_REGION}"
     echo "    - Seed data:     make seed"
     echo ""

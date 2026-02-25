@@ -88,11 +88,29 @@ class Settings(BaseSettings):
     myscheme_rate_limit_delay: float = 1.5  # seconds between requests
     enable_auto_ingestion: bool = True
 
+    # ── Security ────────────────────────────────────────────────────────
+    admin_api_key: str = Field(default="", description="API key for admin endpoints")
+    session_secret: str = Field(default="", description="HMAC session signing secret")
+    cors_origins: str = Field(
+        default="https://haqsetu.in,https://www.haqsetu.in",
+        validation_alias="HAQSETU_CORS_ORIGINS",
+        description="Comma-separated allowed CORS origins for production",
+    )
+    trusted_proxy_count: int = Field(
+        default=1,
+        description="Number of trusted reverse proxies (for X-Forwarded-For parsing)",
+    )
+
     # ── Derived Properties ─────────────────────────────────────────────
 
     @property
     def is_production(self) -> bool:
         return self.env == Environment.PRODUCTION
+
+    @property
+    def cors_origin_list(self) -> list[str]:
+        """Parse comma-separated CORS origins into a list."""
+        return [o.strip() for o in self.cors_origins.split(",") if o.strip()]
 
 
 # Module-level singleton — import ``settings`` everywhere.

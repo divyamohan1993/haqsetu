@@ -15,12 +15,18 @@ from __future__ import annotations
 from typing import Any
 
 import structlog
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel
+
+from src.middleware.auth import require_admin_api_key
 
 logger: structlog.stdlib.BoundLogger = structlog.get_logger(__name__)
 
-router = APIRouter(prefix="/admin/ingest", tags=["admin", "ingestion"])
+router = APIRouter(
+    prefix="/admin/ingest",
+    tags=["admin", "ingestion"],
+    dependencies=[Depends(require_admin_api_key)],
+)
 
 
 # ---------------------------------------------------------------------------
@@ -102,12 +108,12 @@ async def trigger_full_ingestion(
             ),
             result=result.to_dict(),
         )
-    except Exception as exc:
+    except Exception:
         logger.error("api.admin.ingest.full_failed", exc_info=True)
         raise HTTPException(
             status_code=500,
-            detail=f"Ingestion failed: {exc}",
-        ) from exc
+            detail="Ingestion failed. Check server logs for details.",
+        ) from None
 
 
 @router.post("/incremental", response_model=IngestionTriggerResponse)
@@ -134,12 +140,12 @@ async def trigger_incremental_ingestion(
             ),
             result=result.to_dict(),
         )
-    except Exception as exc:
+    except Exception:
         logger.error("api.admin.ingest.incremental_failed", exc_info=True)
         raise HTTPException(
             status_code=500,
-            detail=f"Incremental ingestion failed: {exc}",
-        ) from exc
+            detail="Incremental ingestion failed. Check server logs for details.",
+        ) from None
 
 
 @router.get("/status", response_model=IngestionStatusResponse)

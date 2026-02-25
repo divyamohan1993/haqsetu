@@ -98,10 +98,18 @@ setup_env_file() {
         log_ok ".env file already exists. Skipping copy."
     elif [[ -f "${env_example}" ]]; then
         cp "${env_example}" "${env_file}"
+        chmod 600 "${env_file}"
         log_ok ".env file created from .env.example"
         log_warn "Please edit .env and fill in your GCP credentials."
     else
         log_warn "No .env.example found. You will need to create a .env file manually."
+    fi
+
+    # Generate secure keys if they are placeholders
+    local keygen_script="${PROJECT_ROOT}/scripts/generate_keys.sh"
+    if [[ -x "${keygen_script}" ]]; then
+        log_info "Generating secure keys..."
+        "${keygen_script}" --init
     fi
 }
 

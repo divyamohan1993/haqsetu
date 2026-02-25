@@ -32,6 +32,8 @@ dev = [
     "pytest-cov>=6.0.0",
     "httpx>=0.28.0",
     "ruff>=0.8.0",
+    "bandit[toml]>=1.7.0",
+    "pip-audit>=2.7.0",
 ]
 
 [build-system]
@@ -57,9 +59,12 @@ select = [
     "SIM",  # flake8-simplify
     "TCH",  # flake8-type-checking
     "RUF",  # ruff-specific rules
+    "S",    # flake8-bandit (security)
 ]
 ignore = [
     "E501",  # line length handled by formatter
+    "S101",  # assert usage allowed in non-production code
+    "S104",  # binding to 0.0.0.0 is intentional for containers
 ]
 
 [tool.ruff.lint.isort]
@@ -69,3 +74,7 @@ known-first-party = ["haqsetu"]
 testpaths = ["tests"]
 asyncio_mode = "auto"
 addopts = "-v --tb=short"
+
+[tool.bandit]
+exclude_dirs = ["tests", ".venv", "venv"]
+skips = ["B101"]  # assert is fine outside production paths
