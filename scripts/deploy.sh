@@ -122,6 +122,58 @@ enable_apis() {
 }
 
 # ---------------------------------------------------------------------------
+# Step 2b: Rotate secrets (backup .env BEFORE writing new values)
+# ---------------------------------------------------------------------------
+rotate_secrets() {
+    log_info "Rotating deployment secrets..."
+
+    local env_file="${PROJECT_ROOT}/.env"
+
+    if [[ ! -f "${env_file}" ]]; then
+        log_warn "No .env file found at ${env_file}. Skipping secret rotation."
+        return 0
+    fi
+
+    # ── Backup FIRST, before any mutation ──────────────────────────────
+    local backup_file="${env_file}.backup.$(date +%Y%m%d%H%M%S)"
+    cp "${env_file}" "${backup_file}"
+    log_ok "Backed up .env to ${backup_file} (contains previous secrets)."
+
+    # ── Now generate and write new secrets ─────────────────────────────
+    if [[ "${ENVIRONMENT}" == "production" ]]; then
+        # Rotate ENCRYPTION_KEY if it's still the placeholder
+        local current_key
+        current_key="$(grep -E '^ENCRYPTION_KEY=' "${env_file}" | cut -d= -f2- || true)"
+        if [[ "${current_key}" == "your-256-bit-encryption-key-base64" || -z "${current_key}" ]]; then
+            local new_key
+            new_key="$(openssl rand -base64 32)"
+            if grep -q '^ENCRYPTION_KEY=' "${env_file}"; then
+                sed -i "s|^ENCRYPTION_KEY=.*|ENCRYPTION_KEY=${new_key}|" "${env_file}"
+            else
+                echo "ENCRYPTION_KEY=${new_key}" >> "${env_file}"
+            fi
+            log_ok "ENCRYPTION_KEY rotated."
+        fi
+
+        # Generate ADMIN_API_KEY if not set
+        local current_admin_key
+        current_admin_key="$(grep -E '^ADMIN_API_KEY=' "${env_file}" | cut -d= -f2- || true)"
+        if [[ -z "${current_admin_key}" ]]; then
+            local new_admin_key
+            new_admin_key="$(openssl rand -hex 32)"
+            if grep -q '^ADMIN_API_KEY=' "${env_file}"; then
+                sed -i "s|^ADMIN_API_KEY=.*|ADMIN_API_KEY=${new_admin_key}|" "${env_file}"
+            else
+                echo "ADMIN_API_KEY=${new_admin_key}" >> "${env_file}"
+            fi
+            log_ok "ADMIN_API_KEY generated."
+        fi
+    fi
+
+    log_ok "Secret rotation complete. Prior secrets preserved in ${backup_file}."
+}
+
+# ---------------------------------------------------------------------------
 # Step 3: Run Terraform
 # ---------------------------------------------------------------------------
 run_terraform() {
@@ -270,6 +322,7 @@ main() {
 
     check_prerequisites
     set_gcp_project
+    rotate_secrets
     enable_apis
     run_terraform
     build_and_push_image

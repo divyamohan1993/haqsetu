@@ -376,7 +376,11 @@ else:
 
 # -- Custom middleware ------------------------------------------------------
 app.add_middleware(DPDPAMiddleware)
-app.add_middleware(RateLimitMiddleware, max_requests_per_minute=settings.rate_limit_per_minute)
+app.add_middleware(
+    RateLimitMiddleware,
+    max_requests_per_minute=settings.rate_limit_per_minute,
+    trusted_proxy_count=settings.trusted_proxy_count,
+)
 
 # -- Prometheus metrics -----------------------------------------------------
 # SECURITY: In production, metrics are exposed only internally (scraped by

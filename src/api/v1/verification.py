@@ -100,6 +100,28 @@ def _get_verification_results(request: Request) -> dict[str, Any]:
     return getattr(request.app.state, "verification_results", {})
 
 
+def _require_admin_api_key(request: Request) -> None:
+    """Enforce ``X-Admin-API-Key`` when a production key is configured.
+
+    If ``settings.admin_api_key`` is empty (the default during local
+    development), the check is skipped so the SPA and dev tools work
+    without extra configuration.
+    """
+    from config.settings import settings
+
+    configured_key = settings.admin_api_key
+    if not configured_key:
+        # No key configured — allow the request (dev/staging).
+        return
+
+    provided_key = request.headers.get("X-Admin-API-Key", "")
+    if provided_key != configured_key:
+        raise HTTPException(
+            status_code=403,
+            detail="Invalid or missing X-Admin-API-Key header.",
+        )
+
+
 # ---------------------------------------------------------------------------
 # Endpoints
 # ---------------------------------------------------------------------------
@@ -358,9 +380,14 @@ async def trigger_verification(
     verification.  Otherwise, all schemes that are currently unverified
     (or all schemes when *force* is ``True``) are queued.
 
+    Requires ``X-Admin-API-Key`` header when ``ADMIN_API_KEY`` is
+    configured (typically production).  In development the check is
+    skipped when the key is empty.
+
     Verification runs as a background task and results will appear in
     the dashboard and status endpoints once complete.
     """
+    _require_admin_api_key(request)
     engine = _get_verification_engine(request)
     results = _get_verification_results(request)
 

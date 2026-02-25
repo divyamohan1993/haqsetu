@@ -380,9 +380,10 @@ async def trigger_reverification(
 
     # Queue scheme for re-verification if scheme_id is available
     if feedback.scheme_id:
-        pipeline = getattr(request.app.state, "ingestion_pipeline", None)
-        if pipeline is not None:
+        verification_engine = getattr(request.app.state, "verification_engine", None)
+        if verification_engine is not None:
             try:
+                await verification_engine.verify_scheme(feedback.scheme_id)
                 logger.info(
                     "api.feedback.scheme_reverification_queued",
                     feedback_id=feedback_id,
