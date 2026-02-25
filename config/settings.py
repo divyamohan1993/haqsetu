@@ -101,6 +101,53 @@ class Settings(BaseSettings):
         description="Number of trusted reverse proxies (for X-Forwarded-For parsing)",
     )
 
+    # ── Voice Agent ──────────────────────────────────────────────────
+    voice_agent_enabled: bool = True
+    voice_agent_max_turns: int = 20
+    voice_agent_session_ttl: int = 3600  # 1 hour
+
+    # ── Document Scanner ─────────────────────────────────────────────
+    document_scanner_enabled: bool = True
+    document_scanner_max_image_mb: int = 10
+
+    # ── Legal Rights / BNS ───────────────────────────────────────────
+    legal_rights_enabled: bool = True
+
+    # ── RTI Generator ────────────────────────────────────────────────
+    rti_generator_enabled: bool = True
+
+    # ── Emergency SOS ────────────────────────────────────────────────
+    emergency_sos_enabled: bool = True
+
+    # ── Grievance Tracker ────────────────────────────────────────────
+    grievance_tracker_enabled: bool = True
+
+    # ── Nearby Services ──────────────────────────────────────────────
+    nearby_services_enabled: bool = True
+    nearby_default_radius_km: float = 25.0
+
+    # ── Accessibility ────────────────────────────────────────────────
+    accessibility_enabled: bool = True
+
+    # ── Self-Sustaining / Automation ─────────────────────────────────
+    self_sustaining_enabled: bool = True
+    auto_update_interval_hours: int = 24
+    stale_data_threshold_days: int = 30
+    monthly_budget_limit_usd: float = 500.0
+    cost_alert_threshold_pct: float = 80.0
+
+    # ── WhatsApp / SMS ───────────────────────────────────────────────
+    whatsapp_enabled: bool = False
+    whatsapp_phone_number_id: str = ""
+    whatsapp_access_token: str = ""
+    sms_provider: str = "mock"  # "msg91", "kaleyra", "mock"
+    sms_api_key: str = ""
+
+    # ── Compliance / Audit ───────────────────────────────────────────
+    compliance_audit_enabled: bool = True
+    audit_log_retention_days: int = 2555  # ~7 years (DPDPA)
+    breach_notification_email: str = ""
+
     # ── Derived Properties ─────────────────────────────────────────────
 
     @property
