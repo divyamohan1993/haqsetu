@@ -3574,4 +3574,339 @@ body.dark-mode .audit-entry {
     font-size: 0.8em;
     opacity: 0.7;
   }
+
+  .voice-fab,
+  .voice-panel { display: none !important; }
+}
+
+
+/* ==========================================================================
+   28. VOICE FAB + CONVERSATIONAL PANEL
+   ========================================================================== */
+
+/* Floating Action Button — fixed bottom-right */
+.voice-fab {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  z-index: 900;
+  width: 64px;
+  height: 64px;
+  border-radius: var(--skeuo-radius-circle);
+  box-shadow:
+    0 6px 20px rgba(0, 0, 0, 0.35),
+    inset 0 2px 4px rgba(255, 255, 255, 0.4),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.25);
+  transition: transform var(--skeuo-transition-fast), box-shadow var(--skeuo-transition);
+}
+.voice-fab:hover {
+  transform: scale(1.08);
+  box-shadow:
+    0 8px 28px rgba(0, 0, 0, 0.4),
+    0 0 0 4px rgba(255, 153, 51, 0.3),
+    inset 0 2px 4px rgba(255, 255, 255, 0.4);
+}
+.voice-fab.voice-fab--active {
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.3),
+    0 0 0 4px rgba(255, 107, 107, 0.4),
+    0 0 20px rgba(255, 107, 107, 0.3),
+    inset 0 2px 4px rgba(255, 255, 255, 0.4);
+  animation: skeuo-mic-pulse 1.5s ease-in-out infinite;
+}
+
+/* Slide-up panel */
+.voice-panel {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  max-height: 70vh;
+  display: flex;
+  flex-direction: column;
+  background:
+    linear-gradient(180deg, var(--skeuo-parchment) 0%, var(--skeuo-paper-white) 100%);
+  border-top: 3px solid var(--skeuo-saffron);
+  border-radius: var(--skeuo-radius-lg) var(--skeuo-radius-lg) 0 0;
+  box-shadow: 0 -4px 30px rgba(0, 0, 0, 0.25);
+  transform: translateY(100%);
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.voice-panel[aria-hidden="false"] {
+  transform: translateY(0);
+}
+
+/* Panel header */
+.voice-panel__header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--skeuo-parchment-dark);
+  flex-shrink: 0;
+}
+.voice-panel__header h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-family: var(--skeuo-font-display);
+  color: var(--skeuo-ink);
+}
+.voice-panel__subtitle {
+  font-size: 0.75rem;
+  color: var(--skeuo-ink-faded);
+}
+.voice-panel__close {
+  margin-left: auto;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: var(--skeuo-ink-faded);
+  padding: 0 0.25rem;
+  line-height: 1;
+}
+.voice-panel__close:hover { color: var(--skeuo-india-red); }
+
+/* Chat area */
+.voice-panel__chat {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-height: 120px;
+  max-height: 45vh;
+}
+
+/* Chat bubbles */
+.voice-msg {
+  max-width: 85%;
+  padding: 0.75rem 1rem;
+  border-radius: var(--skeuo-radius-md);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  word-wrap: break-word;
+}
+.voice-msg p { margin: 0 0 0.25rem; }
+.voice-msg p:last-child { margin-bottom: 0; }
+
+.voice-msg--agent {
+  align-self: flex-start;
+  background: var(--skeuo-paper-white);
+  border: 1px solid var(--skeuo-parchment-dark);
+  box-shadow: var(--skeuo-shadow-sm);
+}
+.voice-msg--user {
+  align-self: flex-end;
+  background: var(--skeuo-saffron);
+  color: #fff;
+  border: none;
+  box-shadow: 0 2px 8px rgba(255, 153, 51, 0.3);
+}
+
+/* Typing indicator */
+.voice-msg--typing .typing-dots {
+  display: inline-flex;
+  gap: 4px;
+}
+.voice-msg--typing .typing-dots span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--skeuo-ink-faded);
+  animation: typing-bounce 1.4s ease-in-out infinite;
+}
+.voice-msg--typing .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+.voice-msg--typing .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes typing-bounce {
+  0%, 60%, 100% { transform: translateY(0); }
+  30% { transform: translateY(-6px); }
+}
+
+/* Controls bar */
+.voice-panel__controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border-top: 1px solid var(--skeuo-parchment-dark);
+  flex-shrink: 0;
+  background: var(--skeuo-parchment);
+}
+.voice-panel__mic {
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+}
+.voice-panel__input {
+  flex: 1;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.9rem;
+}
+.voice-panel__send {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  flex-shrink: 0;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
+/* ==========================================================================
+   29. QUICK ACTION CARDS — Dashboard hero area
+   ========================================================================== */
+
+.quick-actions {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+}
+
+.quick-action-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 1rem 0.5rem;
+  border-radius: var(--skeuo-radius-md);
+  background: var(--skeuo-paper-white);
+  border: 1px solid var(--skeuo-parchment-dark);
+  box-shadow: var(--skeuo-shadow-sm);
+  cursor: pointer;
+  text-decoration: none;
+  color: var(--skeuo-ink);
+  transition: transform var(--skeuo-transition-fast), box-shadow var(--skeuo-transition);
+}
+.quick-action-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--skeuo-shadow-md);
+}
+.quick-action-card:active {
+  transform: translateY(0);
+}
+
+.qa-icon {
+  font-size: 1.75rem;
+  line-height: 1;
+}
+.qa-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-align: center;
+}
+.qa-hint {
+  font-size: 0.65rem;
+  color: var(--skeuo-ink-faded);
+  text-align: center;
+}
+
+.qa-emergency {
+  border-color: var(--skeuo-india-red);
+  background: rgba(255, 59, 48, 0.05);
+}
+.qa-emergency:hover {
+  background: rgba(255, 59, 48, 0.1);
+}
+
+
+/* ==========================================================================
+   30. WHATSAPP SHARE BUTTON — Scheme detail pages
+   ========================================================================== */
+
+.share-whatsapp-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  margin-top: 0.5rem;
+  border: none;
+  border-radius: var(--skeuo-radius-md);
+  background: #25D366;
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  box-shadow: 0 2px 8px rgba(37, 211, 102, 0.3);
+  transition: background var(--skeuo-transition-fast), transform var(--skeuo-transition-fast);
+}
+.share-whatsapp-btn:hover {
+  background: #1EB954;
+  transform: translateY(-1px);
+}
+.share-whatsapp-btn:active {
+  transform: translateY(0);
+}
+.share-whatsapp-btn svg {
+  flex-shrink: 0;
+}
+
+
+/* ==========================================================================
+   31. DARK MODE OVERRIDES — Voice panel, Quick actions, WhatsApp share
+   ========================================================================== */
+
+[data-theme="dark"] .voice-panel {
+  background: linear-gradient(180deg, #2a2420 0%, #1e1a16 100%);
+  border-top-color: var(--skeuo-saffron);
+}
+[data-theme="dark"] .voice-panel__header {
+  border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+[data-theme="dark"] .voice-msg--agent {
+  background: #2a2420;
+  border-color: rgba(255, 255, 255, 0.1);
+  color: var(--skeuo-paper-white);
+}
+[data-theme="dark"] .voice-panel__controls {
+  background: #2a2420;
+  border-top-color: rgba(255, 255, 255, 0.1);
+}
+[data-theme="dark"] .quick-action-card {
+  background: #2a2420;
+  border-color: rgba(255, 255, 255, 0.1);
+  color: var(--skeuo-paper-white);
+}
+[data-theme="dark"] .qa-emergency {
+  background: rgba(255, 59, 48, 0.15);
+}
+
+
+/* ==========================================================================
+   32. RESPONSIVE — Voice panel & Quick actions
+   ========================================================================== */
+
+@media (max-width: 600px) {
+  .voice-fab {
+    bottom: 1.25rem;
+    right: 1.25rem;
+    width: 56px;
+    height: 56px;
+  }
+  .voice-panel {
+    max-height: 80vh;
+  }
+  .quick-actions {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 769px) {
+  .voice-panel {
+    left: auto;
+    right: 2rem;
+    bottom: 7rem;
+    max-width: 420px;
+    max-height: 60vh;
+    border-radius: var(--skeuo-radius-lg);
+    border-top: 3px solid var(--skeuo-saffron);
+  }
 }
