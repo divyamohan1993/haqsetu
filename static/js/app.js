@@ -1260,7 +1260,115 @@ class HaqSetuApp {
         }
     }
 
+    /** Render AI orchestrator results into the results container. */
+    _renderAIResults(data) {
+        const container = document.getElementById('admin-ai-results');
+        if (!container) return;
+
+        let html = `<div style="margin-bottom:0.5rem">
+            <strong>${esc(data.summary || '')}</strong>
+            <span class="status-badge ${data.fixes_failed ? 'degraded' : 'healthy'}" style="margin-left:0.5rem">
+                ${data.diagnosis_source || 'rules'} &mdash; ${data.issues_found || 0} issues
+            </span>
+        </div>`;
+
+        const actions = data.actions || [];
+        if (actions.length) {
+            actions.forEach(a => {
+                const statusIcon = a.status === 'completed' ? '&#10004;' :
+                    a.status === 'failed' ? '&#10008;' :
+                    a.status === 'skipped' ? '&#8212;' : '&#9679;';
+                const sevClass = a.severity === 'critical' ? 'error' :
+                    a.severity === 'high' ? 'degraded' : 'healthy';
+                html += `<div class="audit-entry">
+                    <span style="min-width:20px">${statusIcon}</span>
+                    <span class="status-badge ${sevClass}" style="min-width:60px">${esc(a.severity)}</span>
+                    <span class="audit-action">${esc(a.action_name)}</span>
+                    <span class="audit-details">${esc(a.description)}${a.result ? ' — ' + esc(a.result) : ''}</span>
+                </div>`;
+            });
+        } else {
+            html += '<p class="placeholder-text">No issues detected.</p>';
+        }
+        container.innerHTML = html;
+    }
+
     _bindAdminButtons() {
+        // AI Diagnose Only
+        const diagBtn = document.getElementById('admin-ai-diagnose');
+        if (diagBtn && !diagBtn._bound) {
+            diagBtn._bound = true;
+            diagBtn.addEventListener('click', async () => {
+                diagBtn.disabled = true;
+                diagBtn.textContent = 'Diagnosing...';
+                const results = document.getElementById('admin-ai-results');
+                if (results) results.innerHTML = '<p class="placeholder-text">Running AI diagnosis...</p>';
+                try {
+                    const data = await api.post('/admin/recovery/orchestrator/diagnose-only');
+                    this._renderAIResults(data);
+                    Toast.show(`Diagnosis: ${data.issues_found} issue(s). Source: ${data.diagnosis_source}`, 'info');
+                } catch { if (results) results.innerHTML = '<p class="placeholder-text">Diagnosis failed. Check admin API key.</p>'; }
+                diagBtn.disabled = false;
+                diagBtn.textContent = 'Diagnose Only';
+            });
+        }
+
+        // AI Auto-Fix (Gemini 3 Pro)
+        const aiFixBtn = document.getElementById('admin-ai-autofix');
+        if (aiFixBtn && !aiFixBtn._bound) {
+            aiFixBtn._bound = true;
+            aiFixBtn.addEventListener('click', async () => {
+                if (!confirm('Run AI auto-fix? This will analyze and fix system issues.')) return;
+                aiFixBtn.disabled = true;
+                aiFixBtn.textContent = 'Running AI Fix...';
+                const results = document.getElementById('admin-ai-results');
+                if (results) results.innerHTML = '<p class="placeholder-text">Running AI auto-fix with Gemini 3 Pro...</p>';
+                try {
+                    const data = await api.post('/admin/recovery/orchestrator/run', {
+                        execute_fixes: true,
+                        auto_approve: false,
+                    });
+                    this._renderAIResults(data);
+                    Toast.show(
+                        `AI Fix: ${data.fixes_succeeded}/${data.fixes_executed} succeeded (${data.diagnosis_source})`,
+                        data.fixes_failed > 0 ? 'warning' : 'success'
+                    );
+                    this._loadAdminStatus();
+                    this._loadAdminAuditLog();
+                } catch { if (results) results.innerHTML = '<p class="placeholder-text">Auto-fix failed.</p>'; }
+                aiFixBtn.disabled = false;
+                aiFixBtn.textContent = 'Run AI Auto-Fix';
+            });
+        }
+
+        // AI History
+        const histBtn = document.getElementById('admin-ai-history');
+        if (histBtn && !histBtn._bound) {
+            histBtn._bound = true;
+            histBtn.addEventListener('click', async () => {
+                histBtn.disabled = true;
+                const results = document.getElementById('admin-ai-results');
+                try {
+                    const data = await api.get('/admin/recovery/orchestrator/history?limit=10');
+                    const history = data.history || [];
+                    if (!history.length) {
+                        if (results) results.innerHTML = '<p class="placeholder-text">No auto-fix history yet.</p>';
+                    } else {
+                        let html = '';
+                        history.forEach(h => {
+                            html += `<div class="audit-entry">
+                                <span class="audit-time">${fmtDate(h.created_at)}</span>
+                                <span class="audit-action">${esc(h.diagnosis_source)}</span>
+                                <span class="audit-details">${esc(h.summary)} — ${h.fixes_succeeded}/${h.fixes_executed} fixed (${h.duration_seconds}s)</span>
+                            </div>`;
+                        });
+                        if (results) results.innerHTML = html;
+                    }
+                } catch { if (results) results.innerHTML = '<p class="placeholder-text">Failed to load history.</p>'; }
+                histBtn.disabled = false;
+            });
+        }
+
         // Create Snapshot
         const snapshotBtn = document.getElementById('admin-create-snapshot');
         if (snapshotBtn && !snapshotBtn._bound) {

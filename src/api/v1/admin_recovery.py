@@ -634,6 +634,166 @@ async def auto_fix_issues(request: Request) -> dict[str, Any]:
     }
 
 
+# ---------------------------------------------------------------------------
+# AI-Powered Auto-Fix Orchestrator Endpoints (Gemini 3 Pro / Claude CLI)
+# ---------------------------------------------------------------------------
+
+
+class OrchestratorRunRequest(BaseModel):
+    """Request body for running the AI auto-fix orchestrator."""
+
+    execute_fixes: bool = Field(
+        default=True,
+        description="Whether to execute fixes or just diagnose",
+    )
+    auto_approve: bool = Field(
+        default=False,
+        description="Auto-approve even critical fixes (use with caution)",
+    )
+
+
+@router.post("/orchestrator/run")
+async def run_autofix_orchestrator(
+    body: OrchestratorRunRequest,
+    request: Request,
+) -> dict[str, Any]:
+    """Run the AI-powered auto-fix orchestrator.
+
+    Uses Gemini 3 Pro (via Vertex AI) to:
+    1. Analyze complete system state
+    2. Diagnose root causes of any issues
+    3. Generate and execute a safe fix plan
+    4. Report results
+
+    Falls back to rule-based diagnosis if Gemini is unavailable.
+    """
+    admin_ip = request.client.host if request.client else "unknown"
+
+    # Get or create orchestrator
+    orchestrator = getattr(request.app.state, "autofix_orchestrator", None)
+    if orchestrator is None:
+        from config.settings import settings
+        from src.services.autofix_orchestrator import AutoFixOrchestrator
+
+        orchestrator = AutoFixOrchestrator(
+            project_id=settings.gcp_project_id,
+            model_name=settings.vertex_ai_model.replace("flash", "pro")
+            if "flash" in settings.vertex_ai_model
+            else "gemini-3.0-pro",
+            region=settings.vertex_ai_location,
+        )
+        request.app.state.autofix_orchestrator = orchestrator
+
+    _record_audit(
+        "orchestrator_run",
+        f"AI auto-fix started (execute={body.execute_fixes}, auto_approve={body.auto_approve})",
+        admin_ip,
+    )
+
+    report = await orchestrator.diagnose_and_fix(
+        app_state=request.app.state,
+        execute_fixes=body.execute_fixes,
+        auto_approve=body.auto_approve,
+    )
+
+    _record_audit(
+        "orchestrator_complete",
+        f"AI auto-fix: {report.fixes_succeeded}/{report.fixes_executed} succeeded, "
+        f"source={report.diagnosis_source}",
+        admin_ip,
+    )
+
+    return {
+        "report_id": report.report_id,
+        "diagnosis_source": report.diagnosis_source,
+        "model_used": report.model_used,
+        "summary": report.summary,
+        "issues_found": report.issues_found,
+        "fixes_executed": report.fixes_executed,
+        "fixes_succeeded": report.fixes_succeeded,
+        "fixes_failed": report.fixes_failed,
+        "requires_human_approval": report.requires_human_approval,
+        "duration_seconds": report.duration_seconds,
+        "actions": [
+            {
+                "action_name": a.action_name,
+                "description": a.description,
+                "severity": a.severity,
+                "risk_level": a.risk_level,
+                "status": a.status,
+                "result": a.result,
+            }
+            for a in report.actions
+        ],
+    }
+
+
+@router.get("/orchestrator/history")
+async def get_orchestrator_history(
+    request: Request,
+    limit: int = 20,
+) -> dict[str, Any]:
+    """Get history of AI auto-fix runs."""
+    orchestrator = getattr(request.app.state, "autofix_orchestrator", None)
+    if orchestrator is None:
+        return {"history": [], "total": 0}
+
+    history = orchestrator.get_history(limit=limit)
+    return {"history": history, "total": len(history)}
+
+
+@router.post("/orchestrator/diagnose-only")
+async def diagnose_only(request: Request) -> dict[str, Any]:
+    """Run diagnosis without executing any fixes.
+
+    Safe to run at any time — only analyzes system state.
+    """
+    admin_ip = request.client.host if request.client else "unknown"
+
+    orchestrator = getattr(request.app.state, "autofix_orchestrator", None)
+    if orchestrator is None:
+        from config.settings import settings
+        from src.services.autofix_orchestrator import AutoFixOrchestrator
+
+        orchestrator = AutoFixOrchestrator(
+            project_id=settings.gcp_project_id,
+            model_name=settings.vertex_ai_model.replace("flash", "pro")
+            if "flash" in settings.vertex_ai_model
+            else "gemini-3.0-pro",
+            region=settings.vertex_ai_location,
+        )
+        request.app.state.autofix_orchestrator = orchestrator
+
+    _record_audit("orchestrator_diagnose", "Diagnosis-only run", admin_ip)
+
+    report = await orchestrator.diagnose_and_fix(
+        app_state=request.app.state,
+        execute_fixes=False,
+    )
+
+    return {
+        "report_id": report.report_id,
+        "diagnosis_source": report.diagnosis_source,
+        "summary": report.summary,
+        "issues_found": report.issues_found,
+        "requires_human_approval": report.requires_human_approval,
+        "actions": [
+            {
+                "action_name": a.action_name,
+                "description": a.description,
+                "severity": a.severity,
+                "risk_level": a.risk_level,
+            }
+            for a in report.actions
+        ],
+    }
+
+
+# ---------------------------------------------------------------------------
+# Module-level helpers
+# ---------------------------------------------------------------------------
+
+
 def is_maintenance_mode_active() -> bool:
     """Check if maintenance mode is currently active.
 

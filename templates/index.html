@@ -496,6 +496,27 @@
           </div>
         </div>
 
+        <!-- AI Auto-Fix Orchestrator (Gemini 3 Pro) -->
+        <div class="paper-card admin-section">
+          <h3 class="card-title">AI Auto-Fix Orchestrator (Gemini 3 Pro)</h3>
+          <p style="font-size:0.85rem;opacity:0.8;margin-bottom:0.75rem">
+            Uses Gemini 3 Pro to diagnose system issues and execute intelligent fixes.
+            Falls back to rule-based engine if Vertex AI is unavailable.
+          </p>
+          <div class="admin-actions">
+            <button class="skeuo-btn btn-primary" id="admin-ai-diagnose" aria-label="Run AI diagnosis only">
+              Diagnose Only
+            </button>
+            <button class="skeuo-btn btn-primary" id="admin-ai-autofix" aria-label="Run AI auto-fix">
+              Run AI Auto-Fix
+            </button>
+            <button class="skeuo-btn" id="admin-ai-history" aria-label="View auto-fix history">
+              View History
+            </button>
+          </div>
+          <div id="admin-ai-results" class="audit-log" style="margin-top:0.75rem" aria-live="polite"></div>
+        </div>
+
         <!-- Snapshots & Rollback -->
         <div class="paper-card admin-section">
           <h3 class="card-title">Snapshots &amp; Rollback Points</h3>
