@@ -48,8 +48,9 @@ jobs:
           image-ref: "haqsetu:scan"
           format: "sarif"
           output: "trivy-results.sarif"
-          severity: "CRITICAL,HIGH"
+          severity: "CRITICAL,HIGH,MEDIUM"
           exit-code: "0"
+          trivyignores: ".trivyignore"
 
       - name: Upload Trivy scan results
         if: always()

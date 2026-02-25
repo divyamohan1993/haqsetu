@@ -400,7 +400,7 @@ async def rollback_to_snapshot(
                 )
 
         except Exception as exc:
-            errors.append(f"{component}: {exc!s}")
+            errors.append(f"{component}: restore failed")
             logger.error(
                 "admin.rollback.component_failed",
                 component=component,
@@ -860,17 +860,29 @@ async def claude_cli_start_auth(request: Request) -> dict[str, Any]:
     )
 
     bridge = _get_claude_bridge(request)
-    result = await bridge.start_auth_login()
 
-    if result.get("success"):
+    try:
+        result = await bridge.start_auth_login()
+    except Exception:
+        logger.exception("admin.claude_auth_failed")
+        raise HTTPException(status_code=500, detail="Claude CLI authentication failed.")
+
+    safe_result = {
+        "success": result.get("success", False),
+        "device_code": result.get("device_code"),
+        "verification_url": result.get("verification_url"),
+        "message": result.get("message", ""),
+    }
+
+    if safe_result.get("success"):
         _record_audit(
             "claude_auth_flow",
-            f"Device code: {result.get('device_code', 'N/A')}, "
-            f"URL: {result.get('verification_url', 'N/A')}",
+            f"Device code: {safe_result.get('device_code', 'N/A')}, "
+            f"URL: {safe_result.get('verification_url', 'N/A')}",
             admin_ip,
         )
 
-    return result
+    return safe_result
 
 
 @router.post("/claude/run")
@@ -904,10 +916,14 @@ async def claude_cli_run_autofix(
         admin_ip,
     )
 
-    result = await bridge.run_autofix(
-        prompt=body.prompt,
-        timeout=body.timeout,
-    )
+    try:
+        result = await bridge.run_autofix(
+            prompt=body.prompt,
+            timeout=body.timeout,
+        )
+    except Exception:
+        logger.exception("admin.claude_run_failed")
+        raise HTTPException(status_code=500, detail="Claude CLI auto-fix execution failed.")
 
     session = result.get("session", {})
     _record_audit(
@@ -918,7 +934,18 @@ async def claude_cli_run_autofix(
         admin_ip,
     )
 
-    return result
+    # Return only safe fields, excluding any raw error traces
+    safe_session = {
+        "session_id": session.get("session_id"),
+        "status": session.get("status"),
+        "duration_seconds": session.get("duration_seconds"),
+        "exit_code": session.get("exit_code"),
+    }
+    return {
+        "success": result.get("success", False),
+        "session": safe_session,
+        "message": result.get("message", ""),
+    }
 
 
 @router.get("/claude/history")
