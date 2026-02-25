@@ -244,6 +244,30 @@
         </div>
       </div>
 
+      <!-- Quick Action Cards -->
+      <div class="quick-actions" aria-label="Quick actions">
+        <button class="quick-action-card" id="qa-voice" aria-label="Ask by voice">
+          <span class="qa-icon" aria-hidden="true">&#127908;</span>
+          <span class="qa-label">Ask by Voice</span>
+          <span class="qa-hint" lang="hi">आवाज़ से पूछें</span>
+        </button>
+        <a href="#/schemes" class="quick-action-card" aria-label="Browse schemes">
+          <span class="qa-icon" aria-hidden="true">&#128209;</span>
+          <span class="qa-label">Browse Schemes</span>
+          <span class="qa-hint" lang="hi">योजनाएं खोजें</span>
+        </a>
+        <button class="quick-action-card qa-emergency" id="qa-emergency" aria-label="Emergency help">
+          <span class="qa-icon" aria-hidden="true">&#128680;</span>
+          <span class="qa-label">Emergency Help</span>
+          <span class="qa-hint" lang="hi">आपातकालीन मदद</span>
+        </button>
+        <a href="#/feedback" class="quick-action-card" aria-label="Give feedback">
+          <span class="qa-icon" aria-hidden="true">&#128172;</span>
+          <span class="qa-label">Give Feedback</span>
+          <span class="qa-hint" lang="hi">प्रतिक्रिया दें</span>
+        </a>
+      </div>
+
       <!-- Stats Row -->
       <div class="stats-row" id="stats-row" aria-label="Scheme statistics overview">
         <div class="stat-card">
@@ -588,6 +612,46 @@
     </section>
 
   </main>
+
+  <!-- Voice Assistant FAB + Chat Panel -->
+  <button class="skeuo-mic-btn voice-fab" id="voice-fab"
+          aria-label="Talk to HaqSetu" title="Talk to HaqSetu">
+    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24"
+         fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+      <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+      <line x1="12" y1="19" x2="12" y2="23"/>
+      <line x1="8" y1="23" x2="16" y2="23"/>
+    </svg>
+  </button>
+
+  <div class="voice-panel" id="voice-panel" role="dialog" aria-label="Voice Assistant" aria-hidden="true">
+    <div class="voice-panel__header">
+      <h3 lang="hi">हक़सेतु से बात करें</h3>
+      <span class="voice-panel__subtitle">Talk to HaqSetu</span>
+      <button class="voice-panel__close" id="voice-panel-close" aria-label="Close voice assistant">&times;</button>
+    </div>
+    <div class="voice-panel__chat" id="voice-chat" aria-live="polite" aria-label="Conversation">
+      <div class="voice-msg voice-msg--agent">
+        <p>Namaste! Tap the mic and ask me about any government scheme, your rights, or how to get help.</p>
+        <p lang="hi">नमस्ते! माइक दबाएं और किसी भी सरकारी योजना, अपने अधिकारों, या मदद के बारे में पूछें।</p>
+      </div>
+    </div>
+    <div class="voice-panel__controls">
+      <button class="skeuo-mic-btn voice-panel__mic" id="voice-panel-mic" aria-label="Hold to speak">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+             fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+          <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+          <line x1="12" y1="19" x2="12" y2="23"/>
+          <line x1="8" y1="23" x2="16" y2="23"/>
+        </svg>
+      </button>
+      <input type="text" class="skeuo-input voice-panel__input" id="voice-panel-input"
+             placeholder="Or type your question..." aria-label="Type your question">
+      <button class="skeuo-btn btn-primary voice-panel__send" id="voice-panel-send" aria-label="Send">&#10148;</button>
+    </div>
+  </div>
 
   <!-- Toast notification container -->
   <div id="toast-container" class="toast-container" role="alert" aria-live="assertive" aria-atomic="true"></div>

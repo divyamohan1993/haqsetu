@@ -935,6 +935,13 @@ class HaqSetuApp {
                     <a href="#/feedback?scheme_id=${esc(scheme.scheme_id)}" class="skeuo-btn btn-primary" style="width:100%;text-align:center;margin-top:1rem;">
                         Report Issue
                     </a>
+
+                    <a href="https://wa.me/?text=${encodeURIComponent(`${scheme.name}\n\n${(scheme.description || '').slice(0, 200)}...\n\nCheck eligibility: ${location.origin}/#/scheme/${scheme.scheme_id}`)}"
+                       target="_blank" rel="noopener"
+                       class="share-whatsapp-btn" aria-label="Share on WhatsApp">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                        Share on WhatsApp
+                    </a>
                 </aside>
             </div>
 
@@ -1719,10 +1726,206 @@ class HaqSetuApp {
 
 
 // =========================================================================
-// 9.  BOOTSTRAP
+// 9.  VOICE ASSISTANT — Web Speech API STT + backend query
+// =========================================================================
+
+class VoiceAssistant {
+    constructor() {
+        this._fab = document.getElementById('voice-fab');
+        this._panel = document.getElementById('voice-panel');
+        this._chat = document.getElementById('voice-chat');
+        this._mic = document.getElementById('voice-panel-mic');
+        this._input = document.getElementById('voice-panel-input');
+        this._send = document.getElementById('voice-panel-send');
+        this._close = document.getElementById('voice-panel-close');
+        this._recording = false;
+        this._recognition = null;
+        this._sessionId = null;
+
+        if (!this._fab || !this._panel) return;
+        this._initSpeechRecognition();
+        this._bind();
+    }
+
+    _initSpeechRecognition() {
+        const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SR) return;
+        this._recognition = new SR();
+        this._recognition.lang = 'hi-IN';
+        this._recognition.continuous = false;
+        this._recognition.interimResults = false;
+        this._recognition.maxAlternatives = 1;
+
+        this._recognition.onresult = (e) => {
+            const text = e.results[0][0].transcript;
+            if (text) {
+                this._input.value = text;
+                this._sendMessage(text);
+            }
+        };
+        this._recognition.onerror = () => { this._stopRecording(); };
+        this._recognition.onend = () => { this._stopRecording(); };
+    }
+
+    _bind() {
+        // FAB opens/closes panel
+        this._fab.addEventListener('click', () => this._togglePanel());
+        this._close.addEventListener('click', () => this._hidePanel());
+
+        // Mic toggle
+        this._mic.addEventListener('click', () => {
+            if (this._recording) { this._stopRecording(); }
+            else { this._startRecording(); }
+        });
+
+        // Send button + Enter key
+        this._send.addEventListener('click', () => {
+            const text = this._input.value.trim();
+            if (text) this._sendMessage(text);
+        });
+        this._input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const text = this._input.value.trim();
+                if (text) this._sendMessage(text);
+            }
+        });
+
+        // Quick action: "Ask by Voice" opens panel
+        const qaVoice = document.getElementById('qa-voice');
+        if (qaVoice) qaVoice.addEventListener('click', () => this._showPanel());
+
+        // Quick action: Emergency help
+        const qaEmergency = document.getElementById('qa-emergency');
+        if (qaEmergency) qaEmergency.addEventListener('click', () => this._emergencyHelp());
+    }
+
+    _togglePanel() {
+        const hidden = this._panel.getAttribute('aria-hidden') !== 'false';
+        if (hidden) this._showPanel(); else this._hidePanel();
+    }
+
+    _showPanel() {
+        this._panel.setAttribute('aria-hidden', 'false');
+        this._fab.classList.add('voice-fab--active');
+        this._input.focus();
+    }
+
+    _hidePanel() {
+        this._panel.setAttribute('aria-hidden', 'true');
+        this._fab.classList.remove('voice-fab--active');
+        this._stopRecording();
+    }
+
+    _startRecording() {
+        if (!this._recognition) {
+            Toast.show('Voice input not supported in this browser. Please type your question.', 'warning');
+            return;
+        }
+        this._recording = true;
+        this._mic.classList.add('skeuo-mic-btn--recording');
+        this._mic.setAttribute('aria-label', 'Listening... tap to stop');
+        try { this._recognition.start(); } catch { /* already started */ }
+    }
+
+    _stopRecording() {
+        this._recording = false;
+        this._mic.classList.remove('skeuo-mic-btn--recording');
+        this._mic.setAttribute('aria-label', 'Hold to speak');
+        try { this._recognition.abort(); } catch { /* not started */ }
+    }
+
+    _appendMessage(text, role) {
+        const div = document.createElement('div');
+        div.className = `voice-msg voice-msg--${role}`;
+        div.innerHTML = `<p>${esc(text)}</p>`;
+        this._chat.appendChild(div);
+        this._chat.scrollTop = this._chat.scrollHeight;
+        return div;
+    }
+
+    _showTyping() {
+        const div = document.createElement('div');
+        div.className = 'voice-msg voice-msg--agent voice-msg--typing';
+        div.id = 'voice-typing';
+        div.innerHTML = '<div class="typing-dots"><span></span><span></span><span></span></div>';
+        this._chat.appendChild(div);
+        this._chat.scrollTop = this._chat.scrollHeight;
+    }
+
+    _hideTyping() {
+        const el = document.getElementById('voice-typing');
+        if (el) el.remove();
+    }
+
+    async _sendMessage(text) {
+        this._appendMessage(text, 'user');
+        this._input.value = '';
+        this._showTyping();
+
+        try {
+            const body = {
+                query: text,
+                channel: 'web',
+                language: document.documentElement.lang || 'hi',
+            };
+            if (this._sessionId) body.session_id = this._sessionId;
+
+            const result = await api.post('/query', body);
+            this._hideTyping();
+
+            const answer = result.answer || result.response_text || 'Sorry, I could not process that.';
+            this._appendMessage(answer, 'agent');
+
+            if (result.session_id) this._sessionId = result.session_id;
+
+            // Speak the answer using browser TTS as fallback
+            this._speak(answer);
+        } catch {
+            this._hideTyping();
+            this._appendMessage('Sorry, something went wrong. For immediate help, call Tele-Law at 1516.', 'agent');
+        }
+    }
+
+    _speak(text) {
+        if (!window.speechSynthesis) return;
+        // Cancel any ongoing speech
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = document.documentElement.lang || 'hi-IN';
+        utterance.rate = 0.9;
+        window.speechSynthesis.speak(utterance);
+    }
+
+    async _emergencyHelp() {
+        this._showPanel();
+        this._showTyping();
+        try {
+            const data = await api.get('/emergency/contacts');
+            this._hideTyping();
+            const contacts = data.contacts || [];
+            let msg = 'Emergency helplines:\n';
+            for (const c of contacts.slice(0, 5)) {
+                msg += `\n${c.name}: ${c.number}`;
+            }
+            msg += '\n\nFor immediate danger, call 112.';
+            this._appendMessage(msg, 'agent');
+        } catch {
+            this._hideTyping();
+            this._appendMessage('Emergency numbers:\n\nPolice: 100\nAmbulance: 108\nWomen Helpline: 181\nEmergency: 112\nTele-Law: 1516', 'agent');
+        }
+    }
+}
+
+
+// =========================================================================
+// 10.  BOOTSTRAP
 // =========================================================================
 
 document.addEventListener('DOMContentLoaded', () => {
     const app = new HaqSetuApp();
     app.start();
+
+    // Initialise voice assistant (non-blocking — gracefully no-ops if elements missing)
+    new VoiceAssistant();
 });
