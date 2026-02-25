@@ -1,0 +1,100 @@
+# =============================================================================
+# HaqSetu - Dependabot Configuration
+# Automatically creates PRs for dependency updates and security patches.
+# =============================================================================
+
+version: 2
+
+updates:
+  # --- Python (pip) dependencies ---
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "04:00"
+      timezone: "Asia/Kolkata"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "divyamohan1993"
+    labels:
+      - "dependencies"
+      - "python"
+    commit-message:
+      prefix: "deps"
+      include: "scope"
+    # Group minor/patch updates to reduce PR noise
+    groups:
+      google-cloud:
+        patterns:
+          - "google-cloud-*"
+          - "google-auth*"
+          - "grpcio*"
+          - "proto-plus*"
+          - "protobuf*"
+        update-types:
+          - "minor"
+          - "patch"
+      fastapi-ecosystem:
+        patterns:
+          - "fastapi*"
+          - "uvicorn*"
+          - "starlette*"
+          - "pydantic*"
+          - "python-multipart*"
+        update-types:
+          - "minor"
+          - "patch"
+      testing:
+        patterns:
+          - "pytest*"
+          - "coverage*"
+          - "ruff*"
+        update-types:
+          - "minor"
+          - "patch"
+      security-tools:
+        patterns:
+          - "bandit*"
+          - "safety*"
+          - "pip-audit*"
+        update-types:
+          - "minor"
+          - "patch"
+    # Security updates are always raised immediately regardless of schedule
+    security-updates:
+      enabled: true
+
+  # --- Docker base images ---
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+      time: "04:00"
+      timezone: "Asia/Kolkata"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "divyamohan1993"
+    labels:
+      - "dependencies"
+      - "docker"
+    commit-message:
+      prefix: "deps(docker)"
+
+  # --- GitHub Actions ---
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "wednesday"
+      time: "04:00"
+      timezone: "Asia/Kolkata"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "divyamohan1993"
+    labels:
+      - "dependencies"
+      - "ci"
+    commit-message:
+      prefix: "ci(deps)"

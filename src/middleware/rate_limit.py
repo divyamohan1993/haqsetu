@@ -118,19 +118,29 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
 
         return response
 
-    @staticmethod
-    def _get_client_ip(request: Request) -> str:
-        """Extract the client IP, respecting X-Forwarded-For for proxied requests."""
-        # Check for forwarded header (Cloud Run, nginx, etc.)
+    def _get_client_ip(self, request: Request) -> str:
+        """Extract the client IP from trusted proxy headers.
+
+        SECURITY: X-Forwarded-For can be spoofed by clients.  We use the
+        rightmost-minus-N strategy: take the Nth IP from the right of the
+        X-Forwarded-For chain, where N is the number of trusted proxies
+        (default 1, e.g. Cloud Run adds one entry).  This way, the
+        attacker-controllable leftmost entries are ignored.
+
+        Reference: https://adam-p.ca/blog/2022/03/x-forwarded-for/
+        """
+        from config.settings import settings
+
+        trusted_proxies = getattr(settings, "trusted_proxy_count", 1)
+
         forwarded_for = request.headers.get("X-Forwarded-For")
         if forwarded_for:
-            # Take the first IP (original client)
-            return forwarded_for.split(",")[0].strip()
-
-        # Check for X-Real-IP header
-        real_ip = request.headers.get("X-Real-IP")
-        if real_ip:
-            return real_ip.strip()
+            ips = [ip.strip() for ip in forwarded_for.split(",") if ip.strip()]
+            # Take the Nth IP from the right (rightmost = set by the closest proxy)
+            if len(ips) >= trusted_proxies:
+                return ips[-trusted_proxies]
+            # If fewer entries than expected proxies, use the leftmost (best effort)
+            return ips[0] if ips else "unknown"
 
         # Fall back to direct connection IP
         if request.client:

@@ -16,8 +16,10 @@ from __future__ import annotations
 from typing import Any
 
 import structlog
-from fastapi import APIRouter, BackgroundTasks, HTTPException, Query, Request
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, Request
 from pydantic import BaseModel, Field
+
+from src.middleware.auth import require_admin_api_key
 
 logger: structlog.stdlib.BoundLogger = structlog.get_logger(__name__)
 
@@ -335,7 +337,11 @@ async def search_verification_status(
     ]
 
 
-@router.post("/trigger", response_model=VerificationTriggerResponse)
+@router.post(
+    "/trigger",
+    response_model=VerificationTriggerResponse,
+    dependencies=[Depends(require_admin_api_key)],
+)
 async def trigger_verification(
     request: Request,
     background_tasks: BackgroundTasks,

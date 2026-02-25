@@ -115,10 +115,27 @@ class DPDPAMiddleware(BaseHTTPMiddleware):
         # -- Process request -----------------------------------------------
         response = await call_next(request)
 
-        # -- Add privacy headers -------------------------------------------
+        # -- Add security and privacy headers --------------------------------
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["X-Frame-Options"] = "DENY"
         response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        response.headers["Strict-Transport-Security"] = "max-age=63072000; includeSubDomains; preload"
+        response.headers["Content-Security-Policy"] = (
+            "default-src 'self'; "
+            "script-src 'self' 'unsafe-inline'; "
+            "style-src 'self' 'unsafe-inline'; "
+            "img-src 'self' data:; "
+            "font-src 'self'; "
+            "connect-src 'self'; "
+            "frame-ancestors 'none'; "
+            "base-uri 'self'; "
+            "form-action 'self'"
+        )
+        response.headers["Permissions-Policy"] = (
+            "camera=(), microphone=(self), geolocation=(), payment=(), "
+            "usb=(), magnetometer=(), gyroscope=(), accelerometer=()"
+        )
+        response.headers["X-Permitted-Cross-Domain-Policies"] = "none"
         response.headers["X-DPDPA-Compliant"] = "true"
         response.headers["X-Data-Processing-Purpose"] = "government-scheme-assistance"
         response.headers["X-Data-Retention-Policy"] = "session-only"

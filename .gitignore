@@ -1,3 +1,4 @@
+# Python
 __pycache__/
 *.pyc
 *.pyo
@@ -5,17 +6,49 @@ __pycache__/
 dist/
 build/
 .eggs/
+*.so
+
+# Virtual environments
 .venv/
 venv/
+
+# Environment and secrets -- NEVER commit these
 .env
+.env.*
+!.env.example
 *.env.local
+*.env.backup.*
+*.pem
+*.key
+*.p12
+*.jks
+service-account*.json
+credentials*.json
+
+# IDE / tooling
 .ruff_cache/
 .pytest_cache/
+.mypy_cache/
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Test / coverage
 .coverage
 htmlcov/
-.mypy_cache/
-*.so
+coverage.xml
+
+# Terraform
 *.terraform/
 *.terraform.lock.hcl
 terraform.tfstate*
+
+# Security scan reports (kept locally, not committed)
+bandit-report.json
+pip-audit-report.txt
+trivy-results.sarif
+
+# OS artifacts
 .DS_Store
+Thumbs.db

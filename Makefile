@@ -4,7 +4,8 @@
 # =============================================================================
 
 .PHONY: help dev docker-dev docker-prod deploy-dev deploy-prod \
-        test lint format clean seed setup
+        test lint format clean seed setup \
+        security-scan security-audit generate-keys
 
 # Default target
 help: ## Show this help message
@@ -72,6 +73,22 @@ format-check: ## Check formatting without applying changes
 
 typecheck: ## Run type checking (if mypy is installed)
 	@command -v mypy >/dev/null 2>&1 && mypy src/ || echo "mypy not installed, skipping."
+
+# ---------------------------------------------------------------------------
+# Security
+# ---------------------------------------------------------------------------
+
+security-scan: ## Run bandit SAST scan
+	bandit -r src/ -c pyproject.toml -ll
+
+security-audit: ## Run pip-audit dependency vulnerability check
+	pip-audit --strict --desc on
+
+generate-keys: ## Generate or rotate secure keys in .env
+	./scripts/generate_keys.sh
+
+rotate-keys: ## Force-rotate all secure keys in .env
+	./scripts/generate_keys.sh --rotate
 
 # ---------------------------------------------------------------------------
 # Data
