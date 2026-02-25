@@ -106,7 +106,11 @@ def _require_admin_api_key(request: Request) -> None:
     If ``settings.admin_api_key`` is empty (the default during local
     development), the check is skipped so the SPA and dev tools work
     without extra configuration.
+
+    Uses constant-time comparison to prevent timing attacks.
     """
+    import hmac
+
     from config.settings import settings
 
     configured_key = settings.admin_api_key
@@ -115,7 +119,9 @@ def _require_admin_api_key(request: Request) -> None:
         return
 
     provided_key = request.headers.get("X-Admin-API-Key", "")
-    if provided_key != configured_key:
+    if not provided_key or not hmac.compare_digest(
+        provided_key.encode(), configured_key.encode()
+    ):
         raise HTTPException(
             status_code=403,
             detail="Invalid or missing X-Admin-API-Key header.",

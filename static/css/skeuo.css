@@ -2903,3 +2903,675 @@ body.dark-mode .card-title {
     grid-template-columns: repeat(2, 1fr);
   }
 }
+
+
+/* ==========================================================================
+   20. DARK MODE — Full Skeuomorphic Night Theme
+   ========================================================================== */
+
+body.dark-mode {
+  --skeuo-parchment-light:   #1E1B16;
+  --skeuo-parchment:         #252118;
+  --skeuo-parchment-dark:    #2D281E;
+  --skeuo-paper-white:       #1A1814;
+  --skeuo-paper-grain:       #2A2520;
+  --skeuo-wood-light:        #6B5B45;
+  --skeuo-wood:              #4A3F30;
+  --skeuo-wood-dark:         #2E2518;
+  --skeuo-leather:           #3E2F1E;
+  --skeuo-leather-dark:      #2A1F12;
+  --skeuo-shadow-card:       0 2px 6px rgba(0,0,0,0.4), 0 8px 24px rgba(0,0,0,0.25);
+  --skeuo-shadow-lifted:     0 4px 12px rgba(0,0,0,0.5), 0 16px 40px rgba(0,0,0,0.3);
+}
+
+body.dark-mode {
+  background-color: #141210;
+  color: #D5CFC5;
+}
+
+body.dark-mode .skeuo-navbar {
+  background: linear-gradient(180deg, #2E2518 0%, #1E1710 100%);
+  border-bottom-color: #3E3228;
+}
+
+body.dark-mode .paper-card,
+body.dark-mode .scheme-card {
+  background: linear-gradient(145deg, #252118, #1E1B16);
+  border-color: #3A3228;
+  color: #D5CFC5;
+}
+
+body.dark-mode .paper-card:hover,
+body.dark-mode .scheme-card:hover {
+  box-shadow: 0 4px 16px rgba(255, 153, 51, 0.08);
+}
+
+body.dark-mode .skeuo-input,
+body.dark-mode .skeuo-textarea,
+body.dark-mode .skeuo-select {
+  background: #1A1814;
+  border-color: #3A3228;
+  color: #D5CFC5;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+body.dark-mode .skeuo-input:focus,
+body.dark-mode .skeuo-textarea:focus,
+body.dark-mode .skeuo-select:focus {
+  border-color: var(--skeuo-saffron);
+  box-shadow: 0 0 0 3px rgba(255, 153, 51, 0.15);
+}
+
+body.dark-mode .skeuo-table th {
+  background: #2E2518;
+  color: #D5CFC5;
+  border-bottom-color: #4A3F30;
+}
+
+body.dark-mode .skeuo-table td {
+  border-bottom-color: #2E2518;
+  color: #C0B8A8;
+}
+
+body.dark-mode .skeuo-table tr:hover td {
+  background: rgba(255, 153, 51, 0.05);
+}
+
+body.dark-mode .card-title,
+body.dark-mode h1, body.dark-mode h2, body.dark-mode h3 {
+  color: #E8E0CE;
+}
+
+body.dark-mode .placeholder-text {
+  color: #7C7060;
+}
+
+body.dark-mode .nav-tab.active {
+  background: rgba(255, 153, 51, 0.15);
+  color: var(--skeuo-saffron);
+}
+
+body.dark-mode a {
+  color: #D4A55A;
+}
+
+body.dark-mode a:hover {
+  color: var(--skeuo-saffron);
+}
+
+body.dark-mode .hero-section {
+  background: linear-gradient(135deg, #2E2518 0%, #1A1814 100%);
+}
+
+body.dark-mode .hero-title {
+  color: var(--skeuo-saffron);
+}
+
+body.dark-mode .stat-card {
+  background: linear-gradient(145deg, #252118, #1E1B16);
+  border-color: #3A3228;
+}
+
+body.dark-mode .skeuo-btn {
+  border-color: #4A3F30;
+}
+
+body.dark-mode .btn-primary {
+  background: linear-gradient(180deg, var(--skeuo-saffron) 0%, var(--skeuo-saffron-dark) 100%);
+  color: #1A1814;
+}
+
+body.dark-mode .source-item {
+  border-bottom-color: #2E2518;
+}
+
+body.dark-mode .evidence-card {
+  background: #1E1B16;
+  border-color: #3A3228;
+}
+
+body.dark-mode .toast {
+  background: #2E2518;
+  color: #D5CFC5;
+  border-color: #4A3F30;
+}
+
+body.dark-mode footer {
+  background: #1A1814;
+  border-top-color: #2E2518;
+  color: #7C7060;
+}
+
+/* Dark mode toggle button icon swap */
+body.dark-mode #dark-mode-toggle::after {
+  content: '☀️';
+}
+
+#dark-mode-toggle::after {
+  content: '🌙';
+}
+
+
+/* ==========================================================================
+   21. ENHANCED MOBILE OPTIMIZATION — Works on Slowest Phones
+   ========================================================================== */
+
+/* Performance: reduce animations on slow devices */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Touch target: minimum 44x44px for all interactive elements */
+@media (pointer: coarse) {
+  .skeuo-btn,
+  .nav-tab,
+  .skeuo-input,
+  .skeuo-select,
+  .skeuo-textarea,
+  a,
+  button,
+  [role="button"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  .nav-tab {
+    padding: 0.6rem 1rem;
+  }
+
+  .scheme-card {
+    padding: 1rem;
+  }
+}
+
+/* Very small screens (feature phones / 320px) */
+@media (max-width: 480px) {
+  body {
+    font-size: 15px;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  .skeuo-navbar {
+    padding: 0.4rem 0.5rem;
+  }
+
+  .navbar-brand {
+    font-size: 1rem;
+  }
+
+  .navbar-links {
+    gap: 0.25rem;
+  }
+
+  .nav-tab {
+    font-size: 0.75rem;
+    padding: 0.4rem 0.6rem;
+  }
+
+  .main-content {
+    padding: 0.5rem;
+  }
+
+  .hero-section {
+    padding: 1rem 0.5rem;
+  }
+
+  .hero-title {
+    font-size: 1.1rem;
+    line-height: 1.3;
+  }
+
+  .hero-subtitle {
+    font-size: 0.85rem;
+  }
+
+  .hero-search {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .hero-search .skeuo-input {
+    width: 100%;
+  }
+
+  .hero-search .skeuo-btn {
+    width: 100%;
+  }
+
+  .stats-row {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+  }
+
+  .stat-card {
+    padding: 0.5rem;
+  }
+
+  .stat-value {
+    font-size: 1.3rem;
+  }
+
+  .paper-card {
+    padding: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .card-title {
+    font-size: 1rem;
+  }
+
+  .detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .detail-sidebar {
+    order: -1;
+  }
+
+  /* Responsive tables: horizontal scroll */
+  .table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin: 0 -0.75rem;
+    padding: 0 0.75rem;
+  }
+
+  .skeuo-table {
+    min-width: 500px;
+    font-size: 0.8rem;
+  }
+
+  .skeuo-table th,
+  .skeuo-table td {
+    padding: 0.4rem 0.5rem;
+  }
+
+  /* Evidence timeline: stack vertically */
+  .evidence-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .evidence-card {
+    padding: 0.6rem;
+  }
+
+  /* Feedback form: full width inputs */
+  .skeuo-input,
+  .skeuo-select,
+  .skeuo-textarea {
+    width: 100%;
+    font-size: 16px; /* Prevents iOS zoom on focus */
+  }
+
+  .donut-wrapper {
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .donut-wrapper svg {
+    max-width: 180px;
+    height: auto;
+  }
+}
+
+/* Intermediate screens */
+@media (min-width: 481px) and (max-width: 768px) {
+  .detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stats-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .schemes-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+
+/* ==========================================================================
+   22. SKIP TO CONTENT & ACCESSIBILITY IMPROVEMENTS
+   ========================================================================== */
+
+.skip-to-content {
+  position: absolute;
+  top: -100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--skeuo-saffron);
+  color: #1A1814;
+  padding: 0.75rem 1.5rem;
+  font-weight: 700;
+  font-size: 1rem;
+  border-radius: 0 0 var(--skeuo-radius-md) var(--skeuo-radius-md);
+  z-index: 9999;
+  text-decoration: none;
+  transition: top 0.2s;
+}
+
+.skip-to-content:focus {
+  top: 0;
+}
+
+/* Focus visible ring for keyboard navigation */
+:focus-visible {
+  outline: 3px solid var(--skeuo-saffron);
+  outline-offset: 2px;
+}
+
+/* Screen reader only text */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* High contrast mode support */
+@media (forced-colors: active) {
+  .skeuo-btn {
+    border: 2px solid ButtonText;
+  }
+
+  .led {
+    border: 2px solid ButtonText;
+  }
+
+  .paper-card {
+    border: 1px solid CanvasText;
+  }
+}
+
+
+/* ==========================================================================
+   23. MAINTENANCE MODE OVERLAY
+   ========================================================================== */
+
+.maintenance-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+}
+
+.maintenance-card {
+  background: var(--skeuo-parchment-light);
+  padding: 2rem;
+  border-radius: var(--skeuo-radius-lg);
+  max-width: 500px;
+  text-align: center;
+  box-shadow: var(--skeuo-shadow-lifted);
+}
+
+body.dark-mode .maintenance-card {
+  background: #252118;
+  color: #D5CFC5;
+}
+
+.maintenance-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.maintenance-title {
+  font-family: var(--skeuo-font-serif);
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: var(--skeuo-saffron-dark);
+}
+
+.maintenance-message {
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: inherit;
+  opacity: 0.9;
+}
+
+
+/* ==========================================================================
+   24. SUPER ADMIN PANEL STYLES
+   ========================================================================== */
+
+.admin-panel {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.admin-section {
+  margin-bottom: 1.5rem;
+}
+
+.admin-section h3 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.admin-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.admin-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.admin-stat .stat-label {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  opacity: 0.7;
+}
+
+.admin-stat .stat-value {
+  font-size: 1.4rem;
+  font-weight: 700;
+  font-family: var(--skeuo-font-serif);
+}
+
+.admin-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.admin-actions .skeuo-btn {
+  flex: 1 1 auto;
+  min-width: 150px;
+  text-align: center;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--skeuo-radius-pill);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.status-badge.healthy {
+  background: rgba(57, 231, 95, 0.15);
+  color: #2D5016;
+}
+
+.status-badge.degraded {
+  background: rgba(255, 179, 71, 0.15);
+  color: #A66800;
+}
+
+.status-badge.error {
+  background: rgba(255, 107, 107, 0.15);
+  color: #8B1A1A;
+}
+
+body.dark-mode .status-badge.healthy {
+  background: rgba(57, 231, 95, 0.1);
+  color: #6BDB8B;
+}
+
+body.dark-mode .status-badge.degraded {
+  background: rgba(255, 179, 71, 0.1);
+  color: #FFB347;
+}
+
+body.dark-mode .status-badge.error {
+  background: rgba(255, 107, 107, 0.1);
+  color: #FF8B8B;
+}
+
+.audit-log {
+  max-height: 300px;
+  overflow-y: auto;
+  font-family: var(--skeuo-font-mono);
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+.audit-entry {
+  padding: 0.35rem 0;
+  border-bottom: 1px solid var(--skeuo-paper-grain);
+  display: flex;
+  gap: 0.75rem;
+}
+
+body.dark-mode .audit-entry {
+  border-bottom-color: #2E2518;
+}
+
+.audit-time {
+  opacity: 0.6;
+  white-space: nowrap;
+  min-width: 160px;
+}
+
+.audit-action {
+  font-weight: 600;
+  color: var(--skeuo-saffron-dark);
+  min-width: 120px;
+}
+
+.audit-details {
+  opacity: 0.85;
+}
+
+@media (max-width: 480px) {
+  .admin-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .admin-actions {
+    flex-direction: column;
+  }
+
+  .admin-actions .skeuo-btn {
+    min-width: auto;
+  }
+
+  .audit-entry {
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+}
+
+
+/* ==========================================================================
+   25. SERVICE WORKER OFFLINE INDICATOR
+   ========================================================================== */
+
+.offline-banner {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--skeuo-seal-red);
+  color: #fff;
+  text-align: center;
+  padding: 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  z-index: 9999;
+  transform: translateY(100%);
+  transition: transform 0.3s ease;
+}
+
+.offline-banner.visible {
+  transform: translateY(0);
+}
+
+/* ==========================================================================
+   26. FONT LOADING OPTIMIZATION
+   ========================================================================== */
+
+/* Font display swap to prevent FOIT on slow connections */
+@font-face {
+  font-family: 'System Fallback';
+  src: local('Segoe UI'), local('Helvetica Neue'), local('Arial');
+  font-display: swap;
+}
+
+
+/* ==========================================================================
+   27. PRINT STYLES (for scheme detail printouts)
+   ========================================================================== */
+
+@media print {
+  .skeuo-navbar,
+  .navbar-links,
+  .skip-to-content,
+  .toast-container,
+  .offline-banner,
+  footer,
+  .skeuo-btn,
+  #dark-mode-toggle,
+  #language-selector {
+    display: none !important;
+  }
+
+  body {
+    background: #fff !important;
+    color: #000 !important;
+    font-size: 12pt;
+  }
+
+  .paper-card {
+    box-shadow: none !important;
+    border: 1px solid #ccc;
+    break-inside: avoid;
+  }
+
+  a[href]::after {
+    content: " (" attr(href) ")";
+    font-size: 0.8em;
+    opacity: 0.7;
+  }
+}

@@ -83,6 +83,14 @@
 </head>
 <body class="skeuo-body">
 
+  <!-- Skip to content link for accessibility -->
+  <a href="#app" class="skip-to-content">Skip to main content</a>
+
+  <!-- Offline indicator banner -->
+  <div id="offline-banner" class="offline-banner" role="alert" aria-live="assertive">
+    You are offline. Some features may be unavailable.
+  </div>
+
   <!-- Loading overlay with spinning Ashoka Chakra -->
   <div id="loading-overlay" class="loading-overlay" role="status" aria-live="polite" aria-label="Loading HaqSetu application">
     <div class="chakra-spinner" aria-hidden="true">
@@ -180,6 +188,9 @@
       </a>
       <a href="#/feedback" class="nav-tab" data-view="feedback" role="tab" aria-selected="false" aria-controls="view-feedback">
         <span class="tab-icon" aria-hidden="true">&#128172;</span> Feedback
+      </a>
+      <a href="#/admin" class="nav-tab" data-view="admin" role="tab" aria-selected="false" aria-controls="view-admin">
+        <span class="tab-icon" aria-hidden="true">&#9881;</span> Admin
       </a>
     </div>
     <div class="navbar-actions">
@@ -447,6 +458,63 @@
       </div>
     </section>
 
+    <!-- Super Admin / Disaster Recovery View -->
+    <section id="view-admin" class="view" role="tabpanel" aria-labelledby="tab-admin">
+      <div class="view-header">
+        <h2>System Administration &amp; Disaster Recovery</h2>
+        <p class="view-description">Monitor system health, manage backups, and control disaster recovery</p>
+      </div>
+      <div class="admin-panel">
+
+        <!-- System Status -->
+        <div class="paper-card admin-section">
+          <h3 class="card-title">System Status</h3>
+          <div id="admin-system-status" class="admin-grid" aria-live="polite">
+            <p class="placeholder-text">Loading system status...</p>
+          </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="paper-card admin-section">
+          <h3 class="card-title">Quick Actions</h3>
+          <div class="admin-actions">
+            <button class="skeuo-btn btn-primary" id="admin-create-snapshot" aria-label="Create data snapshot">
+              Create Snapshot
+            </button>
+            <button class="skeuo-btn" id="admin-validate-data" aria-label="Validate data integrity">
+              Validate Data
+            </button>
+            <button class="skeuo-btn" id="admin-auto-fix" aria-label="Auto-fix detected issues">
+              Auto-Fix Issues
+            </button>
+            <button class="skeuo-btn" id="admin-flush-cache" aria-label="Flush and rebuild cache">
+              Flush Cache
+            </button>
+            <button class="skeuo-btn" id="admin-toggle-maintenance" aria-label="Toggle maintenance mode">
+              Toggle Maintenance
+            </button>
+          </div>
+        </div>
+
+        <!-- Snapshots & Rollback -->
+        <div class="paper-card admin-section">
+          <h3 class="card-title">Snapshots &amp; Rollback Points</h3>
+          <div id="admin-snapshots" aria-live="polite">
+            <p class="placeholder-text">No snapshots yet. Create one to enable disaster recovery.</p>
+          </div>
+        </div>
+
+        <!-- Audit Log -->
+        <div class="paper-card admin-section">
+          <h3 class="card-title">Admin Audit Log</h3>
+          <div id="admin-audit-log" class="audit-log" aria-live="polite">
+            <p class="placeholder-text">No audit entries yet.</p>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
   </main>
 
   <!-- Toast notification container -->
@@ -469,5 +537,41 @@
   </footer>
 
   <script src="/static/js/app.js"></script>
+
+  <!-- Offline detection and service worker registration -->
+  <script>
+    // Offline/online detection
+    (function() {
+      var banner = document.getElementById('offline-banner');
+      function updateOnlineStatus() {
+        if (navigator.onLine) {
+          banner.classList.remove('visible');
+        } else {
+          banner.classList.add('visible');
+        }
+      }
+      window.addEventListener('online', updateOnlineStatus);
+      window.addEventListener('offline', updateOnlineStatus);
+      updateOnlineStatus();
+
+      // Register service worker for offline caching
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/static/sw.js', { scope: '/' })
+          .catch(function() { /* SW registration failed silently */ });
+      }
+
+      // Dark mode persistence
+      if (localStorage.getItem('haqsetu-dark-mode') === 'true') {
+        document.body.classList.add('dark-mode');
+      }
+      var darkToggle = document.getElementById('dark-mode-toggle');
+      if (darkToggle) {
+        darkToggle.addEventListener('click', function() {
+          var isDark = document.body.classList.contains('dark-mode');
+          localStorage.setItem('haqsetu-dark-mode', isDark ? 'true' : 'false');
+        });
+      }
+    })();
+  </script>
 </body>
 </html>
